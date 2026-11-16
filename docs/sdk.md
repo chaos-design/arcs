@@ -63,8 +63,8 @@ interface SteerEvent {
 
 ```text
 sdk/
-├── vercel/      # @chaos-design/arcs-sdk-vercel — Vercel AI SDK 中间件与模型包装器
-├── langchain/   # @chaos-design/arcs-sdk-langchain — LangChain.js & LangGraph 节点/回调
+├── vercel/      # @chaos-design/arcs-sdk-vercel — withArcs 模型包装器（LanguageModelV4）
+├── langchain/   # @chaos-design/arcs-sdk-langchain — createArcsNode（LangGraph 兼容节点，零框架依赖）
 └── README.md    # SDK 职责与边界总览
 ```
 
@@ -87,12 +87,27 @@ const steeredModel = withArcs(openai('gpt-4o'), {
       `[ARCS 操舵介入] L${event.level} | ${event.reason} | 效果: ${event.effects.map(e => e.type).join(' → ')}`
     );
   },
+  hitl: async ({ toolName, reason }) => confirm(`允许 ${toolName}？${reason}`), // L4 进程内审批
 });
 
 const { text } = await generateText({
   model: steeredModel,
   tools: myCodingTools,
-  maxSteps: 15,
   prompt: '开始重构鉴权模块',
 });
 ```
+
+### LangGraph 节点用法（sdk/langchain）
+
+```typescript
+import { createArcsNode } from '@chaos-design/arcs-sdk-langchain';
+
+graph.addNode('arcs', createArcsNode({ goal: '仅修复前端样式 Bug' }));
+// 节点输入：{ goal, thought, toolCall, history }；输出：{ toolCall（改写/null）, inject?, steer? }
+```
+
+### 已知范围裁剪（v1）
+
+- `withArcs` 拦截 `doGenerate`（generateText / Agent 循环）；`doStream` **透传不纠偏**——`streamText` 场景需后续版本补齐。
+- `InjectMessage` 在 SDK 语境下翻译为「tool-call → text 替代」：框架内无消息注入通道，阻断提示以模型输出形式呈现。
+- langchain 的 `createArcsNode` 为零依赖结构实现（LangGraph 节点即普通函数）；`CallbackHandler` 形态待后续补充。

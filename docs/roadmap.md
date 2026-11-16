@@ -6,7 +6,7 @@
 | **P1** | plugin-kit 运行时 | `HostAdapter`、`PluginRuntime`、SessionState、Config/HITL/Telemetry 桥接 | **ReplayHarness 回放仿真通过**（效果列表顺序、预算、degraded、HITL 三分支）；mock adapter 跑通 capture→sense→plan→apply 全链单测 | ✅ 2026-11-17 |
 | **P2** | 首个插件（MCP） | `plugins/mcp` 端到端 | 真实 MCP Server 挂载，L1/L2 纠偏可观测，审计事件可查询 | ✅ 2026-11-17 |
 | **P3** | Codex / DeepSeek / Claude Code 插件 | 三个宿主 `HostAdapter` | 真实宿主进程运行，验证 L3/L4 与审批恢复（含拒绝/超时分支） | 待实施（需真实宿主环境） |
-| **P4** | SDK 适配 | `sdk/vercel`、`sdk/langchain` | 各自 demo 跑通，`SteerEvent` 字段正确，边界约束通过 review | 待实施 |
+| **P4** | SDK 适配 | `sdk/vercel`、`sdk/langchain` | 各自 demo 跑通，`SteerEvent` 字段正确，边界约束通过 review | ✅ 2026-11-17（doStream 透传为 v1 裁剪，见 docs/sdk.md） |
 | **P5** | 文档与遥测 | 架构文档、Mermaid 图、偏移曲线面板 | README 与 docs 同步完成；图均可渲染；偏移曲线可从 JSONL 聚合 | 部分完成（文档/曲线聚合 ✅，面板待实施） |
 
 ## 阶段依赖

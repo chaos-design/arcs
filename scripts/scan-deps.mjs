@@ -27,6 +27,15 @@ const RULES = [
     ],
     allowNode: ['node:child_process', 'node:process', 'node:url'],
   },
+  {
+    // SDK 直线边界（docs/sdk.md）：直接依赖 core + 框架类型包，禁 plugin-kit（绕过胶水层）
+    dir: 'sdk/vercel/src',
+    allow: ['zod', '@chaos-design/arcs-core', '@ai-sdk/provider'],
+  },
+  {
+    dir: 'sdk/langchain/src',
+    allow: ['@chaos-design/arcs-core'],
+  },
 ];
 
 const IMPORT_RE = /(?:\bfrom\s+|\bimport\s+|\brequire\(\s*)(['"])([^'"]+)\1/g;
