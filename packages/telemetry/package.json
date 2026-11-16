@@ -1,0 +1,29 @@
+{
+  "name": "@chaos-design/arcs-telemetry",
+  "version": "0.1.0",
+  "description": "ARCS 遥测：AuditEvent 模型、TelemetrySink 契约与偏移曲线聚合",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "zod": "^3.25.0"
+  }
+}

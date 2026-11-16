@@ -1,0 +1,30 @@
+{
+  "name": "@chaos-design/arcs-plugin-kit",
+  "version": "0.1.0",
+  "description": "ARCS 插件胶水层：HostAdapter 契约、PluginRuntime 编排、SessionState 与配置/HITL/遥测桥接",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-telemetry": "workspace:*",
+    "zod": "^3.25.0"
+  }
+}
