@@ -1,0 +1,10 @@
+{
+  "name": "arcs-claude-code",
+  "version": "0.1.0",
+  "description": "Agent Real-time Course Steering — 在工具执行前实时纠偏，任务不中断",
+  "author": {
+    "name": "Chaos Design"
+  },
+  "keywords": ["arcs", "claude-code", "steering", "hooks"],
+  "hooks": "./hooks/hooks.json"
+}

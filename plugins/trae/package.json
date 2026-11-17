@@ -1,0 +1,39 @@
+{
+  "name": "@chaos-design/arcs-plugin-trae",
+  "version": "0.1.0",
+  "description": "ARCS Trae 宿主插件：项目级 hooks，13 事件只读采集与审计（Tier C，fail-open 不阻断）",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "arcs-plugin-trae": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "hooks",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-host-kit": "workspace:*",
+    "@chaos-design/arcs-plugin-kit": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

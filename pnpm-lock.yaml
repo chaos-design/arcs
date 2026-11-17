@@ -24,6 +24,25 @@ importers:
         specifier: ^3.25.0
         version: 3.25.76
 
+  packages/host-kit:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../core
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../plugin-kit
+      '@chaos-design/arcs-telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
   packages/plugin-kit:
     dependencies:
       '@chaos-design/arcs-core':
@@ -45,6 +64,63 @@ importers:
         specifier: ^3.25.0
         version: 3.25.76
 
+  plugins/claude-code:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/codex:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/deepseek:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
   plugins/mcp:
     dependencies:
       '@chaos-design/arcs-core':
@@ -56,6 +132,101 @@ importers:
       '@chaos-design/arcs-telemetry':
         specifier: workspace:*
         version: link:../../packages/telemetry
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/opencode:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/pi:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/trae:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/workbuddy:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/zcode:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
       zod:
         specifier: ^3.25.0
         version: 3.25.76

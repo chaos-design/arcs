@@ -114,16 +114,22 @@ arcs/
 ├── packages/
 │   ├── core/                  # 基础内核：纯检测/决策，零宿主依赖
 │   ├── plugin-kit/            # 插件胶水层：HostAdapter 契约 + 运行时 + 桥接
+│   ├── host-kit/              # 宿主插件共用运行时：能力矩阵 + Hook 入口桥 + 效果翻译
 │   └── telemetry/             # 轨迹偏移曲线与纠偏审计数据模型/接收端
 ├── sdk/                       # 代码级接入（sdk/xxx，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   ├── langchain/             # @chaos-design/arcs-sdk-langchain
 │   └── README.md
-├── plugins/                   # 宿主插件（重点实现对象）
-│   ├── codex/                 # @chaos-design/arcs-plugin-codex
-│   ├── deepseek/              # @chaos-design/arcs-plugin-deepseek
-│   ├── claude-code/           # @chaos-design/arcs-plugin-claude-code
-│   └── mcp/                   # @chaos-design/arcs-plugin-mcp
+├── plugins/                   # 宿主插件（8 家 Agent 平台 + MCP 网关）
+│   ├── claude-code/           # 原生 Hook（17）· L1/L2/L4 ask
+│   ├── codex/                 # 原生 Hook（12）· L1/L2/L4 deny
+│   ├── opencode/              # 全局插件 + 工具中间件 · L1/L2/L4 挂起
+│   ├── zcode/                 # 原生 Hook（7）· L2/L4 阻断
+│   ├── workbuddy/             # 原生 Hook（25）· L2/L4 阻断
+│   ├── pi/                    # 全局扩展 · L2/L4 阻断
+│   ├── deepseek/              # Cordis bundle · L2/L4 事件广播
+│   ├── trae/                  # 项目级 hooks · 仅采集与审计
+│   └── mcp/                   # 透明代理网关 · L1–L4（唯一可改工具名）
 ├── examples/
 │   ├── sdk-vercel-demo/
 │   └── plugin-codex-demo/
@@ -216,7 +222,7 @@ flowchart LR
 | **P0** | core 地基 | 类型检查通过；算法单测覆盖；失败降级单测通过；依赖扫描确认零宿主依赖 |
 | **P1** | plugin-kit 运行时 | ReplayHarness 回放仿真通过；mock adapter 跑通 capture→sense→plan→apply 全链单测 |
 | **P2** | 首个插件（MCP） | 真实 MCP Server 挂载，L1/L2 纠偏可观测 |
-| **P3** | Codex / DeepSeek 插件 | 真实宿主运行，验证 L3/L4 与审批恢复 |
+| **P3** | 8 家 Agent 平台插件 | ✅ 已实现 8 家插件 + `host-kit`；mock 宿主端到端夹具通过，能力矩阵与降级行为由一致性测试锁定（真实宿主实测待集成方执行，见 [plugins.md](./docs/plugins.md)） |
 | **P4** | SDK 适配 | 各 demo 跑通，边界约束通过 review |
 | **P5** | 文档与遥测 | README 与 docs 同步，Mermaid 图均可渲染 |
 
@@ -305,6 +311,26 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 ```
 
 ---
+
+### 3. 安装各平台宿主插件（8 家 Agent）
+
+平台插件提供原生 manifest / hooks.json 或全局扩展形态，全部复用 `host-kit` 的能力矩阵与 fail-open 入口桥：
+
+```bash
+pnpm build:native-plugins
+
+# Trae：把 hooks 合并进项目 .trae/hooks.json（幂等，保留无关配置）
+node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/workspace
+
+# OpenCode / Pi：复制到全局插件目录，重启后自动发现
+node scripts/install-host-plugins.mjs --client=opencode
+node scripts/install-host-plugins.mjs --client=pi
+
+# Claude Code / Codex / WorkBuddy / ZCode / DeepSeek：脚本打印各平台 CLI 安装命令
+node scripts/install-host-plugins.mjs --client=claude-code
+```
+
+纠偏目标通过 `--goal` 或 `ARCS_GOAL` 注入。各平台**实际能落地的纠偏等级不同**（例如 Hook 普遍无法改工具名，Codex 不支持 `ask`，Trae 只能审计），完整能力与降级规则见 [docs/plugins.md](./docs/plugins.md)。
 
 ## 📚 文档索引
 

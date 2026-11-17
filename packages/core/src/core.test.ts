@@ -262,24 +262,46 @@ describe('createArcsEngine（fail-open 与预算）', () => {
     expect(outcome.degraded).toBe(true);
   });
 
-  it('sense 预算耗尽 → 跳过可选传感器', () => {
+  it('sense 预算耗尽 → 跳过可选传感器（假时钟确定性触发）', () => {
+    let t = 0;
+    const advancingClock = () => { t += 100; return t; };
     const engine = createArcsEngine(
       { ...makeCtx().policy, embedder: new HashingEmbedder() },
-      { budgets: { senseMs: 0, planMs: 10 } },
+      { budgets: { senseMs: 0, planMs: 1_000_000 }, clock: advancingClock },
     );
     const outcome = engine.run(makeCtx());
     expect(outcome.notes.join(' ')).toContain('跳过可选传感器');
     expect(outcome.signals.some((s) => s.kind === 'semantic')).toBe(false);
   });
 
-  it('plan 超预算 → PassThrough 降级', () => {
+  it('plan 超预算 → PassThrough 降级（假时钟确定性触发）', () => {
+    // 假时钟每次读取前进 100ms：sense 的各传感器也用该时钟，故 senseMs 设足够大避免误跳；
+    // plan 的 workMs = 第二次读取 - 第一次读取 = 100ms >= planMs=10 → 降级。
+    let t = 0;
+    const advancingClock = () => { t += 100; return t; };
     const engine = createArcsEngine(makeCtx().policy, {
-      budgets: { senseMs: 35, planMs: 0 },
+      budgets: { senseMs: 1_000_000, planMs: 10 },
+      clock: advancingClock,
     });
     const outcome = engine.run(makeCtx({ toolCall: { id: 't', name: 'bash', args: { command: 'rm -rf /' } } }));
     expect(outcome.effects).toEqual([{ type: 'PassThrough' }]);
     expect(outcome.degraded).toBe(true);
     expect(outcome.notes.join(' ')).toContain('超预算');
+  });
+
+  it('默认 CPU 时钟不受墙钟抢占噪声影响：同步规划不被误降级', () => {
+    // 模拟墙钟被抢占 50ms，但 CPU 时间几乎不变 → 不应触发 plan 超预算降级。
+    const wallClock = Date.now;
+    let reads = 0;
+    Date.now = () => { reads += 1; return wallClock() + reads * 50; };
+    try {
+      const engine = createArcsEngine(makeCtx().policy);
+      const outcome = engine.run(makeCtx({ toolCall: { id: 't', name: 'bash', args: { command: 'rm -rf /' } } }));
+      expect(outcome.effects.some((e) => e.type === 'Suspend')).toBe(true);
+      expect(outcome.degraded).toBe(false);
+    } finally {
+      Date.now = wallClock;
+    }
   });
 });
 

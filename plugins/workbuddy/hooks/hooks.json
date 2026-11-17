@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=SessionStart" }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=SessionEnd" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=UserPromptSubmit" }] }],
+    "PreToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PreToolUse" }] }],
+    "PermissionRequest": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PermissionRequest" }] }],
+    "PermissionDenied": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PermissionDenied" }] }],
+    "PostToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PostToolUse" }] }],
+    "PostToolUseFailure": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PostToolUseFailure" }] }],
+    "Notification": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=Notification" }] }],
+    "SubagentStart": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=SubagentStart" }] }],
+    "SubagentStop": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=SubagentStop" }] }],
+    "TaskCreated": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=TaskCreated" }] }],
+    "TaskCompleted": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=TaskCompleted" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=Stop" }] }],
+    "StopFailure": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=StopFailure" }] }],
+    "TeamMessageIdle": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=TeamMessageIdle" }] }],
+    "InstructionsLoaded": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=InstructionsLoaded" }] }],
+    "ConfigChange": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=ConfigChange" }] }],
+    "CwdChanged": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=CwdChanged" }] }],
+    "WorktreeCreate": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=WorktreeCreate" }] }],
+    "WorktreeRemove": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=WorktreeRemove" }] }],
+    "PreCompact": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PreCompact" }] }],
+    "PostCompact": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=PostCompact" }] }],
+    "Elicitation": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=Elicitation" }] }],
+    "ElicitationResult": [{ "hooks": [{ "type": "command", "command": "node \"${CODEBUDDY_PLUGIN_ROOT}/dist/cli.js\" --event=ElicitationResult" }] }]
+  }
+}

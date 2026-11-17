@@ -3,7 +3,7 @@
 | # | 约束 | 理由 | 保障方式 |
 |---|---|---|---|
 | 1 | **core 纯度红线**：不得出现 `fs` / `net` / `child_process` 导入 | 保证算法可移植、可测试、无副作用 | CI 依赖扫描断言 |
-| 2 | **延迟预算**：normalize + sense ≤ 35ms、plan ≤ 10ms、materialize ≤ 5ms，合计 < 50ms | 做到「偏航即发现、立即纠偏」 | 预算分解 + p99 基准测试；重模型判断走异步旁路，不阻塞主链 |
+| 2 | **延迟预算**：normalize + sense ≤ 35ms、plan ≤ 10ms、materialize ≤ 5ms，合计 < 50ms | 做到「偏航即发现、立即纠偏」 | 预算按 **CPU 时间**（`process.cpuUsage`，经 `globalThis` 取用以保持 core 零 import）计量，不按墙钟——同步传感器/规划器被 OS 抢占时墙钟虚增会误判超预算，把 L4 阻断降级为放行；`createArcsEngine({ clock })` 可注入假时钟做确定性测试 |
 | 3 | **决策可序列化**：`SteeringEffect`（及有序列表）必须可 JSON 化 | 支撑审计、回放与遥测 | 类型约束 + JSON roundtrip 单测 |
 | 4 | **审批语义**：`Suspend` 只挂起单个高危动作，审批后恢复；拒绝/超时（默认 120s）→ 阻断 + 注入解释，任务继续 | 保证任务连续性，避免演变为任务终止 | HITL 桥接契约约束（`HitlDecision.timeout` 必填） |
 | 5 | **胶水层宿主无关**：`plugin-kit` 不 import 任何宿主 SDK | 保持胶水层可复用 | 宿主依赖下沉到 `plugins/*` |

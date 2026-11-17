@@ -19,4 +19,4 @@ export { fingerprint, LoopHashSensor } from './sensors/loop-sensor.js';
 export { buildSchemaPatch, SchemaSensor, type SchemaPatchResult } from './sensors/schema-sensor.js';
 export { SemanticSensor } from './sensors/semantic-sensor.js';
 export { RuleBasedPlanner, sanitizeEffects } from './planner.js';
-export { createArcsEngine, defaultSensors, type ArcsEngine, type EngineBudgets } from './engine.js';
+export { createArcsEngine, defaultSensors, type ArcsEngine, type EngineBudgets, type BudgetClock } from './engine.js';

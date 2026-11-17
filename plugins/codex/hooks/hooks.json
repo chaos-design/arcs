@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=SessionStart" }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=SessionEnd" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=UserPromptSubmit" }] }],
+    "PreToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=PreToolUse" }] }],
+    "PostToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=PostToolUse" }] }],
+    "PermissionRequest": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=PermissionRequest" }] }],
+    "PreCompact": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=PreCompact" }] }],
+    "PostCompact": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=PostCompact" }] }],
+    "SubagentStart": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=SubagentStart" }] }],
+    "SubagentStop": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=SubagentStop" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=Stop" }] }],
+    "Interrupt": [{ "hooks": [{ "type": "command", "command": "node \"${CODEX_PLUGIN_ROOT}/dist/cli.js\" --event=Interrupt" }] }]
+  }
+}

@@ -32,9 +32,11 @@ flowchart LR
   SINK --> M["InMemorySink<br/>开发 / 测试"]
   SINK --> O["OtlpSink<br/>OpenTelemetry"]
   SINK --> H["HttpSink<br/>自建面板 / Webhook"]
+  SINK --> F["FileAuditSink<br/>host-kit · 本地 JSONL"]
   M --> ARC["偏移曲线聚合<br/>会话级 severity 时序"]
   O --> ARC
   H --> ARC
+  F --> ARC
 ```
 
 ## TelemetrySink 契约
@@ -50,6 +52,23 @@ interface TelemetrySink {
 - `emit` **不得抛出异常**——遥测失败静默丢弃，绝不影响纠偏主链；
 - 同步实现须 < 1ms，否则改为内部缓冲 + 异步冲刷；
 - 不做阻塞 I/O，不反压宿主。
+
+### FileAuditSink（本地持久化，位于 `packages/host-kit`）
+
+为使"真实宿主联调"可验证，`host-kit` 提供 `FileAuditSink`（实现 `TelemetrySink`），保持 telemetry 包零 I/O 的纯逻辑边界：
+
+- 路径：`ARCS_AUDIT_FILE` 指定精确文件；否则 `<ARCS_HOME>/audit/<host>/<YYYY-MM-DD>.jsonl`（`ARCS_HOME` 默认 `~/.arcs`）
+- 写入：`appendFileSync` 单次写完一整行；失败静默（遥测不得阻塞主链）
+- 内容：只含 `AuditEvent` 已校验的结构化字段，**不含原始 prompt 与工具参数**；`evidence` 可能含路径信息，按需管理文件权限
+- 装配：`runHookEntry` 与三个订阅型插件（opencode/pi/deepseek）默认按环境变量构造 sink；未设置任何变量时不创建，行为与旧版完全一致
+
+验证一次真实会话：
+
+```bash
+export ARCS_HOME=~/.arcs
+# 用自有账号启动一次真实 Agent 会话并触发工具调用
+node scripts/host-real-check.mjs --verify   # 报告事件数、按宿主/等级统计、降级次数
+```
 
 ## 偏移曲线（Steering Arc 曲线）
 

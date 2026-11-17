@@ -8,6 +8,7 @@ export default defineConfig({
       '@chaos-design/arcs-core': resolve('packages/core/src/index.ts'),
       '@chaos-design/arcs-telemetry': resolve('packages/telemetry/src/index.ts'),
       '@chaos-design/arcs-plugin-kit': resolve('packages/plugin-kit/src/index.ts'),
+      '@chaos-design/arcs-host-kit': resolve('packages/host-kit/src/index.ts'),
     },
   },
   test: {

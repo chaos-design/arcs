@@ -9,6 +9,26 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
+const HOST_DEPS = [
+  'zod',
+  '@chaos-design/arcs-core',
+  '@chaos-design/arcs-telemetry',
+  '@chaos-design/arcs-plugin-kit',
+  '@chaos-design/arcs-host-kit',
+];
+
+// 平台插件的 node 内建逐条登记理由，避免白名单过宽削弱红线
+const PLUGIN_NODE = {
+  'claude-code': ['node:url'], // cli 入口 isEntry 守卫
+  codex: ['node:url'],
+  zcode: ['node:url'],
+  workbuddy: ['node:url'],
+  trae: ['node:url'],
+  opencode: ['node:fs', 'node:url', 'node:os'], // 会话 claim 文件 + 默认 HOME + cli 守卫
+  pi: ['node:fs', 'node:url', 'node:os'],
+  deepseek: ['node:path', 'node:url'],
+};
+
 const RULES = [
   { dir: 'packages/core/src', allow: ['zod'] },
   { dir: 'packages/telemetry/src', allow: ['zod', '@chaos-design/arcs-core'] },
@@ -16,6 +36,17 @@ const RULES = [
     dir: 'packages/plugin-kit/src',
     allow: ['zod', '@chaos-design/arcs-core', '@chaos-design/arcs-telemetry'],
   },
+  {
+    // 共用宿主运行时：唯一允许 node I/O 的 packages 层包
+    dir: 'packages/host-kit/src',
+    allow: HOST_DEPS,
+    allowNode: ['node:fs', 'node:os', 'node:path', 'node:process'],
+  },
+  ...Object.entries(PLUGIN_NODE).map(([name, allowNode]) => ({
+    dir: `plugins/${name}/src`,
+    allow: HOST_DEPS,
+    allowNode,
+  })),
   {
     // 插件层允许宿主侧 I/O（spawn 下游 MCP Server）；宿主 SDK 仍下沉、不在白名单
     dir: 'plugins/mcp/src',

@@ -20,6 +20,24 @@ export interface EngineBudgets {
   planMs: number;
 }
 
+/**
+ * 预算时钟（返回毫秒）。默认用 CPU 时间而非墙钟：同步传感器/规划器被 OS
+ * 抢占时墙钟会虚增，导致误判超预算而把 L4 阻断降级为放行（fail-open 反向滥用）。
+ * CPU 时间只计实际计算，不受调度停顿影响。测试可注入假时钟精确验证超预算分支。
+ */
+export type BudgetClock = () => number;
+
+const defaultClock: BudgetClock = () => {
+  const proc = (globalThis as {
+    process?: { cpuUsage?: () => { user: number; system: number } };
+  }).process;
+  if (proc?.cpuUsage) {
+    const usage = proc.cpuUsage();
+    return (usage.user + usage.system) / 1000; // 微秒 → 毫秒
+  }
+  return Date.now();
+};
+
 export interface ArcsEngine {
   readonly policy: Policy;
   sense(ctx: ExecutionContext): { signals: DriftSignal[]; degraded: boolean; notes: string[] };
@@ -44,34 +62,42 @@ export function createArcsEngine(
     sensors?: DriftSensor[];
     planner?: CoursePlanner;
     budgets?: EngineBudgets;
+    /** 预算时钟；默认 CPU 时间（外部可注入假时钟做确定性测试） */
+    clock?: BudgetClock;
   } = {},
 ): ArcsEngine {
   const sensors = options.sensors ?? defaultSensors();
   const planner = options.planner ?? new RuleBasedPlanner();
   const budgets: EngineBudgets = options.budgets ?? { senseMs: 35, planMs: 10 };
+  const clock = options.clock ?? defaultClock;
 
   function sense(ctx: ExecutionContext) {
-    const t0 = Date.now();
     const signals: DriftSignal[] = [];
     let degraded = false;
     const notes: string[] = [];
+    // 预算按各传感器「实际执行耗时」累计，而非整段墙钟时间：
+    // 并行负载下事件循环的调度停顿不应误判为传感器超预算而跳过可选传感器。
+    let workMs = 0;
     for (const sensor of sensors) {
-      if (sensor.optional && Date.now() - t0 >= budgets.senseMs) {
+      if (sensor.optional && workMs >= budgets.senseMs) {
         notes.push(`sense 预算耗尽，跳过可选传感器 ${sensor.kind}`);
         continue;
       }
+      const started = clock();
       try {
         signals.push(...sensor.sense(ctx));
       } catch (err) {
         degraded = true;
         notes.push(`传感器 ${sensor.kind} 异常跳过：${String(err)}`);
+      } finally {
+        workMs += clock() - started;
       }
     }
     return { signals, degraded, notes };
   }
 
   function plan(ctx: ExecutionContext, signals: DriftSignal[]) {
-    const t0 = Date.now();
+    const started = clock();
     let degraded = false;
     const notes: string[] = [];
     let effects: SteeringEffect[];
@@ -82,7 +108,8 @@ export function createArcsEngine(
       degraded = true;
       notes.push(`plan 异常降级：${String(err)}`);
     }
-    if (Date.now() - t0 >= budgets.planMs) {
+    const workMs = clock() - started;
+    if (workMs >= budgets.planMs) {
       effects = [{ type: 'PassThrough' }];
       degraded = true;
       notes.push(`plan 超预算（>${budgets.planMs}ms），降级放行`);
