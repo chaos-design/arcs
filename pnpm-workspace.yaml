@@ -3,3 +3,4 @@ packages:
   - "sdk/*"
   - "plugins/*"
   - "examples/*"
+  - "site"

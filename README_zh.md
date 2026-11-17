@@ -134,6 +134,7 @@ arcs/
 ├── examples/
 │   ├── sdk-vercel-demo/       # mock 模型演示 L1 补参 / L2 熔断
 │   └── plugin-mcp-demo/       # 三进程演示透传 / L2 熔断 / L4 阻断 / 审计落盘
+├── site/                      # 文档站点（Vite + React，构建时内嵌 docs/*.md；pnpm site:dev / site:build）
 ├── docs/                      # 架构与设计文档（见文末索引）
 ├── plans/                     # plan-flow 计划
 ├── LICENSE                    # Apache 2.0
@@ -287,7 +288,14 @@ const { text } = await generateText({
 });
 ```
 
-### 3. 偏移曲线面板（P5 · 观测纠偏轨迹）
+### 3. 文档站点
+
+```bash
+corepack pnpm site:dev      # http://127.0.0.1:5175 本地浏览全部文档
+corepack pnpm site:build    # 产出 site/dist 静态站点（构建时内嵌 docs/*.md，零外部资源）
+```
+
+### 4. 偏移曲线面板（P5 · 观测纠偏轨迹）
 
 真实会话的审计 JSONL（`ARCS_AUDIT_FILE` 或 `<ARCS_HOME>/audit/**`）可直接生成偏移曲线面板：
 
@@ -301,7 +309,7 @@ corepack pnpm dashboard --home ~/.arcs --html dashboard.html     # 独立 HTML �
 
 面板回答 docs/telemetry.md 的两个问题：**是否收敛**（severity 尾段 < 首段）与**是否过舵**（放行占比、HITL 误报）。
 
-### 4. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
+### 5. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
 
 针对封闭或半开放的外部 Harness，ARCS 提供 **生命周期 Hook 插件** 与 **MCP 透明代理** 两种无侵入挂载方式。
 
@@ -349,7 +357,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 
 ---
 
-### 5. 安装各平台宿主插件（8 家 Agent）
+### 6. 安装各平台宿主插件（8 家 Agent）
 
 平台插件提供原生 manifest / hooks.json 或全局扩展形态，全部复用 `host-kit` 的能力矩阵与 fail-open 入口桥：
 
