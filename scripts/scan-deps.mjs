@@ -40,7 +40,8 @@ const RULES = [
     // 共用宿主运行时：唯一允许 node I/O 的 packages 层包
     dir: 'packages/host-kit/src',
     allow: HOST_DEPS,
-    allowNode: ['node:fs', 'node:os', 'node:path', 'node:process'],
+    // node:crypto：claim.ts 对超长 sessionId 计算防碰撞短哈希（11 号计划）
+    allowNode: ['node:fs', 'node:os', 'node:path', 'node:process', 'node:crypto'],
   },
   ...Object.entries(PLUGIN_NODE).map(([name, allowNode]) => ({
     dir: `plugins/${name}/src`,

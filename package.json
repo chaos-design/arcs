@@ -11,6 +11,7 @@
     "lint": "turbo run lint",
     "test": "vitest run",
     "scan": "node scripts/scan-deps.mjs",
+    "dashboard": "node scripts/offset-dashboard.mjs",
     "build:native-plugins": "node scripts/build-host-plugins.mjs",
     "install-plugins": "node scripts/install-host-plugins.mjs",
     "verify:contracts": "node scripts/verify-host-contracts.mjs",

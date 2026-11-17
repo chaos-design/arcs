@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   auditEventSchema,
   buildAuditEvent,
+  buildDashboardModel,
   buildOffsetCurves,
   InMemorySink,
 } from './index.js';
@@ -93,5 +94,54 @@ describe('InMemorySink 容量上限（11 号计划加固）', () => {
       uncapped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'codex', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
     }
     expect(uncapped.events).toHaveLength(5);
+  });
+});
+
+describe('buildDashboardModel 面板聚合（P5 · 11 号计划）', () => {
+  const ev = (over: Partial<Parameters<typeof buildAuditEvent>[0]> & { ts: number; sessionId: string }) =>
+    buildAuditEvent({
+      host: 'codex',
+      level: null,
+      signals: [],
+      effects: [],
+      latencyMs: 1,
+      degraded: false,
+      ...over,
+    } as never);
+
+  it('聚合：事件/会话计数、等级直方图、HITL 三分支、放行占比、收敛判定', () => {
+    const sig = (sev: number) => [{ kind: 'loop' as const, severity: sev, score: sev, evidence: 'x' }];
+    const events = [
+      ev({ ts: 1, sessionId: 'a', signals: sig(0.6), level: 1 }),
+      ev({ ts: 2, sessionId: 'a', signals: sig(0.8), level: 2 }),
+      ev({ ts: 3, sessionId: 'a', signals: sig(0.5), level: null }),
+      ev({ ts: 4, sessionId: 'a', signals: sig(0.3), level: null }),
+      ev({ ts: 5, sessionId: 'a', signals: sig(0.2), level: null }),
+      ev({ ts: 6, sessionId: 'b', signals: sig(0.9), level: 4, hitl: { approved: true, timeout: false } }),
+      ev({ ts: 7, sessionId: 'b', degraded: true }),
+    ];
+    const model = buildDashboardModel(events);
+    expect(model.eventCount).toBe(7);
+    expect(model.sessionCount).toBe(2);
+    expect(model.degradedCount).toBe(1);
+    expect(model.hostCounts).toEqual({ codex: 7 });
+    expect(model.levelCounts).toEqual({ '1': 1, '2': 1, '3': 0, '4': 1, null: 4 });
+    expect(model.hitl).toEqual({ asked: 1, approved: 1, rejected: 0, timeout: 0 });
+    expect(model.passThroughRatio).toBeCloseTo(4 / 7);
+    expect(model.timeRange).toEqual({ first: 1, last: 7 });
+
+    const a = model.sessions.find((s) => s.sessionId === 'a')!;
+    expect(a.converging).toBe(true); // 尾段均值 0.333 < 首段均值 0.633
+    expect(a.curve.maxSeverity).toBe(0.8);
+    const b = model.sessions.find((s) => s.sessionId === 'b')!;
+    expect(b.converging).toBe(false);
+  });
+
+  it('空事件流：零值模型不抛错', () => {
+    const model = buildDashboardModel([]);
+    expect(model.eventCount).toBe(0);
+    expect(model.sessionCount).toBe(0);
+    expect(model.passThroughRatio).toBe(0);
+    expect(model.timeRange.first).toBeNull();
   });
 });
