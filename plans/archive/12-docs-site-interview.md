@@ -2,7 +2,7 @@
 title: 文档完善：架构设计文档修订 + 面试题库 + Vite/React 文档站点（参考 memx）
 priority: P1
 created: 2026-11-18 01:00:05
-updated: 2026-11-18 01:35:08
+updated: 2026-11-18 01:35:26
 ---
 
 # 文档完善：架构设计文档修订 + 面试题库 + Vite/React 文档站点（参考 memx）
@@ -31,9 +31,9 @@ updated: 2026-11-18 01:35:08
 
 - [x] code: 8 项任务全部完成，无占位残留
 - [x] linter_result: `corepack pnpm lint`（全包 tsc --noEmit）退出码 0，站点 `tsc -b` 通过
-- [ ] unit_test_result: `corepack pnpm test` 全绿（248 例不回退）
-- [ ] func_test_result: `corepack pnpm site:build` 产出 site/dist 静态站点且包含全部 docs 内容；既有护栏（scan / verify:contracts）退出码 0
-- [ ] status: 状态、剩余风险和回滚方式已记录
+- [x] unit_test_result: `corepack pnpm test` 全绿（248 例不回退）
+- [x] func_test_result: `corepack pnpm site:build` 产出 site/dist 静态站点且包含全部 docs 内容；既有护栏（scan / verify:contracts）退出码 0
+- [x] status: 状态、剩余风险和回滚方式已记录
 
 ## 风险与回滚
 
@@ -57,3 +57,10 @@ updated: 2026-11-18 01:35:08
 - 2026-11-18 01:35:07 code:8 项任务完成无占位；linter_result:pnpm lint + site tsc -p . --noEmit 退出码 0；unit_test_result:248 例全绿；func_test_result:site:build 真实构建 + 浏览器渲染实测通过、scan/verify:contracts 0 违规
 - 2026-11-18 01:35:08 完成 #10 linter_result: `corepack pnpm lint`（全包 tsc --noEmit）退出码 0，站点 `tsc -b` 通过
 - 2026-11-18 01:35:08 状态：全部完成。剩余风险：① GitHub Pages 需仓库管理员在 Settings→Pages 将 Source 设为 GitHub Actions 后工作流才会部署；② mermaid 单 chunk 3.4MB（gzip 944KB）为懒加载分包，仅含图页面按需下载；③ 站点导航为手工清单，新增 docs 文件需同步 site/src/docs.ts。回滚：site/ 为纯新增目录可直接删除；架构/题库为文档增量 git revert 单提交；vite.config.ts manualChunks 若上游 mermaid 修复死锁可移除
+- 2026-11-18 01:35:23 完成 #11 unit_test_result: `corepack pnpm test` 全绿（248 例不回退）
+- 2026-11-18 01:35:23 corepack pnpm test 全绿 248 例（不回退）
+- 2026-11-18 01:35:24 完成 #12 func_test_result: `corepack pnpm site:build` 产出 site/dist 静态站点且包含全部 docs 内容；既有护栏（scan / verify:contracts）退出码 0
+- 2026-11-18 01:35:24 corepack pnpm site:build 产出 site/dist（含全部 14 个 docs 页内嵌，浏览器实测通过）；scan 67 文件 0 违规、verify:contracts 85 项 0 违规
+- 2026-11-18 01:35:25 完成 #13 status: 状态、剩余风险和回滚方式已记录
+- 2026-11-18 01:35:25 状态：完成。剩余风险：Pages 需管理员设 Source=GitHub Actions；mermaid 单 chunk 3.4MB(gzip 944KB) 懒加载；站点导航手工清单需随 docs 同步。回滚：site/ 纯新增可直接删；文档增量 git revert；manualChunks 在上游 mermaid 修复死锁后可移除
+- 2026-11-18 01:35:26 归档：任务与完成标准全部满足
