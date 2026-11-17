@@ -20,8 +20,8 @@ arcs/
 │   ├── claude-code/           # @chaos-design/arcs-plugin-claude-code
 │   └── mcp/                   # @chaos-design/arcs-plugin-mcp
 ├── examples/
-│   ├── sdk-vercel-demo/       # Vercel AI SDK 集成示例
-│   └── plugin-codex-demo/     # Codex CLI 挂载插件实战示例
+│   ├── sdk-vercel-demo/       # Vercel AI SDK 集成示例（mock 模型，L1/L2）
+│   └── plugin-mcp-demo/       # MCP 透明代理三进程实战示例（透传/L2/L4/审计落盘）
 ├── docs/                      # 架构与设计文档
 │   ├── README.md
 │   ├── architecture.md
@@ -36,6 +36,7 @@ arcs/
 │   ├── extension-points.md
 │   ├── constraints.md
 │   └── roadmap.md
+├── scripts/                   # 零依赖守护脚本：scan-deps / verify-host-contracts / install-plugins / offset-dashboard（pnpm dashboard）
 ├── plans/                     # plan-flow 计划（状态与优先级契约见 plans/README.md）
 ├── LICENSE                    # Apache 2.0
 ├── turbo.json

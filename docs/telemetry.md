@@ -60,7 +60,7 @@ interface TelemetrySink {
 - 路径：`ARCS_AUDIT_FILE` 指定精确文件；否则 `<ARCS_HOME>/audit/<host>/<YYYY-MM-DD>.jsonl`（`ARCS_HOME` 默认 `~/.arcs`）
 - 写入：`appendFileSync` 单次写完一整行；失败静默（遥测不得阻塞主链）
 - 内容：只含 `AuditEvent` 已校验的结构化字段，**不含原始 prompt 与工具参数**；`evidence` 可能含路径信息，按需管理文件权限
-- 装配：`runHookEntry` 与三个订阅型插件（opencode/pi/deepseek）默认按环境变量构造 sink；未设置任何变量时不创建，行为与旧版完全一致
+- 装配：`runHookEntry`、三个订阅型插件（opencode/pi/deepseek）与 `arcs-plugin-mcp` CLI 默认按环境变量构造 sink；未设置任何变量时不创建，行为与旧版完全一致
 
 验证一次真实会话：
 
@@ -77,4 +77,18 @@ node scripts/host-real-check.mjs --verify   # 报告事件数、按宿主/等级
 1. **是否收敛**：纠偏介入后 severity 是否单调下降、偏航间隔是否拉长；
 2. **是否过舵**：PassThrough 占比、`PatchArgs` 命中率、HITL 误报率。
 
-输出为 JSONL（每行一个 `AuditEvent`），供 roadmap P5 的可视化面板与回放仿真（[testing.md](./testing.md)）消费。
+输出为 JSONL（每行一个 `AuditEvent`），供可视化面板与回放仿真（[testing.md](./testing.md)）消费。
+
+### 偏移曲线面板（roadmap P5，已实现）
+
+仓库内置零依赖面板脚本（`scripts/offset-dashboard.mjs`，即 `pnpm dashboard`）：
+
+```bash
+corepack pnpm dashboard                                    # 读 $ARCS_HOME/audit/**/*.jsonl，终端统计 + 每会话 sparkline
+corepack pnpm dashboard --file audit.jsonl --html panel.html   # 生成独立 HTML 面板（内联 SVG，零外部资源，浏览器直接打开）
+corepack pnpm dashboard --session demo- --limit 5          # 会话前缀过滤 / 展示条数
+```
+
+- 聚合语义与渲染分离：数据模型由 `@chaos-design/arcs-telemetry` 的 `buildDashboardModel`（纯函数）产出——等级直方图、HITL 三分支（批准/拒绝/超时互斥）、放行占比、按会话收敛判定（尾 3 点均值 < 首 3 点均值）；
+- 面板回答两个问题：**是否收敛**（severity 曲线尾段下移）与**是否过舵**（放行占比过高=漏检，PatchArgs 命中率与 HITL 误报）；
+- 自建面板/OTLP 消费方可直接复用 `buildDashboardModel`，渲染层可替换（扩展点见 [extension-points.md](./extension-points.md)）。

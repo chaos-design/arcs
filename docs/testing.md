@@ -33,6 +33,8 @@
 
 ## 边界守护（CI）
 
+`.github/workflows/ci.yml` 已落地（install → build → lint → test → scan → verify:contracts → 面板冒烟）：
+
 - 依赖扫描断言：core 不得出现 `fs` / `net` / `child_process` 导入；plugin-kit 不得 import 任何宿主 SDK；
 - 预算基准：sense + plan p99 < 50ms（重传感器走异步旁路不计入）；
 - 文档校验：Mermaid 图可渲染、相对链接无断链（与本仓库文档任务的 DoD 一致）。

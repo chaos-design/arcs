@@ -132,8 +132,8 @@ arcs/
 │   ├── trae/                  # 项目级 hooks · 仅采集与审计
 │   └── mcp/                   # 透明代理网关 · L1–L4（唯一可改工具名）
 ├── examples/
-│   ├── sdk-vercel-demo/
-│   └── plugin-codex-demo/
+│   ├── sdk-vercel-demo/       # mock 模型演示 L1 补参 / L2 熔断
+│   └── plugin-mcp-demo/       # 三进程演示透传 / L2 熔断 / L4 阻断 / 审计落盘
 ├── docs/                      # 架构与设计文档（见文末索引）
 ├── plans/                     # plan-flow 计划
 ├── LICENSE                    # Apache 2.0
@@ -224,8 +224,8 @@ flowchart LR
 | **P1** | plugin-kit 运行时 | ReplayHarness 回放仿真通过；mock adapter 跑通 capture→sense→plan→apply 全链单测 |
 | **P2** | 首个插件（MCP） | 真实 MCP Server 挂载，L1/L2 纠偏可观测 |
 | **P3** | 8 家 Agent 平台插件 | ✅ 已实现 8 家插件 + `host-kit`；mock 宿主端到端夹具通过，能力矩阵与降级行为由一致性测试锁定（真实宿主实测待集成方执行，见 [plugins.md](./docs/plugins.md)） |
-| **P4** | SDK 适配 | 各 demo 跑通，边界约束通过 review |
-| **P5** | 文档与遥测 | README 与 docs 同步，Mermaid 图均可渲染 |
+| **P4** | SDK 适配 | ✅ `sdk/vercel` / `sdk/langchain` 完成；examples/ 提供可运行 demo |
+| **P5** | 文档与遥测 | ✅ README 与 docs 同步；`pnpm dashboard` 生成偏移曲线面板（终端 + HTML） |
 
 > 阶段依赖与完整 DoD 见 [docs/roadmap.md](./docs/roadmap.md)。
 
@@ -287,7 +287,21 @@ const { text } = await generateText({
 });
 ```
 
-### 3. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
+### 3. 偏移曲线面板（P5 · 观测纠偏轨迹）
+
+真实会话的审计 JSONL（`ARCS_AUDIT_FILE` 或 `<ARCS_HOME>/audit/**`）可直接生成偏移曲线面板：
+
+```bash
+export ARCS_AUDIT_FILE=/tmp/arcs-audit.jsonl     # 让代理 / Hook 插件落盘审计
+node examples/plugin-mcp-demo/demo.mjs           # 跑一次真实三进程演示
+
+corepack pnpm dashboard --file /tmp/arcs-audit.jsonl             # 终端统计 + sparkline
+corepack pnpm dashboard --home ~/.arcs --html dashboard.html     # 独立 HTML 面板（内联 SVG，零外部资源）
+```
+
+面板回答 docs/telemetry.md 的两个问题：**是否收敛**（severity 尾段 < 首段）与**是否过舵**（放行占比、HITL 误报）。
+
+### 4. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
 
 针对封闭或半开放的外部 Harness，ARCS 提供 **生命周期 Hook 插件** 与 **MCP 透明代理** 两种无侵入挂载方式。
 
@@ -335,7 +349,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 
 ---
 
-### 4. 安装各平台宿主插件（8 家 Agent）
+### 5. 安装各平台宿主插件（8 家 Agent）
 
 平台插件提供原生 manifest / hooks.json 或全局扩展形态，全部复用 `host-kit` 的能力矩阵与 fail-open 入口桥：
 
