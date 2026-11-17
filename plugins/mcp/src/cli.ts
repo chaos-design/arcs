@@ -26,13 +26,49 @@ export function parseCliArgs(argv: string[]): CliArgs {
   return args;
 }
 
+/**
+ * 引号感知的命令切分：支持单/双引号包裹含空格的参数。
+ * 背景：--target 的值已经过 shell 消费一层引号，内层引号（如
+ * `--target 'node "/path with space/server.mjs"'`）会原样到达这里，
+ * 必须在本函数内解析而不是盲目按空白切分。未闭合引号按字面量保留。
+ */
+export function splitCommand(input: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  let quote: '"' | "'" | null = null;
+  for (const ch of input) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      else current += ch;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (/\s/.test(ch)) {
+      if (current) {
+        parts.push(current);
+        current = '';
+      }
+    } else {
+      current += ch;
+    }
+  }
+  if (current) parts.push(current);
+  return parts;
+}
+
 function main(): void {
   const args = parseCliArgs(process.argv.slice(2));
   if (!args.goal || !args.target) {
     process.stderr.write(
       '用法: arcs-plugin-mcp --goal <既定目标> --target <下游 MCP Server 启动命令> ' +
-        '[--drift-threshold 0.75] [--max-consecutive-loops 2] [--protected-paths ".env*,**/migrations/**"]\n',
+        '[--drift-threshold 0.75] [--max-consecutive-loops 2] [--protected-paths ".env*,**/migrations/**"]\n' +
+      '提示: 路径含空格时用内层引号包裹，如 --target \'node "/path with space/server.mjs"\'\n',
     );
+    process.exit(2);
+  }
+
+  const targetArgv = splitCommand(args.target!);
+  if (targetArgv.length === 0) {
+    process.stderr.write('--target 解析结果为空，请检查命令格式\n');
     process.exit(2);
   }
 
@@ -48,9 +84,11 @@ function main(): void {
 
   const proxy = new McpProxy({
     goal: args.goal,
-    target: args.target!.split(/\s+/).filter(Boolean),
+    target: targetArgv,
     configOverrides,
     onDownstreamExit: (code) => process.exit(code ?? 0),
+    // spawn 失败（ENOENT 等）只触发 error 不触发 exit：显式退出避免悬挂
+    onDownstreamError: () => process.exit(127),
   });
   proxy.start();
 }

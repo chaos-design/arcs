@@ -14,14 +14,25 @@ interface RpcMessage {
   error?: unknown;
 }
 
-function startProxy(configOverrides: Record<string, unknown>) {
+function startProxy(
+  configOverrides: Record<string, unknown>,
+  opts: {
+    target?: string[];
+    onDownstreamError?: (err: Error) => void;
+    log?: (line: string) => void;
+  } = {},
+) {
   const clientInput = new PassThrough();
   const clientOutput = new PassThrough();
-  const proxy = new McpProxy({
-    goal: '仅修复前端样式 Bug，禁止修改后端 API 路由',
-    target: ['node', FAKE_SERVER],
-    configOverrides: configOverrides as never,
-  });
+  const proxy = new McpProxy(
+    {
+      goal: '仅修复前端样式 Bug，禁止修改后端 API 路由',
+      target: opts.target ?? ['node', FAKE_SERVER],
+      configOverrides: configOverrides as never,
+      onDownstreamError: opts.onDownstreamError,
+    },
+    { log: opts.log },
+  );
   proxy.start(clientInput, clientOutput);
 
   const pending = new Map<number, (msg: RpcMessage) => void>();
@@ -63,7 +74,14 @@ function startProxy(configOverrides: Record<string, unknown>) {
     await new Promise((r) => setTimeout(r, 50));
   }
 
-  return { proxy, request, stop, sink: (proxy as unknown as { sink: InMemorySink }).sink };
+  return {
+    proxy,
+    request,
+    stop,
+    clientInput,
+    clientOutput,
+    sink: (proxy as unknown as { sink: InMemorySink }).sink,
+  };
 }
 
 describe('MCP 透明代理 · 真实进程 e2e', () => {
@@ -138,5 +156,69 @@ describe('MCP 透明代理 · 真实进程 e2e', () => {
     } finally {
       await stop();
     }
+  });
+});
+
+describe('MCP 透明代理 · 稳健性红线（11 号计划加固）', () => {
+  it('非法 JSON 行带 id：回 -32700 Parse error 而非静默丢弃', async () => {
+    const logs: string[] = [];
+    const { request, stop, clientInput, clientOutput } = startProxy({}, { log: (l) => logs.push(l) });
+    // 先走一条正常请求确认链路可用
+    const ok = await request('tools/list', {});
+    expect(ok.result).toBeDefined();
+
+    // 手写一条坏 JSON 行（保留合法 id 字段），等待 -32700 错误响应
+    const reply = new Promise<RpcMessage>((resolve) => {
+      const onData = (chunk: Buffer) => {
+        for (const line of chunk.toString().split('\n')) {
+          if (!line.trim()) continue;
+          try {
+            const msg = JSON.parse(line) as RpcMessage;
+            if (msg.id === 99001 && msg.error) {
+              clientOutput.removeListener('data', onData);
+              resolve(msg);
+            }
+          } catch {
+            // 忽略非 JSON 行
+          }
+        }
+      };
+      clientOutput.on('data', onData);
+    });
+    clientInput.write('{"jsonrpc":"2.0","id":99001,"method":"tools/call",broken\n');
+    const res = await reply;
+    expect(res.error).toMatchObject({ code: -32700, message: 'Parse error' });
+    await stop();
+  });
+
+  it('下游立即退出：tools/call 回 -32000 错误响应，客户端不悬挂', async () => {
+    const logs: string[] = [];
+    const { request, stop } = startProxy(
+      {},
+      { target: ['node', '-e', 'process.exit(0)'], log: (l) => logs.push(l) },
+    );
+    await new Promise((r) => setTimeout(r, 150)); // 等下游退出
+    // 下游可能尚在启动（转发并登记未决）或已退出（立即回错）——两条路径都必须有应答
+    const res = await request('tools/call', { name: 'echo', arguments: { text: 'hi' } }, 3000);
+    expect(res.error).toMatchObject({ code: -32000 });
+    expect(String((res.error as { message: string }).message)).toContain('未完成');
+    await stop();
+  });
+
+  it('spawn 失败（命令不存在）：onDownstreamError 上报且代理不崩溃', async () => {
+    const errors: Error[] = [];
+    const logs: string[] = [];
+    const { stop } = startProxy(
+      {},
+      {
+        target: ['arcs-definitely-not-exist-xyz'],
+        onDownstreamError: (err) => errors.push(err),
+        log: (l) => logs.push(l),
+      },
+    );
+    await new Promise((r) => setTimeout(r, 200));
+    expect(errors).toHaveLength(1);
+    expect((errors[0] as Error & { code?: string }).code).toBe('ENOENT');
+    await stop();
   });
 });

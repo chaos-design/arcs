@@ -120,3 +120,35 @@ describe('parseCliArgs', () => {
     expect(args.verbose).toBeUndefined();
   });
 });
+
+describe('splitCommand 引号感知切分（11 号计划加固）', () => {
+  it('无引号：按空白切分（与旧行为一致）', async () => {
+    const { splitCommand } = await import('./cli.js');
+    expect(splitCommand('npx -y @modelcontextprotocol/server-filesystem ./src')).toEqual([
+      'npx',
+      '-y',
+      '@modelcontextprotocol/server-filesystem',
+      './src',
+    ]);
+  });
+
+  it('双引号包裹含空格路径', async () => {
+    const { splitCommand } = await import('./cli.js');
+    expect(splitCommand('node "/path with space/server.mjs" --port 1')).toEqual([
+      'node',
+      '/path with space/server.mjs',
+      '--port',
+      '1',
+    ]);
+  });
+
+  it('单引号与混合引号', async () => {
+    const { splitCommand } = await import('./cli.js');
+    expect(splitCommand("sh -c 'echo a b' \"x y\"")).toEqual(['sh', '-c', 'echo a b', 'x y']);
+  });
+
+  it('未闭合引号按字面量保留，不吞参数', async () => {
+    const { splitCommand } = await import('./cli.js');
+    expect(splitCommand('node "/path unfinished')).toEqual(['node', '/path unfinished']);
+  });
+});

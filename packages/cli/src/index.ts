@@ -23,8 +23,8 @@ export interface RunDeps {
   resolveEntrypoint: (pkg: string, bin: string) => Entrypoint | null;
 }
 
-/** 默认 spawner：继承 stdio，父进程收到信号时转发给子进程 */
-function inheritedSpawn(command: string, args: string[]): Promise<number> {
+/** 默认 spawner：继承 stdio，父进程收到信号时转发给子进程（导出供测试验证监听器清理） */
+export function inheritedSpawn(command: string, args: string[]): Promise<number> {
   return new Promise((resolve, reject) => {
     const child = nodeSpawn(command, args, { stdio: 'inherit' });
     const forward = (signal: NodeJS.Signals) => () => child.kill(signal);
@@ -32,12 +32,17 @@ function inheritedSpawn(command: string, args: string[]): Promise<number> {
     const onSigterm = forward('SIGTERM');
     process.on('SIGINT', onSigint);
     process.on('SIGTERM', onSigterm);
-    child.on('error', reject);
-    child.on('exit', (code, signal) => {
+    // spawn 失败只触发 error 不触发 exit：两条路径都要清理监听器，否则反复启动会累积
+    let settled = false;
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
       process.off('SIGINT', onSigint);
       process.off('SIGTERM', onSigterm);
-      resolve(signal ? 1 : (code ?? 0));
-    });
+      fn();
+    };
+    child.on('error', (err) => settle(() => reject(err)));
+    child.on('exit', (code, signal) => settle(() => resolve(signal ? 1 : (code ?? 0))));
   });
 }
 

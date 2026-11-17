@@ -104,3 +104,33 @@ describe('run', () => {
     expect(t.err.mock.calls.flat().join('')).toContain('未知命令');
   });
 });
+
+describe('inheritedSpawn 信号监听器治理（11 号计划加固）', () => {
+  it('正常退出后 SIGINT/SIGTERM 监听器被清理', async () => {
+    const { inheritedSpawn } = await import('./index.js');
+    const beforeSigint = process.listenerCount('SIGINT');
+    const beforeSigterm = process.listenerCount('SIGTERM');
+    const code = await inheritedSpawn(process.execPath, ['-e', 'process.exit(3)']);
+    expect(code).toBe(3);
+    expect(process.listenerCount('SIGINT')).toBe(beforeSigint);
+    expect(process.listenerCount('SIGTERM')).toBe(beforeSigterm);
+  });
+
+  it('spawn 失败（命令不存在）后监听器同样被清理且 reject', async () => {
+    const { inheritedSpawn } = await import('./index.js');
+    const beforeSigint = process.listenerCount('SIGINT');
+    const beforeSigterm = process.listenerCount('SIGTERM');
+    await expect(inheritedSpawn('arcs-definitely-not-exist-xyz', [])).rejects.toThrow();
+    expect(process.listenerCount('SIGINT')).toBe(beforeSigint);
+    expect(process.listenerCount('SIGTERM')).toBe(beforeSigterm);
+  });
+
+  it('连续启动多次不累积监听器', async () => {
+    const { inheritedSpawn } = await import('./index.js');
+    const beforeSigint = process.listenerCount('SIGINT');
+    for (let i = 0; i < 3; i++) {
+      await inheritedSpawn(process.execPath, ['-e', 'process.exit(0)']);
+    }
+    expect(process.listenerCount('SIGINT')).toBe(beforeSigint);
+  });
+});
