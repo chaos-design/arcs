@@ -18,6 +18,12 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@22.20.5)
 
+  examples/sdk-vercel-demo:
+    dependencies:
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+
   packages/cli:
     dependencies:
       '@chaos-design/arcs-plugin-mcp':
@@ -136,6 +142,9 @@ importers:
       '@chaos-design/arcs-core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
       '@chaos-design/arcs-plugin-kit':
         specifier: workspace:*
         version: link:../../packages/plugin-kit

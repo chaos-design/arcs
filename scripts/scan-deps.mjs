@@ -54,6 +54,7 @@ const RULES = [
     allow: [
       'zod',
       '@chaos-design/arcs-core',
+      '@chaos-design/arcs-host-kit', // cli 装配 FileAuditSink（ARCS_AUDIT_FILE 落盘）
       '@chaos-design/arcs-telemetry',
       '@chaos-design/arcs-plugin-kit',
     ],

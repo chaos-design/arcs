@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-host-kit": "workspace:*",
     "@chaos-design/arcs-plugin-kit": "workspace:*",
     "@chaos-design/arcs-telemetry": "workspace:*",
     "zod": "^3.25.0"

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { pathToFileURL } from 'node:url';
+import { createAuditSink } from '@chaos-design/arcs-host-kit';
 import { McpProxy } from './proxy.js';
 
 export interface CliArgs {
@@ -82,14 +83,18 @@ function main(): void {
         : undefined,
   };
 
-  const proxy = new McpProxy({
-    goal: args.goal,
-    target: targetArgv,
-    configOverrides,
-    onDownstreamExit: (code) => process.exit(code ?? 0),
-    // spawn 失败（ENOENT 等）只触发 error 不触发 exit：显式退出避免悬挂
-    onDownstreamError: () => process.exit(127),
-  });
+  const proxy = new McpProxy(
+    {
+      goal: args.goal,
+      target: targetArgv,
+      configOverrides,
+      onDownstreamExit: (code) => process.exit(code ?? 0),
+      // spawn 失败（ENOENT 等）只触发 error 不触发 exit：显式退出避免悬挂
+      onDownstreamError: () => process.exit(127),
+    },
+    // 审计落盘：ARCS_AUDIT_FILE / ARCS_HOME 环境变量存在时写入 JSONL（供 pnpm dashboard 消费）
+    { sink: createAuditSink() ?? undefined },
+  );
   proxy.start();
 }
 
