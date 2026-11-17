@@ -137,6 +137,19 @@ export ARCS_GOAL="重构 src/auth，严禁修改数据库迁移文件"
 claude --plugin-dir /abs/path/to/arcs/plugins/claude-code
 ```
 
+## 统一 CLI 快速启动（`packages/cli`）
+
+`@chaos-design/arcs-cli`（bin `arcs`）负责"发现 + 拉起"，不重复各插件的能力声明：
+
+```bash
+npx @chaos-design/arcs-cli list                     # 列出全部插件
+npx @chaos-design/arcs-cli start mcp -- --goal "..." --target "..."  # 拉起 MCP 常驻代理
+npx @chaos-design/arcs-cli start mcp --dry-run      # 只打印命令不启动
+npx @chaos-design/arcs-cli start claude-code        # Hook 型打印宿主启用方式
+```
+
+`mcp` 是唯一有独立常驻服务的插件，`start` 会解析其 bin 并拉起 stdio 代理子进程，`--` 之后的参数原样透传；其余 Hook / 全局扩展型插件由宿主加载，CLI 给出启用命令与能力摘要。见 [packages/cli/README.md](../packages/cli/README.md)。
+
 ## 安装与构建
 
 ```bash

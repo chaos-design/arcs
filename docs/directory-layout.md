@@ -7,6 +7,8 @@ arcs/
 ├── packages/
 │   ├── core/                  # 基础内核：纯检测/决策，零宿主依赖
 │   ├── plugin-kit/            # 插件胶水层：HostAdapter 契约 + 运行时 + 桥接
+│   ├── host-kit/              # 宿主插件共用运行时：能力矩阵 + Hook 入口桥 + 效果翻译
+│   ├── cli/                   # @chaos-design/arcs-cli：统一命令行（发现 + 快速启动插件服务）
 │   └── telemetry/             # AuditEvent 模型 / TelemetrySink 契约 / 偏移曲线
 ├── sdk/                       # 代码级接入（sdk/xxx 形式，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel

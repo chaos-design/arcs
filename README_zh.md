@@ -115,6 +115,7 @@ arcs/
 │   ├── core/                  # 基础内核：纯检测/决策，零宿主依赖
 │   ├── plugin-kit/            # 插件胶水层：HostAdapter 契约 + 运行时 + 桥接
 │   ├── host-kit/              # 宿主插件共用运行时：能力矩阵 + Hook 入口桥 + 效果翻译
+│   ├── cli/                   # @chaos-design/arcs-cli：统一命令行（发现 + 快速启动插件服务）
 │   └── telemetry/             # 轨迹偏移曲线与纠偏审计数据模型/接收端
 ├── sdk/                       # 代码级接入（sdk/xxx，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
@@ -232,7 +233,29 @@ flowchart LR
 
 ## 🚀 快速开始
 
-### 1. SDK 代码级集成（适用于自研 Agent 应用）
+### 1. CLI 一键启动（最快上手）
+
+用一条命令发现并启动任意插件服务，无需先了解各宿主的挂载细节：
+
+```bash
+# 列出全部插件（名称 / 宿主 / 启动方式 / 能力）
+npx @chaos-design/arcs-cli list
+
+# 启动 MCP 常驻 stdio 代理（-- 之后的参数原样转发给插件）
+npx @chaos-design/arcs-cli start mcp -- \
+  --goal "仅修复前端样式，禁止改后端 API" \
+  --target "npx -y @modelcontextprotocol/server-filesystem ./src"
+
+# 先看会执行什么，不真正启动
+npx @chaos-design/arcs-cli start mcp --dry-run -- --goal "..." --target "..."
+
+# Hook / 扩展型插件由宿主加载，CLI 给出启用方式而非启动进程
+npx @chaos-design/arcs-cli start claude-code
+```
+
+`mcp` 是唯一有独立常驻服务的插件；其余 8 家宿主插件为 Hook / 全局扩展，由宿主内调用。也可全局安装后用短命令 `arcs`（`pnpm add -g @chaos-design/arcs-cli`）。
+
+### 2. SDK 代码级集成（适用于自研 Agent 应用）
 
 ```bash
 pnpm add @chaos-design/arcs-core @chaos-design/arcs-sdk-vercel
@@ -264,7 +287,7 @@ const { text } = await generateText({
 });
 ```
 
-### 2. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
+### 3. Harness 宿主插件集成（适用于 Codex / DeepSeek 等外部 Agent）
 
 针对封闭或半开放的外部 Harness，ARCS 提供 **生命周期 Hook 插件** 与 **MCP 透明代理** 两种无侵入挂载方式。
 
@@ -312,7 +335,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 
 ---
 
-### 3. 安装各平台宿主插件（8 家 Agent）
+### 4. 安装各平台宿主插件（8 家 Agent）
 
 平台插件提供原生 manifest / hooks.json 或全局扩展形态，全部复用 `host-kit` 的能力矩阵与 fail-open 入口桥：
 

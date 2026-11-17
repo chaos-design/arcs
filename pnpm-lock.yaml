@@ -18,6 +18,16 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@22.20.5)
 
+  packages/cli:
+    dependencies:
+      '@chaos-design/arcs-plugin-mcp':
+        specifier: workspace:*
+        version: link:../../plugins/mcp
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
   packages/core:
     dependencies:
       zod:
