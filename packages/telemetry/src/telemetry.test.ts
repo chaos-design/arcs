@@ -78,3 +78,20 @@ describe('偏移曲线聚合', () => {
     expect(curves[0]!.maxSeverity).toBe(1);
   });
 });
+
+describe('InMemorySink 容量上限（11 号计划加固）', () => {
+  it('设置 maxEvents 后 FIFO 逐出最旧事件；缺省保持无上限', () => {
+    const capped = new InMemorySink(3);
+    for (let i = 0; i < 5; i++) {
+      capped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'codex', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
+    }
+    expect(capped.events).toHaveLength(3);
+    expect(capped.events.map((e) => e.ts)).toEqual([2, 3, 4]);
+
+    const uncapped = new InMemorySink();
+    for (let i = 0; i < 5; i++) {
+      uncapped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'codex', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
+    }
+    expect(uncapped.events).toHaveLength(5);
+  });
+});

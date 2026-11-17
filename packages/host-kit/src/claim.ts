@@ -1,4 +1,5 @@
 import * as nodeFs from 'node:fs';
+import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -47,7 +48,11 @@ export interface SessionClaimOptions {
 export function sanitizeClaimId(sessionId: string): string {
   const cleaned = sessionId.replace(/[^a-zA-Z0-9._-]/g, '-');
   const safe = cleaned === '.' || cleaned === '..' ? 'invalid' : cleaned;
-  return safe.slice(0, 96) || 'unknown';
+  if (safe.length <= 96) return safe || 'unknown';
+  // 超长 id 直接截断会让不同会话落到同一 claim 文件：前缀保留可读性 + 原 id 哈希防碰撞
+  const head = safe.slice(0, 80);
+  const digest = createHash('sha256').update(sessionId).digest('hex').slice(0, 16);
+  return `${head}-${digest}`;
 }
 
 export function claimDirectory(options: SessionClaimOptions): string {

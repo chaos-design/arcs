@@ -215,3 +215,53 @@ describe('turn 计数', () => {
     expect(handle.turnBySession.get('s')).toBe('turn-9');
   });
 });
+
+describe('并发竞态与容量治理（11 号计划加固）', () => {
+  const dangerousOf = (sid: string) => ({
+    type: 'tool/call',
+    sessionId: sid,
+    callId: `c-${sid}`,
+    tool: { name: 'Bash' },
+    input: { command: 'rm -rf /' },
+  });
+
+  it('并发 block 决策：blockTransport 收到各自事件的 raw，不错拿他会话数据', async () => {
+    const seenRawSessions: string[] = [];
+    const ctx = createMockCtx();
+    apply(ctx, {
+      goal: '安全重构',
+      blockTransport: async (_decision, raw) => {
+        seenRawSessions.push((raw.payload as { toolUseId?: string }).toolUseId ?? '');
+        return true;
+      },
+    });
+    // 不 await 第一个：模拟两个会话事件并发交错（旧实现经共享 lastRaw 会错拿）
+    const first = fire(ctx, 'session/event', dangerousOf('sA'))[0] as Promise<HostDecision>;
+    const second = fire(ctx, 'session/event', dangerousOf('sB'))[0] as Promise<HostDecision>;
+    await Promise.all([first, second]);
+    expect(seenRawSessions.sort()).toEqual(['c-sA', 'c-sB']);
+  });
+
+  it('会话 Map 超过容量上限时 FIFO 逐出最旧会话', async () => {
+    const ctx = createMockCtx();
+    const handle = apply(ctx, { goal: '安全重构' });
+    // SESSION_MAP_CAP 为 512：写入 520 个会话（每个都触发 capSessionMaps）
+    for (let i = 0; i < 520; i++) {
+      const sid = `sess-${String(i).padStart(4, '0')}`;
+      handle.turnBySession.set(sid, '0');
+      handle.decisionBySession.set(sid, { kind: 'pass', level: null, reason: '' });
+      handle.enforcedBySession.set(sid, false);
+    }
+    // 触发一次真实事件链，内部 capSessionMaps 生效
+    await fire(ctx, 'session/event', {
+      type: 'tool/call',
+      sessionId: 'sess-probe',
+      callId: 'c-probe',
+      tool: { name: 'Bash' },
+      input: { command: 'ls' },
+    })[0];
+    expect(handle.turnBySession.size).toBeLessThanOrEqual(513);
+    expect(handle.turnBySession.has('sess-0000')).toBe(false); // 最旧者被逐出
+    expect(handle.turnBySession.has('sess-probe')).toBe(true);
+  });
+});

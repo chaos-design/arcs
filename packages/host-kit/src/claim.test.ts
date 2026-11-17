@@ -88,3 +88,23 @@ describe('SessionClaim', () => {
     expect(sanitizeClaimId('')).toBe('unknown');
   });
 });
+
+describe('超长 sessionId 防碰撞（11 号计划加固）', () => {
+  it('超过 96 字符的 id：不同 id 得到不同文件名（截断+哈希）', () => {
+    const a = 'x'.repeat(100) + '-alpha';
+    const b = 'x'.repeat(100) + '-beta';
+    const fa = sanitizeClaimId(a);
+    const fb = sanitizeClaimId(b);
+    expect(fa).not.toBe(fb); // 旧实现双双截断到同一文件名
+    expect(fa.length).toBeLessThanOrEqual(100);
+    expect(fa.startsWith('x'.repeat(80) + '-')).toBe(true);
+  });
+
+  it('同一 id 稳定映射；96 字符以内行为不变', () => {
+    const long = 'sess-' + 'y'.repeat(120);
+    expect(sanitizeClaimId(long)).toBe(sanitizeClaimId(long));
+    expect(sanitizeClaimId('z'.repeat(96))).toBe('z'.repeat(96));
+    expect(sanitizeClaimId('')).toBe('unknown');
+    expect(sanitizeClaimId('..')).toBe('invalid');
+  });
+});

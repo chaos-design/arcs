@@ -21,6 +21,9 @@ export type { HarnessEvent } from './mapping.js';
 
 export const name = 'arcs-deepseek';
 
+/** 会话级 Map 的容量上限（超过 FIFO 逐出；防宿主缺失 session/disposed 事件时泄漏） */
+const SESSION_MAP_CAP = 512;
+
 /** Cordis Context 的最小结构（仅用 on / emit，刻意不依赖 sessions 服务） */
 export interface DeepseekContext {
   on(event: string, handler: (payload: any) => unknown): unknown;
@@ -93,7 +96,19 @@ export function apply(ctx: DeepseekContext, config: DeepseekConfig = {}): Deepse
   const turnBySession = new Map<string, string>();
   const decisionBySession = new Map<string, HostDecision>();
   const enforcedBySession = new Map<string, boolean>();
-  let lastRaw: RawEvent | undefined;
+
+  // 会话 Map 容量上限：宿主不发 session/disposed 时防止无限增长（FIFO 逐出最旧会话）
+  const capSessionMaps = (): void => {
+    while (turnBySession.size > SESSION_MAP_CAP) {
+      turnBySession.delete(turnBySession.keys().next().value!);
+    }
+    while (decisionBySession.size > SESSION_MAP_CAP) {
+      decisionBySession.delete(decisionBySession.keys().next().value!);
+    }
+    while (enforcedBySession.size > SESSION_MAP_CAP) {
+      enforcedBySession.delete(enforcedBySession.keys().next().value!);
+    }
+  };
 
   // 共享决策持有者：第 4 个参数 subscribeFn 负责注册 Cordis 订阅；
   // 每次事件前用 reset() 清空上次决策，避免长订阅残留。
@@ -108,7 +123,7 @@ export function apply(ctx: DeepseekContext, config: DeepseekConfig = {}): Deepse
       const dispatch = async (
         event: HarnessEvent | null | undefined,
         forcedType?: string,
-      ): Promise<HostDecision> => {
+      ): Promise<{ decision: HostDecision; raw?: RawEvent }> => {
         try {
           adapter.reset();
           const source = forcedType
@@ -116,18 +131,22 @@ export function apply(ctx: DeepseekContext, config: DeepseekConfig = {}): Deepse
             : (event ?? {});
           const native = mapHarnessEvent(source as HarnessEvent);
           // 生命周期事件强制走审计；业务事件仅 PreToolUse 纠偏
-          if (!forcedType && !shouldSteerDeepseek(native)) return emptyDecision();
-          lastRaw = nativeToRaw('deepseek', native);
-          return await runAndDecide(lastRaw);
+          if (!forcedType && !shouldSteerDeepseek(native)) return { decision: emptyDecision() };
+          const raw = nativeToRaw('deepseek', native);
+          // raw 随决策一起返回（而非共享可变变量）：并发事件的 block 决策不会错拿他事件的数据
+          return { decision: await runAndDecide(raw), raw };
         } catch (err) {
-          return { ...emptyDecision(), reason: 'arcs fail-open', degraded: [`runtime:${String(err)}`] };
+          return {
+            decision: { ...emptyDecision(), reason: 'arcs fail-open', degraded: [`runtime:${String(err)}`] },
+          };
         }
       };
 
       ctx.on('session/created', async (session: HarnessEvent) => {
         const sid = sessionIdOf(session);
         turnBySession.set(sid, turnIdOf(session) || '0');
-        const decision = await dispatch(session, 'session/created');
+        capSessionMaps();
+        const { decision } = await dispatch(session, 'session/created');
         decisionBySession.set(sid, decision);
         return decision;
       });
@@ -139,19 +158,21 @@ export function apply(ctx: DeepseekContext, config: DeepseekConfig = {}): Deepse
         const turnId = turnIdOf(event) || String((Number.isNaN(prev) ? 0 : prev) + 1);
         turnBySession.set(sid, turnId);
 
-        const decision = await dispatch(event);
+        const { decision, raw } = await dispatch(event);
         decisionBySession.set(sid, decision);
 
-        // 有阻断通道才真正拦截；通道异常一律 fail-open，不抛给宿主
+        // 有阻断通道才真正拦截；通道异常一律 fail-open，不抛给宿主。
+        // 使用本次事件自己的 raw，避免并发事件下错拿其它会话的原始数据
         let enforced = false;
-        if (decision.kind === 'block' && blockTransport && lastRaw) {
+        if (decision.kind === 'block' && blockTransport && raw) {
           try {
-            enforced = (await blockTransport(decision, lastRaw)) === true;
+            enforced = (await blockTransport(decision, raw)) === true;
           } catch {
             enforced = false;
           }
         }
         enforcedBySession.set(sid, enforced);
+        capSessionMaps();
 
         if (ctx.emit) {
           ctx.emit('arcs/decision', { sessionId: sid, turnId, decision, enforced });
@@ -161,7 +182,7 @@ export function apply(ctx: DeepseekContext, config: DeepseekConfig = {}): Deepse
 
       ctx.on('session/disposed', async (session: HarnessEvent) => {
         const sid = sessionIdOf(session);
-        const decision = await dispatch(session, 'session/disposed');
+        const { decision } = await dispatch(session, 'session/disposed');
         decisionBySession.set(sid, decision);
         turnBySession.delete(sid);
         return decision;

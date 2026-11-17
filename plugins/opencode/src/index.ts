@@ -90,7 +90,9 @@ export function createOpencodePlugin(options: PipelineOptions = {}): OpencodePlu
 
       // 2) L2/L3 注入通道：OpenCode 只认 experimental.chat.system.transform（V2 为 session context hook），
       //    经 output.system[] 追加；工具 output 只有 args，写 arcsContext 是无效的。
+      // 容量上限：两次模型请求之间注入可能多次触发，超过上限 FIFO 逐出最旧条目防泄漏
       const pendingInjections: string[] = [];
+      const PENDING_INJECTIONS_CAP = 64;
       ctx.session?.hook?.('context', (event) => {
         if (pendingInjections.length === 0) return;
         event.system.push(...pendingInjections.splice(0));
@@ -123,6 +125,9 @@ export function createOpencodePlugin(options: PipelineOptions = {}): OpencodePlu
         // L2/L3 注入上下文：排队到下一次模型请求，经 session context hook 写入 system[]（不阻断任务）
         if (translated.injected.length > 0) {
           pendingInjections.push(...translated.injected);
+          while (pendingInjections.length > PENDING_INJECTIONS_CAP) {
+            pendingInjections.shift();
+          }
         }
 
         // 阻断（宿主/降级产出 block）：throw 让宿主拒绝执行（有意不 catch）
