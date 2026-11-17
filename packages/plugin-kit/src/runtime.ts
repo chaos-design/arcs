@@ -91,7 +91,14 @@ export class PluginRuntime {
   }
 
   async run(raw: RawEvent): Promise<SteeringOutcome> {
-    await this.ensureInit();
+    try {
+      await this.ensureInit();
+    } catch {
+      // 初始化失败（配置校验 / adapter.setup 异常）：fail-open 放行并记降级审计；
+      // 重置 initPromise，让下一个事件有机会重试初始化（如宿主延迟就绪）。
+      this.initPromise = undefined;
+      return this.degradedPassThrough(raw);
+    }
     const t0 = Date.now();
     let degraded = false;
     const notes: string[] = [];
@@ -182,8 +189,37 @@ export class PluginRuntime {
   /** 订阅模式：adapter 采集到事件即驱动编排（fire-and-forget） */
   start(): void {
     this.adapter.subscribe((raw) => {
-      void this.run(raw);
+      // run() 内部已把所有异常收敛为 fail-open 结果；此处兜底保证绝不外抛到宿主
+      void this.run(raw).catch(() => {});
     });
+  }
+
+  /**
+   * 初始化失败 / 引擎不可用时的降级放行：PassThrough + degraded 审计。
+   * 与主链同一遥测出口，保证面板能看到降级轨迹。
+   */
+  private degradedPassThrough(raw: RawEvent): SteeringOutcome {
+    const parsed = rawEventSchema.safeParse(raw);
+    const sessionId = parsed.success ? parsed.data.sessionId : 'invalid';
+    const host = parsed.success ? parsed.data.host : 'unknown';
+    const effects: SteeringEffect[] = [{ type: 'PassThrough' }];
+    try {
+      this.sink.emit(
+        buildAuditEvent({
+          ts: Date.now(),
+          sessionId,
+          host,
+          level: null,
+          signals: [],
+          effects,
+          latencyMs: 0,
+          degraded: true,
+        }),
+      );
+    } catch {
+      // 遥测失败静默（telemetry.md Sink 契约）
+    }
+    return { effects, signals: [], latencyMs: 0, degraded: true };
   }
 }
 

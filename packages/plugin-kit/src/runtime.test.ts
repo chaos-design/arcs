@@ -322,3 +322,66 @@ describe('ReplayHarness 回放仿真（docs/testing.md 第二层）', () => {
     expect(outcome.latencyMs).toBeLessThan(50);
   });
 });
+
+describe('初始化失败 fail-open（11 号计划加固）', () => {
+  it('adapter.setup 抛错：run 返回降级 PassThrough + 降级审计，不外抛', async () => {
+    const adapter = new MockHostAdapter();
+    adapter.setup = () => {
+      throw new Error('宿主句柄未就绪');
+    };
+    const sink = new InMemorySink();
+    const runtime = new PluginRuntime(adapter, { sink, hitl: new MockHitlTransport() });
+
+    const outcome = await runtime.run(makeRaw());
+    expect(outcome.degraded).toBe(true);
+    expect(outcome.effects).toEqual([{ type: 'PassThrough' }]);
+    expect(sink.events).toHaveLength(1);
+    expect(sink.events[0]!.degraded).toBe(true);
+    expect(sink.events[0]!.level).toBeNull();
+    expect(sink.events[0]!.sessionId).toBe('s1');
+  });
+
+  it('init 失败重置 initPromise：宿主就绪后下一个事件重试初始化成功', async () => {
+    const adapter = new MockHostAdapter();
+    const originalSetup = adapter.setup.bind(adapter);
+    let failSetup = true;
+    adapter.setup = (handles) => {
+      if (failSetup) throw new Error('首事件时宿主未就绪');
+      originalSetup(handles); // 恢复句柄注入，模拟宿主延迟就绪
+    };
+    const sink = new InMemorySink();
+    const runtime = new PluginRuntime(adapter, { sink, hitl: new MockHitlTransport() });
+
+    const first = await runtime.run(makeRaw());
+    expect(first.degraded).toBe(true);
+
+    failSetup = false; // 宿主延迟就绪
+    const second = await runtime.run(makeRaw({ timestamp: Date.now() + 1 }));
+    expect(second.degraded).toBe(false);
+    expect(runtime.getConfig()).toBeDefined();
+    expect(sink.events.map((e) => e.degraded)).toEqual([true, false]);
+  });
+
+  it('非法宿主配置（zod 校验失败）：降级放行且 start() 订阅链不产生未处理拒绝', async () => {
+    const adapter = new MockHostAdapter();
+    const sink = new InMemorySink();
+    const runtime = new PluginRuntime(adapter, {
+      host: { driftThreshold: Number.NaN } as never,
+      sink,
+      hitl: new MockHitlTransport(),
+    });
+
+    runtime.start(); // 订阅模式：回调内异常不允许逃逸为 unhandledRejection
+    const notify = adapter.subscribed[0]!;
+    const flush = () => new Promise((r) => setImmediate(r)); // 冲刷订阅回调内的 async 链
+    await notify(makeRaw());
+    await flush();
+    await notify(makeRaw({ timestamp: Date.now() + 1 }));
+    await flush();
+
+    // 两个事件均 fail-open，且都记了降级审计（init 每次重试均失败）
+    expect(sink.events).toHaveLength(2);
+    expect(sink.events.every((e) => e.degraded && e.level === null)).toBe(true);
+    expect(adapter.raws).toHaveLength(0); // 未进入 normalize，未污染宿主数据
+  });
+});
