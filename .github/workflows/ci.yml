@@ -1,0 +1,46 @@
+# ARCS CI（docs/testing.md 边界守护）：构建 → 类型检查 → 测试 → 依赖红线 → 宿主契约护栏
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # 版本取自 package.json#packageManager
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 安装依赖
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: 构建（turbo）
+        run: corepack pnpm build
+
+      - name: 类型检查（全包 tsc --noEmit）
+        run: corepack pnpm lint
+
+      - name: 测试（vitest）
+        run: corepack pnpm test
+
+      - name: 依赖红线扫描
+        run: corepack pnpm scan
+
+      - name: 宿主契约护栏
+        run: corepack pnpm verify:contracts
+
+      - name: 偏移曲线面板冒烟（样例数据 → HTML）
+        run: |
+          mkdir -p /tmp/arcs-ci/audit/mcp
+          printf '{"ts":1763400000000,"sessionId":"ci","host":"mcp","level":2,"signals":[{"kind":"loop","severity":0.8,"score":1,"evidence":"ci"}],"effects":[{"type":"InjectMessage"}],"latencyMs":1,"degraded":false}\n' \
+            > /tmp/arcs-ci/audit/mcp/2026-01-01.jsonl
+          node scripts/offset-dashboard.mjs --home /tmp/arcs-ci --html /tmp/arcs-ci/dashboard.html
