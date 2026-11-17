@@ -313,6 +313,11 @@ function main(argv = process.argv.slice(2)) {
 // 仅作为脚本直接执行时启动；被 import（测试）时不产生副作用
 const isEntry = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isEntry) {
+  // 管道下游提前关闭（如 `pnpm dashboard | head`）不得让脚本崩出 EPIPE 栈
+  process.stdout.on('error', (err) => {
+    if (err.code === 'EPIPE') process.exit(0);
+    throw err;
+  });
   main().then((code) => {
     if (code !== 0) process.exitCode = code;
   });
