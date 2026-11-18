@@ -37,9 +37,12 @@ flowchart TB
   PI --> KIT
   DS --> KIT
   TR --> KIT
+  MCP --> KIT
   MCP --> CORE
   KIT --> CORE
 ```
+
+> Like every other plugin, the mcp gateway is orchestrated by `plugin-kit` (`HostAdapter` + `PluginRuntime`) while reusing host-kit's `createAuditSink` for audit persistence — it does not bypass the shared runtime to reach the core directly.
 
 ## Module Responsibilities
 
@@ -98,7 +101,7 @@ apply(ctx, {
 });
 ```
 
-- **Contract guardrails**: In addition to statically validating the manifest/hooks structure, event counts, and capability matrix of the 8 platforms, `pnpm verify:contracts` also **actually executes** the `serialize*` functions of Codex / Claude Code / ZCode and feeds their output into the official rule assertor (currently 75 rules). Fixtures come from the [Codex official output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json), and parsing rules come from [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs). Note: **the schema lags behind the parser** — `allow` must be paired with `updatedInput`, `deny` must carry a non-empty reason, and `ask` is always rejected; these rules exist only in the parser. Behavior-level validation is implemented accordingly and has caught and fixed multiple output violations that would have broken blocking (Codex orphaned `allow` / `deny` without a reason; Claude outputting the illegal enum `block`; WorkBuddy/Trae misusing the `decision` field instead of `permissionDecision`; `additionalContext` wrongly placed at the top level). The current 85 checks cover all 5 Hook platforms, split by platform: Codex uses parser rules, while the other four follow the Claude-compatible shape (`permissionDecision` and `additionalContext` both inside `hookSpecificOutput`; WorkBuddy's arg-patching field is `modifiedInput`). It is a regression guardrail and does not replace real host verification.
+- **Contract guardrails**: In addition to statically validating the manifest/hooks structure, event counts, and capability matrix of the 8 platforms, `pnpm verify:contracts` also **actually executes** the `serialize*` functions of Codex / Claude Code / ZCode and feeds their output into the official rule assertor (the check count is whatever `pnpm verify:contracts` reports at run time). Fixtures come from the [Codex official output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json), and parsing rules come from [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs). Note: **the schema lags behind the parser** — `allow` must be paired with `updatedInput`, `deny` must carry a non-empty reason, and `ask` is always rejected; these rules exist only in the parser. Behavior-level validation is implemented accordingly and has caught and fixed multiple output violations that would have broken blocking (Codex orphaned `allow` / `deny` without a reason; Claude outputting the illegal enum `block`; WorkBuddy/Trae misusing the `decision` field instead of `permissionDecision`; `additionalContext` wrongly placed at the top level). These behavior-level checks cover all 5 Hook platforms (the total count is whatever `pnpm verify:contracts` reports at run time), split by platform: Codex uses parser rules, while the other four follow the Claude-compatible shape (`permissionDecision` and `additionalContext` both inside `hookSpecificOutput`; WorkBuddy's arg-patching field is `modifiedInput`). It is a regression guardrail and does not replace real host verification.
 - **Local audit evidence**: Once `ARCS_HOME` or `ARCS_AUDIT_FILE` is set, all plugins append `AuditEvent` to `<home>/audit/<host>/<YYYY-MM-DD>.jsonl`; `pnpm real-check` probes the CLI and provides real-session steps, while `pnpm real-check -- --verify` counts audit events. When the variables are not set, nothing is written to disk and behavior is unchanged. See [telemetry.md](./telemetry.md) for details.
 
 ## Shared Runtime `packages/host-kit`
@@ -163,6 +166,9 @@ node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/worksp
 node scripts/install-host-plugins.mjs --client=opencode
 node scripts/install-host-plugins.mjs --client=pi
 
-# Native marketplace platforms are installed via their own CLI (the script prints the exact command)
+# DeepSeek goes through Cordis bundle injection (--deepseek-profile selects web/cli)
+node scripts/install-host-plugins.mjs --client=deepseek
+
+# Plugin-directory platforms load from a local directory (the script prints the enable commands; see each plugin's README)
 node scripts/install-host-plugins.mjs --client=claude-code
 ```

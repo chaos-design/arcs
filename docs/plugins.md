@@ -37,9 +37,12 @@ flowchart TB
   PI --> KIT
   DS --> KIT
   TR --> KIT
+  MCP --> KIT
   MCP --> CORE
   KIT --> CORE
 ```
+
+> mcp 网关与其它插件一样经 `plugin-kit` 编排（`HostAdapter` + `PluginRuntime`），同时复用 `host-kit` 的 `createAuditSink` 落审计——并非绕过共用运行时直连内核。
 
 ## 模块职责
 
@@ -98,7 +101,7 @@ apply(ctx, {
 });
 ```
 
-- **契约护栏**：`pnpm verify:contracts` 除静态校验 8 个平台的 manifest/hooks 结构、事件数量与能力矩阵外，还**实际执行** Codex / Claude Code / ZCode 的 `serialize*` 函数，把输出喂给官方规则断言器（当前 75 项）。fixture 来自 [Codex 官方 output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json)，解析规则来自 [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs)。注意：**schema 落后于 parser**——`allow` 必须与 `updatedInput` 成对、`deny` 必须带非空 reason、`ask` 一律拒绝，这几条只有 parser 里有。行为级校验据此实现，已抓到并修复多处会导致阻断失效的输出违规（Codex 孤立 allow / 无理由 deny；Claude 输出非法枚举 `block`；WorkBuddy/Trae 误用 `decision` 字段而非 `permissionDecision`；`additionalContext` 误置顶层）。当前 85 项校验覆盖全部 5 个 Hook 平台，按平台分治：Codex 用 parser 规则，其余四家按 Claude 兼容形态（`permissionDecision` 与 `additionalContext` 都在 `hookSpecificOutput` 内；WorkBuddy 改参字段为 `modifiedInput`）。它是回归护栏，不替代真实宿主验证。
+- **契约护栏**：`pnpm verify:contracts` 除静态校验 8 个平台的 manifest/hooks 结构、事件数量与能力矩阵外，还**实际执行** Codex / Claude Code / ZCode 的 `serialize*` 函数，把输出喂给官方规则断言器（校验项数以 `pnpm verify:contracts` 实时输出为准）。fixture 来自 [Codex 官方 output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json)，解析规则来自 [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs)。注意：**schema 落后于 parser**——`allow` 必须与 `updatedInput` 成对、`deny` 必须带非空 reason、`ask` 一律拒绝，这几条只有 parser 里有。行为级校验据此实现，已抓到并修复多处会导致阻断失效的输出违规（Codex 孤立 allow / 无理由 deny；Claude 输出非法枚举 `block`；WorkBuddy/Trae 误用 `decision` 字段而非 `permissionDecision`；`additionalContext` 误置顶层）。行为级校验覆盖全部 5 个 Hook 平台（总项数以 `pnpm verify:contracts` 实时输出为准），按平台分治：Codex 用 parser 规则，其余四家按 Claude 兼容形态（`permissionDecision` 与 `additionalContext` 都在 `hookSpecificOutput` 内；WorkBuddy 改参字段为 `modifiedInput`）。它是回归护栏，不替代真实宿主验证。
 - **本地审计证据**：设置 `ARCS_HOME` 或 `ARCS_AUDIT_FILE` 后，所有插件会把 `AuditEvent` 追加到 `<home>/audit/<host>/<YYYY-MM-DD>.jsonl`；`pnpm real-check` 探测 CLI 并给出真实会话步骤，`pnpm real-check -- --verify` 统计审计事件。未设置变量时不落盘、行为不变。详见 [telemetry.md](./telemetry.md)。
 
 ## 共用运行时 `packages/host-kit`
@@ -163,6 +166,9 @@ node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/worksp
 node scripts/install-host-plugins.mjs --client=opencode
 node scripts/install-host-plugins.mjs --client=pi
 
-# 原生 marketplace 平台按各自 CLI 安装（脚本会打印准确命令）
+# DeepSeek 走 Cordis bundle 注入（--deepseek-profile 可选 web/cli）
+node scripts/install-host-plugins.mjs --client=deepseek
+
+# 插件目录型平台按本地目录加载（脚本会打印启用命令，详见各插件 README）
 node scripts/install-host-plugins.mjs --client=claude-code
 ```

@@ -71,11 +71,23 @@ flowchart TB
       SV["sdk/vercel"]
       SL["sdk/langchain"]
     end
-    subgraph PL["宿主插件 plugins/"]
-      CODEX["plugins/codex"]
-      DS["plugins/deepseek"]
-      MCP["plugins/mcp"]
+    subgraph PL["宿主插件 plugins/（8 平台 + MCP 网关）"]
+      CC["claude-code"]
+      CODEX["codex"]
+      OC["opencode"]
+      PI["pi"]
+      DS["deepseek"]
+      WB["workbuddy"]
+      ZC["zcode"]
+      TR["trae"]
+      MCP["mcp 透明代理"]
     end
+  end
+  subgraph HK["宿主插件共用运行时 packages/host-kit"]
+    CAP["能力矩阵 HOST_CAPABILITIES"]
+    HOOK["HookEntryAdapter / runHookEntry"]
+    DEC["效果 → 决策翻译"]
+    AUDIT["FileAuditSink 审计落盘"]
   end
   subgraph KIT["插件胶水层 packages/plugin-kit"]
     HA["HostAdapter 契约"]
@@ -94,14 +106,22 @@ flowchart TB
 
   SV --> CORE
   SL --> CORE
-  CODEX --> KIT
-  DS --> KIT
+  CC --> HK
+  CODEX --> HK
+  OC --> HK
+  PI --> HK
+  DS --> HK
+  WB --> HK
+  ZC --> HK
+  TR --> HK
   MCP --> KIT
+  MCP -.审计落盘.-> HK
+  HK --> KIT
   KIT --> TELE
   TELE --> CORE
 ```
 
-依赖关系为单向链：`plugins/* → plugin-kit → telemetry → core`，core 绝不反向感知上层；`AuditEvent` 与 `TelemetrySink` 契约定义在 `packages/telemetry`；`sdk/*` 直接依赖 core，绕过胶水层。纠偏结果最终返回宿主继续执行——这是「任务不中断」得以成立的技术基础。
+依赖关系为单向链：`plugins/* → host-kit → plugin-kit → telemetry → core`，core 绝不反向感知上层；8 个 Hook/扩展型插件统一经 `host-kit` 的能力矩阵与入口桥，mcp 网关经 `plugin-kit` 编排并复用 `host-kit` 的审计落盘。`AuditEvent` 与 `TelemetrySink` 契约定义在 `packages/telemetry`；`sdk/*` 直接依赖 core，绕过胶水层。纠偏结果最终返回宿主继续执行——这是「任务不中断」得以成立的技术基础。
 
 > 完整架构与交互时序见 [docs/architecture.md](./docs/architecture.md)。
 

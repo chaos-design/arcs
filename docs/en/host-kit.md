@@ -11,7 +11,7 @@ The runtime layer shared by eight platform plugins: it consolidates "platform di
 
 ## Capability Matrix `HOST_CAPABILITIES`
 
-Each host has one `HostCapabilities` record: a `tier` (A/B/C) plus four capability switches (`patchArgs` / `redirectTool` / `injectMessage` / `suspend` / `block`) plus a `note` describing the host's quirks. Key points:
+Each host has one `HostCapabilities` record: a `tier` (A/B/C) plus five capability switches (`patchArgs` / `redirectTool` / `injectMessage` / `suspend` / `block`) plus a `note` describing the host's quirks. Key points:
 
 | Host | tier | Key quirks |
 |---|---|---|
@@ -66,6 +66,18 @@ The multi-process Hook model has no shared memory, so session state is carried a
 - **Filename safety**: `sanitizeClaimId` rejects path traversal; ids longer than 96 characters are truncated to 80 characters plus the first 16 hex digits of the original id's sha256, preventing different long ids from colliding on the same file after truncation.
 - **A lost trace is preferable to duplication/interruption**: when reading the claim fails (transient I/O error), treat it as already claimed and accept duplicate steering rather than throwing an exception that interrupts the Agent; deletion failures in `releaseSession` are likewise ignored.
 - `createSessionClaim(source, home?)` returns a handle, centralizing HOME resolution (`ARCS_CLAIM_HOME` → `ARCS_HOME` → `~/.arcs`) and the current process's held set (`releaseAll` as a fallback).
+
+## Export overview
+
+Beyond the core surface covered in the sections above, `packages/host-kit/src/index.ts` also exports these companion APIs:
+
+| Export | Purpose |
+|---|---|
+| `PLATFORMS` / `isPlatform` | Single source of truth for platform names: every supported host's name plus runtime validation; plugins must not invent platform names |
+| `capabilitiesFor` / `hasCapability` | Read a capability-matrix record by platform / test a single capability switch; plugins must not hardcode booleans |
+| `emptyDecision` | The initial `HostDecision` (allow with an empty effect list), the starting point for adapter decision assembly |
+| `goalFromArgs` / `readInput` | `--goal` / `ARCS_GOAL` parsing and full stdin reading, the fixed pairing for plugin CLI entries |
+| `claimDirectory` / `claimFilePath` / `claimSession` / `defaultIsAlive` / `nodeClaimFs` | Path derivation, atomic acquisition, liveness probing and node filesystem adapter for `SessionClaim`; `ClaimFs` / `ClaimRecord` are the corresponding types |
 
 ## Testing
 

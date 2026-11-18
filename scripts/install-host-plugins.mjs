@@ -8,22 +8,20 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
+// 各平台按「本地插件目录」方式加载（与各插件 README、docs/plugins.md 的安装说明一致）；
+// 不再引用不存在的仓库根 marketplace 清单（历史 astro-* 命名已随改名废弃）。
 const MARKETPLACE = {
   'claude-code': [
-    `claude plugin marketplace add ${ROOT}`,
-    'claude plugin install arcs-claude-code@astro-local --scope user',
+    `claude --plugin-dir ${join(ROOT, 'plugins/claude-code')}`,
   ],
   codex: [
-    `codex plugin marketplace add ${ROOT}`,
-    'codex plugin add arcs-codex@astro-local',
+    `codex --plugin-dir ${join(ROOT, 'plugins/codex')}`,
   ],
   workbuddy: [
-    `codebuddy plugin marketplace add ${ROOT}`,
-    'codebuddy plugin install arcs-workbuddy@astro-local --scope user',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/workbuddy')}（含 .codebuddy-plugin/plugin.json 与 hooks/hooks.json），命令见 plugins/workbuddy/README.md`,
   ],
   zcode: [
-    `codex plugin marketplace add ${join(ROOT, 'plugins/zcode')}`,
-    'codex plugin add arcs-zcode@astro-zcode-local',
+    `# 通过本地 marketplace（plugins/zcode/marketplace.json，名称 arcs-zcode-marketplace）或插件目录加载 ${join(ROOT, 'plugins/zcode')}，命令见 plugins/zcode/README.md`,
   ],
   deepseek: [
     `pnpm build:native-plugins`,

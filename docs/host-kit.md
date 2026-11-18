@@ -11,7 +11,7 @@
 
 ## 能力矩阵 `HOST_CAPABILITIES`
 
-每个宿主一条 `HostCapabilities` 记录：`tier`（A/B/C）+ 四个能力开关（`patchArgs` / `redirectTool` / `injectMessage` / `suspend` / `block`）+ `note` 说明宿主怪癖。要点：
+每个宿主一条 `HostCapabilities` 记录：`tier`（A/B/C）+ 五个能力开关（`patchArgs` / `redirectTool` / `injectMessage` / `suspend` / `block`）+ `note` 说明宿主怪癖。要点：
 
 | 宿主 | tier | 关键怪癖 |
 |---|---|---|
@@ -66,6 +66,18 @@ stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRunt
 - **文件名安全**：`sanitizeClaimId` 拒绝路径穿越；超 96 字符的 id 截断到 80 字符 + 原 id 的 sha256 前 16 位，防不同长 id 截断后碰撞到同一文件。
 - **丢失 trace 优于重复/中断**：读 claim 失败（瞬时 I/O 错误）时视为已 claim 接受重复纠偏，也不抛异常打断 Agent；`releaseSession` 删除失败同样忽略。
 - `createSessionClaim(source, home?)` 返回句柄，集中 HOME 解析（`ARCS_CLAIM_HOME` → `ARCS_HOME` → `~/.arcs`）与本进程持有集合（`releaseAll` 兜底）。
+
+## 导出总览
+
+除上述章节展开的核心面外，`packages/host-kit/src/index.ts` 还导出这些配套 API：
+
+| 导出 | 用途 |
+|---|---|
+| `PLATFORMS` / `isPlatform` | 平台名单一来源：全部受支持宿主的名字与运行时校验，插件不得自造平台名 |
+| `capabilitiesFor` / `hasCapability` | 按平台读取能力矩阵记录 / 判断单个能力开关，插件不得硬编码布尔值 |
+| `emptyDecision` | `HostDecision` 初始值（放行 + 空 effect 列表），adapter 组装决策的起点 |
+| `goalFromArgs` / `readInput` | `--goal` / `ARCS_GOAL` 解析与 stdin 全量读取，插件 CLI 入口的固定搭配 |
+| `claimDirectory` / `claimFilePath` / `claimSession` / `defaultIsAlive` / `nodeClaimFs` | `SessionClaim` 的路径推导、原子抢占、进程存活探测与 node 文件系统适配；`ClaimFs` / `ClaimRecord` 为对应类型 |
 
 ## 测试
 

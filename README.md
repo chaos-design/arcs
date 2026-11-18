@@ -71,11 +71,23 @@ flowchart TB
       SV["sdk/vercel"]
       SL["sdk/langchain"]
     end
-    subgraph PL["Host Plugins plugins/"]
-      CODEX["plugins/codex"]
-      DS["plugins/deepseek"]
-      MCP["plugins/mcp"]
+    subgraph PL["Host Plugins plugins/ (8 platforms + MCP gateway)"]
+      CC["claude-code"]
+      CODEX["codex"]
+      OC["opencode"]
+      PI["pi"]
+      DS["deepseek"]
+      WB["workbuddy"]
+      ZC["zcode"]
+      TR["trae"]
+      MCP["mcp transparent proxy"]
     end
+  end
+  subgraph HK["Shared Host Runtime packages/host-kit"]
+    CAP["Capability Matrix HOST_CAPABILITIES"]
+    HOOK["HookEntryAdapter / runHookEntry"]
+    DEC["Effect → Decision Translation"]
+    AUDIT["FileAuditSink Audit Persistence"]
   end
   subgraph KIT["Plugin Glue Layer packages/plugin-kit"]
     HA["HostAdapter Contract"]
@@ -94,14 +106,22 @@ flowchart TB
 
   SV --> CORE
   SL --> CORE
-  CODEX --> KIT
-  DS --> KIT
+  CC --> HK
+  CODEX --> HK
+  OC --> HK
+  PI --> HK
+  DS --> HK
+  WB --> HK
+  ZC --> HK
+  TR --> HK
   MCP --> KIT
+  MCP -.audit persistence.-> HK
+  HK --> KIT
   KIT --> TELE
   TELE --> CORE
 ```
 
-The dependency graph is a one-way chain: `plugins/* → plugin-kit → telemetry → core`; core never perceives the upper layers in reverse. The `AuditEvent` and `TelemetrySink` contracts are defined in `packages/telemetry`; `sdk/*` depends directly on core, bypassing the glue layer. Correction results are ultimately returned to the host to continue execution — this is the technical foundation that makes "uninterrupted tasks" possible.
+The dependency graph is a one-way chain: `plugins/* → host-kit → plugin-kit → telemetry → core`; core never perceives the upper layers in reverse. The 8 hook/extension plugins go through `host-kit`'s capability matrix and entry bridge, while the mcp gateway is orchestrated by `plugin-kit` and reuses `host-kit`'s audit persistence. The `AuditEvent` and `TelemetrySink` contracts are defined in `packages/telemetry`; `sdk/*` depends directly on core, bypassing the glue layer. Correction results are ultimately returned to the host to continue execution — this is the technical foundation that makes "uninterrupted tasks" possible.
 
 > For the full architecture and interaction sequence, see [docs/architecture.md](./docs/en/architecture.md).
 
