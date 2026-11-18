@@ -6,13 +6,14 @@ ARCS steering is implemented as a Cordis bundle for the DeepSeek Harness. The pl
 
 ## Installation
 
-Use the repository's plugin installation script to add this plugin to the DeepSeek client's bundle:
+Build the plugin and wire the bundle patch into the DeepSeek Harness:
 
 ```bash
-pnpm install-plugins -- --clients=deepseek
+corepack pnpm --filter @chaos-design/arcs-plugin-deepseek build
+pnpm install-plugins -- --client=deepseek   # prints build & integration guidance
 ```
 
-The installation script injects `plugins/deepseek` as a bundle and applies the `dsh.bundle.patch` (`cordis.patch.yml`) declared in the package manifest to insert an `arcs-steering` section into the DeepSeek configuration:
+This plugin ships as a Cordis bundle: integration is performed by the DeepSeek Harness bundle tooling consuming `cordis.patch.yml` — the manifest is declared by the plugin's `cordis.patch.yml` and registered via the `dsh.bundle.patch` field in `package.json`, inserting an `arcs-steering` section into the DeepSeek configuration:
 
 ```yaml
 - insert:

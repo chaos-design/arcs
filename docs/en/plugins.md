@@ -158,7 +158,7 @@ npx @chaos-design/arcs-cli start claude-code        # for Hook-type, print how t
 ## Installation and Build
 
 ```bash
-# Build all host plugins (host-kit → 8 plugins)
+# Build all host plugins (host-kit → 9 packages, incl. the mcp gateway)
 pnpm build:native-plugins
 
 # Install a single platform (Trae writes project hooks; OpenCode / Pi copy to the global directory)
@@ -166,7 +166,7 @@ node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/worksp
 node scripts/install-host-plugins.mjs --client=opencode
 node scripts/install-host-plugins.mjs --client=pi
 
-# DeepSeek goes through Cordis bundle injection (--deepseek-profile selects web/cli)
+# DeepSeek goes through Cordis bundle integration (prints guidance; see plugins/deepseek/README.md)
 node scripts/install-host-plugins.mjs --client=deepseek
 
 # Plugin-directory platforms load from a local directory (the script prints the enable commands; see each plugin's README)

@@ -66,8 +66,7 @@ interface SteerEvent {
 ```text
 sdk/
 ├── vercel/      # @chaos-design/arcs-sdk-vercel — withArcs 模型包装器（LanguageModelV4）
-├── langchain/   # @chaos-design/arcs-sdk-langchain — createArcsNode（LangGraph 兼容节点，零框架依赖）
-└── README.md    # SDK 职责与边界总览
+└── langchain/   # @chaos-design/arcs-sdk-langchain — createArcsNode（LangGraph 兼容节点，零框架依赖）
 ```
 
 ## 使用示例

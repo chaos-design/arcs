@@ -301,8 +301,9 @@ a.card:hover { border-color: var(--blue); text-decoration: none; transform: tran
 }
 .doc-toc ol { margin: 0; padding-left: 16px; }
 .doc-toc li { color: var(--muted); margin: 4px 0; line-height: 1.4; }
-.doc-toc a { color: var(--muted); text-decoration: none; }
+.doc-toc a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
 .doc-toc a:hover { color: var(--ink); }
+.doc-toc a.active { color: var(--cyan); font-weight: 600; }
 
 .doc-warning {
   background: rgba(242, 193, 78, 0.1);

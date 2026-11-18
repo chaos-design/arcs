@@ -141,8 +141,7 @@ arcs/
 │   └── telemetry/             # 轨迹偏移曲线与纠偏审计数据模型/接收端
 ├── sdk/                       # 代码级接入（sdk/xxx，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
-│   ├── langchain/             # @chaos-design/arcs-sdk-langchain
-│   └── README.md
+│   └── langchain/             # @chaos-design/arcs-sdk-langchain
 ├── plugins/                   # 宿主插件（8 家 Agent 平台 + MCP 网关）
 │   ├── claude-code/           # 原生 Hook（17）· L1/L2/L4 ask
 │   ├── codex/                 # 原生 Hook（12）· L1/L2/L4 deny

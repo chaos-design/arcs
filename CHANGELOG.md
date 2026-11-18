@@ -10,15 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Bilingual docs site: language encoded in the hash route (`?lang=en`, `en/` physical keys) with a 中文/EN toggle in the sidebar footer and mobile header; switching preserves the current page and anchor, missing translations fall back to Chinese; UI strings and both navigation lists live in `site/src/i18n.ts` (`2b26ed9`).
+- New bilingual READMEs for the `claude-code` and `mcp` plugins: 17-hook output contract (`permissionDecision` / `updatedInput`) and the MCP proxy's L1–L4 landing semantics, CLI arguments, serial queue and fail-open guarantees (`854f1a6`).
+- README.md for every publishable package: `packages/{core,telemetry,plugin-kit,host-kit}` and `sdk/{vercel,langchain}`.
 
 - Bilingual documentation set: a new English `README.md` mirrors the Chinese `README_zh.md`, covering architecture, module split, four-level steering policy, quick start and documentation index.
 - Bilingual community and governance files: `CONTRIBUTING.md` / `CONTRIBUTING_zh.md`, `CODE_OF_CONDUCT.md` / `CODE_OF_CONDUCT_zh.md`, `SECURITY.md` / `SECURITY_zh.md`, and this changelog (`CHANGELOG.md` / `CHANGELOG_zh.md`).
 - Full English translations of all 15 documents under `docs/en/`: [README](./docs/en/README.md), [architecture](./docs/en/architecture.md), [directory-layout](./docs/en/directory-layout.md), [core](./docs/en/core.md), [plugin-kit](./docs/en/plugin-kit.md), [host-kit](./docs/en/host-kit.md), [plugins](./docs/en/plugins.md), [sdk](./docs/en/sdk.md), [key-flows](./docs/en/key-flows.md), [telemetry](./docs/en/telemetry.md), [testing](./docs/en/testing.md), [extension-points](./docs/en/extension-points.md), [constraints](./docs/en/constraints.md), [roadmap](./docs/en/roadmap.md) and [interview](./docs/en/interview.md).
-- English companion READMEs for every plugin and example that has one: 7 of the 9 `plugins/*` directories (`codex`, `deepseek`, `opencode`, `pi`, `trae`, `workbuddy`, `zcode`) plus both demos (`examples/sdk-vercel-demo`, `examples/plugin-mcp-demo`).
+- English companion READMEs for every plugin and example: all 9 `plugins/*` directories plus both demos (`examples/sdk-vercel-demo`, `examples/plugin-mcp-demo`).
+
+### Fixed
+
+- `scripts/build-host-plugins.mjs` now builds the `mcp` plugin too, so `examples/plugin-mcp-demo` works by following its README.
+- DeepSeek installation no longer references a nonexistent `--deepseek-profile` flag; the plugin's README and the installer print honest Cordis-bundle integration steps.
+- Mermaid sequence diagrams in `architecture` / `sdk` / `key-flows` (both languages) no longer fall back to source: ` + ` inside message lines is parsed as an activation token.
 
 ### Changed
 
 - Documentation indexes in both languages now cross-link the English and Chinese variants of every document.
+- Site layout aligned to the memx reference: sectioned documentation matrix with top-accent cards, breadcrumb + quick-entry cards, single-line sidebar nav with a leading 导航 group and dual footer buttons, mobile header with GitHub icon and animated hamburger, right-hand sticky TOC, mermaid lightbox, and a two-line previous/next pager (`be09700`).
+- `scripts/install-host-plugins.mjs` now prints verified local-plugin-directory commands instead of nonexistent `astro-*` marketplace names, accepts `--clients=a,b` multi-selection, and excludes `node_modules`/`dist` when copying global plugins.
 
 ## [0.1.0] - 2026-11-18
 

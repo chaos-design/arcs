@@ -83,6 +83,7 @@ export function DocView({ route }: DocViewProps) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const [mermaidFailed, setMermaidFailed] = useState(false);
   const [toc, setToc] = useState<TocItem[]>([]);
+  const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const [zoomSvg, setZoomSvg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -138,6 +139,35 @@ export function DocView({ route }: DocViewProps) {
       }
     })();
   }, [html, key, lang]);
+
+  // TOC scroll spy：以滚动容器视口顶部附近（+96px 判定线）最近已越过的 h2 作为当前节。
+  // 除 scroll 事件外挂一个 300ms 兜底轮询：后台/节流环境下渲染帧暂停，
+  // scroll 事件可能不派发（scrollTop 变了但事件不来），轮询保证高亮最终收敛。
+  useEffect(() => {
+    if (toc.length < 2) return;
+    const content = document.querySelector<HTMLElement>('.content');
+    if (!content) return;
+    let lastTop = -1;
+    const compute = () => {
+      const top = content.scrollTop;
+      if (top === lastTop) return;
+      lastTop = top;
+      const anchor = content.getBoundingClientRect().top + 96;
+      let current = toc[0]!.id;
+      for (const item of toc) {
+        const el = document.getElementById(item.id);
+        if (el && el.getBoundingClientRect().top <= anchor) current = item.id;
+      }
+      setActiveHeading(current);
+    };
+    compute();
+    content.addEventListener('scroll', compute, { passive: true });
+    const timer = window.setInterval(compute, 300);
+    return () => {
+      content.removeEventListener('scroll', compute);
+      window.clearInterval(timer);
+    };
+  }, [toc]);
 
   // 灯箱：Esc 关闭 + 打开期间锁定滚动容器
   useEffect(() => {
@@ -236,6 +266,7 @@ export function DocView({ route }: DocViewProps) {
               <li key={item.id}>
                 <a
                   href={`#${item.id}`}
+                  className={activeHeading === item.id ? 'active' : undefined}
                   onClick={(e) => {
                     // SPA hash 路由下禁止改写 location.hash，仅滚动到锚点
                     e.preventDefault();

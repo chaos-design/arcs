@@ -158,7 +158,7 @@ npx @chaos-design/arcs-cli start claude-code        # Hook 型打印宿主启用
 ## 安装与构建
 
 ```bash
-# 构建全部宿主插件（host-kit → 8 插件）
+# 构建全部宿主插件（host-kit → 9 家，含 mcp 网关）
 pnpm build:native-plugins
 
 # 安装单个平台（Trae 写入项目 hooks；OpenCode / Pi 复制到全局目录）
@@ -166,7 +166,7 @@ node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/worksp
 node scripts/install-host-plugins.mjs --client=opencode
 node scripts/install-host-plugins.mjs --client=pi
 
-# DeepSeek 走 Cordis bundle 注入（--deepseek-profile 可选 web/cli）
+# DeepSeek 走 Cordis bundle 接入（打印指引，详见 plugins/deepseek/README.md）
 node scripts/install-host-plugins.mjs --client=deepseek
 
 # 插件目录型平台按本地目录加载（脚本会打印启用命令，详见各插件 README）

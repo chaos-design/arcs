@@ -141,8 +141,7 @@ arcs/
 │   └── telemetry/             # Trajectory drift curves and correction audit data models/sinks
 ├── sdk/                       # Code-level access (sdk/xxx, in-process)
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
-│   ├── langchain/             # @chaos-design/arcs-sdk-langchain
-│   └── README.md
+│   └── langchain/             # @chaos-design/arcs-sdk-langchain
 ├── plugins/                   # Host plugins (8 agent platforms + MCP gateway)
 │   ├── claude-code/           # Native hooks (17) · L1/L2/L4 ask
 │   ├── codex/                 # Native hooks (12) · L1/L2/L4 deny

@@ -87,26 +87,30 @@ function verify(home) {
     process.exit(1);
   }
   const events = files.flatMap(readEvents);
-  if (events.length === 0) {
-    console.error(`审计文件为空：${root}`);
+  // 缺 ts / ts 非数字的行不参与统计与时间输出，避免 new Date(NaN).toISOString() 抛 RangeError
+  const valid = events.filter((e) => typeof e.ts === 'number' && Number.isFinite(e.ts));
+  if (valid.length === 0) {
+    console.error(`审计文件为空（或全部事件缺 ts 字段）：${root}`);
     process.exit(1);
   }
+  const skipped = events.length - valid.length;
+  if (skipped > 0) console.warn(`[real-check] 跳过 ${skipped} 行缺 ts / ts 非法的事件`);
   const byHost = {};
   const byLevel = {};
   let degraded = 0;
-  for (const e of events) {
+  for (const e of valid) {
     byHost[e.host ?? 'unknown'] = (byHost[e.host ?? 'unknown'] ?? 0) + 1;
     const level = String(e.level ?? 'pass');
     byLevel[level] = (byLevel[level] ?? 0) + 1;
     if (e.degraded) degraded += 1;
   }
-  console.log(`审计文件：${files.length} 个，事件：${events.length} 条`);
+  console.log(`审计文件：${files.length} 个，事件：${valid.length} 条`);
   console.log(`按宿主：${JSON.stringify(byHost)}`);
   console.log(`按等级：${JSON.stringify(byLevel)}`);
   console.log(`降级(fail-open)：${degraded}`);
   for (const file of files) console.log(`  ${file} (${statSync(file).size} bytes)`);
   console.log('\n最近 5 条：');
-  for (const e of events.slice(-5)) {
+  for (const e of valid.slice(-5)) {
     console.log(`  ${new Date(e.ts).toISOString()} ${e.host} level=${e.level ?? 'pass'} degraded=${e.degraded}`);
   }
 }

@@ -161,6 +161,7 @@ export function docTitle(key: string, lang: Lang): string {
 
 interface Strings {
   home: string;
+  siteTitle: string;
   brandSub: string;
   navGroupNav: string;
   navHome: string;
@@ -205,6 +206,7 @@ interface Strings {
 const STRINGS: Record<Lang, Strings> = {
   zh: {
     home: '首页',
+    siteTitle: 'ARCS · Agent 纠偏系统文档',
     brandSub: 'Agent 实时纠偏系统',
     navGroupNav: '导航',
     navHome: '首页 / 总览',
@@ -248,6 +250,7 @@ const STRINGS: Record<Lang, Strings> = {
   },
   en: {
     home: 'Home',
+    siteTitle: 'ARCS · Agent course steering docs',
     brandSub: 'Agent course steering',
     navGroupNav: 'Navigation',
     navHome: 'Home / Overview',

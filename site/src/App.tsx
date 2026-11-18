@@ -3,7 +3,7 @@ import { DocView } from './DocView';
 import { Header } from './Header';
 import { Home } from './Home';
 import { Sidebar } from './Sidebar';
-import { t } from './i18n';
+import { docTitle, t } from './i18n';
 import { parseHash, parseLang, switchLangHash, type Lang, type Route } from './routes';
 
 /** 与 CSS 的移动端断点保持一致（styles.css 的 @media (max-width: 860px)） */
@@ -48,6 +48,13 @@ export function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+
+  // 文档标题与 <html lang> 跟随路由/语言：文档页显示文档标题，浏览器历史与分享链接可读
+  useEffect(() => {
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+    document.title =
+      route.kind === 'doc' && route.key ? `${docTitle(route.key, lang)} · ARCS` : t(lang).siteTitle;
+  }, [route, lang]);
 
   // 切换语言：记忆新语言并改写 hash；hashchange 处理器统一回填 route/lang（浏览器前进后退同样生效）
   const changeLang = (next: Lang) => {

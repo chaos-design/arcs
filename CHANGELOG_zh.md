@@ -14,11 +14,19 @@
 - 中英双语文档集：新增英文 `README.md` 与中文 `README_zh.md` 相互对应，覆盖架构、模块划分、四级操舵策略、快速开始与文档索引。
 - 中英双语社区与治理文件：`CONTRIBUTING.md` / `CONTRIBUTING_zh.md`、`CODE_OF_CONDUCT.md` / `CODE_OF_CONDUCT_zh.md`、`SECURITY.md` / `SECURITY_zh.md`，以及本变更日志（`CHANGELOG.md` / `CHANGELOG_zh.md`）。
 - `docs/en/` 下全部 15 篇文档完成英译：[README](./docs/en/README.md)、[architecture](./docs/en/architecture.md)、[directory-layout](./docs/en/directory-layout.md)、[core](./docs/en/core.md)、[plugin-kit](./docs/en/plugin-kit.md)、[host-kit](./docs/en/host-kit.md)、[plugins](./docs/en/plugins.md)、[sdk](./docs/en/sdk.md)、[key-flows](./docs/en/key-flows.md)、[telemetry](./docs/en/telemetry.md)、[testing](./docs/en/testing.md)、[extension-points](./docs/en/extension-points.md)、[constraints](./docs/en/constraints.md)、[roadmap](./docs/en/roadmap.md) 与 [interview](./docs/en/interview.md)。
-- 为所有自带 README 的插件与示例补齐英文伴生文件：9 个插件目录中有 7 个自带 README（`codex`、`deepseek`、`opencode`、`pi`、`trae`、`workbuddy`、`zcode`），以及两个示例（`examples/sdk-vercel-demo`、`examples/plugin-mcp-demo`）。
+- 为所有插件与示例补齐英文伴生 README：9 个 `plugins/*` 目录全部覆盖，另有两个示例（`examples/sdk-vercel-demo`、`examples/plugin-mcp-demo`）。
+
+### 修复（Fixed）
+
+- `scripts/build-host-plugins.mjs` 现在也构建 `mcp` 插件，按 README 操作 `examples/plugin-mcp-demo` 不再因缺产物启动失败。
+- DeepSeek 安装不再引用不存在的 `--deepseek-profile` flag；插件 README 与安装器改为如实的 Cordis bundle 接入指引。
+- `architecture` / `sdk` / `key-flows`（中英）的 mermaid 时序图不再回退源码：消息行中的 ` + ` 会被词法器误判为激活语法，已改写。
 
 ### 变更（Changed）
 
 - 中英两种语言的文档索引现均交叉链接各篇文档的中英文版本。
+- 站点布局对齐 memx 参考：分区式文档矩阵与顶边色条卡片、面包屑 + 快捷入口卡、单行侧栏导航（含「导航」首组）与双按钮底栏、移动端 GitHub 图标 + 动画汉堡、右侧粘性 TOC、mermaid 灯箱、双行上/下一篇 pager（`be09700`）。
+- `scripts/install-host-plugins.mjs` 打印已验证的本地插件目录命令（废弃不存在的 `astro-*` marketplace 命名），支持 `--clients=a,b` 多选，复制全局插件时排除 `node_modules`/`dist`。
 
 ## [0.1.0] - 2026-11-18
 
