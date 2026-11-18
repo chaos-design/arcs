@@ -9,7 +9,28 @@ let mermaidReady: Promise<typeof import('mermaid')['default']> | undefined;
 function renderMermaidSvg(graph: string): Promise<string> {
   // securityLevel 用 loose：仓库受控文档需要 <br/> HTML label；strict 会干扰渲染管线
   mermaidReady ??= import('mermaid').then((m) => {
-    m.default.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+    // themeVariables 与 styles.css 的设计 token 手工对齐（参考 memx 的做法）
+    m.default.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose',
+      themeVariables: {
+        background: '#141618',
+        primaryColor: '#1b1e21',
+        primaryTextColor: '#f3f0e9',
+        primaryBorderColor: '#34393d',
+        secondaryColor: '#24282c',
+        tertiaryColor: '#1b1e21',
+        lineColor: '#6f9dff',
+        textColor: '#f3f0e9',
+        mainBkg: '#1b1e21',
+        nodeBorder: '#34393d',
+        clusterBkg: '#141618',
+        clusterBorder: '#34393d',
+        edgeLabelBackground: '#141618',
+        titleColor: '#f3f0e9',
+      },
+    });
     return m.default;
   });
   return mermaidReady.then(async (mermaid) => {
@@ -102,15 +123,16 @@ export function DocView({ route }: DocViewProps) {
     })();
   }, [html]);
 
-  // 锚点跳转（#/doc/key/anchor）
+  // 锚点跳转（#/doc/key/anchor）——滚动容器是 .content，而非 window
   useEffect(() => {
+    const content = document.querySelector<HTMLElement>('.content');
     if (!route.anchor) {
-      window.scrollTo({ top: 0 });
+      content?.scrollTo({ top: 0 });
       return;
     }
     const target = document.getElementById(route.anchor);
     if (target) target.scrollIntoView({ block: 'start' });
-    else window.scrollTo({ top: 0 });
+    else content?.scrollTo({ top: 0 });
   }, [route]);
 
   if (!source) {
