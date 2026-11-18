@@ -1,0 +1,37 @@
+{
+  "name": "@chaos-design/arcs-sdk-vercel",
+  "version": "0.1.0",
+  "description": "ARCS Vercel AI SDK 接入：withArcs 模型包装器，进程内实时纠偏",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@ai-sdk/provider": ">=1.0.0"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@ai-sdk/provider": "*",
+    "ai": "*",
+    "zod-to-json-schema": "^3.24.0"
+  }
+}

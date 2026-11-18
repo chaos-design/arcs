@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=SessionStart" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=UserPromptSubmit" }] }],
+    "PreToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=PreToolUse" }] }],
+    "PostToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=PostToolUse" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=Stop" }] }],
+    "StopFailure": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=StopFailure" }] }],
+    "Interrupt": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=Interrupt" }] }],
+    "SessionPend": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=SessionPend" }] }],
+    "Notification": [{ "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=Notification" }] }],
+    "PermissionRequest": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=PermissionRequest" }] }],
+    "PermissionDenied": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=PermissionDenied" }] }],
+    "Elicitation": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=Elicitation" }] }],
+    "ElicitationResult": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "npx --no-install arcs-plugin-trae --event=ElicitationResult" }] }]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@chaos-design/arcs-plugin-codex",
+  "version": "0.1.0",
+  "description": "ARCS Codex 宿主插件：PreToolUse 前置纠偏（L1/L2/L4，含输入改写）",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "arcs-plugin-codex": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "hooks",
+    ".codex-plugin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-host-kit": "workspace:*",
+    "@chaos-design/arcs-plugin-kit": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

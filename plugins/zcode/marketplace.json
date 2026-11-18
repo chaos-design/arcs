@@ -1,0 +1,15 @@
+{
+  "name": "arcs-zcode-marketplace",
+  "owner": {
+    "name": "Chaos Design"
+  },
+  "plugins": [
+    {
+      "name": "arcs-zcode",
+      "source": "./",
+      "displayName": "ARCS ZCode",
+      "description": "Agent Real-time Course Steering — 在工具执行前实时纠偏，任务不中断",
+      "category": "steering"
+    }
+  ]
+}

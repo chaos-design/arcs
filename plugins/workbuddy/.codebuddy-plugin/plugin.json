@@ -1,0 +1,10 @@
+{
+  "name": "arcs-workbuddy",
+  "version": "0.1.0",
+  "description": "Agent Real-time Course Steering — WorkBuddy 25 钩子前置纠偏，任务不中断",
+  "author": {
+    "name": "Chaos Design"
+  },
+  "keywords": ["arcs", "workbuddy", "steering", "hooks"],
+  "hooks": "./hooks/hooks.json"
+}

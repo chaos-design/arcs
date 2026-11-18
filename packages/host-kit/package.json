@@ -1,0 +1,34 @@
+{
+  "name": "@chaos-design/arcs-host-kit",
+  "version": "0.1.0",
+  "description": "宿主插件共用运行时：平台能力矩阵、原生事件映射、纠偏效果翻译与 Hook 入口桥",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-plugin-kit": "workspace:*",
+    "@chaos-design/arcs-telemetry": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

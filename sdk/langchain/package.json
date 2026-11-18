@@ -1,0 +1,31 @@
+{
+  "name": "@chaos-design/arcs-sdk-langchain",
+  "version": "0.1.0",
+  "description": "ARCS LangChain.js / LangGraph 接入：零依赖 createArcsNode 节点（进程内实时纠偏）",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*"
+  },
+  "devDependencies": {
+    "zod": "^3.25.0"
+  }
+}
