@@ -1,3 +1,5 @@
+[English](./en/key-flows.md) · 中文
+
 # 关键流程
 
 ## 纠偏闭环主流程

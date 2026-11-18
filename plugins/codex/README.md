@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-codex
 
 ARCS Codex 宿主插件。在 `PreToolUse` 前置拦截工具调用，把纠偏决策以 Codex 原生

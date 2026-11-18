@@ -1,3 +1,5 @@
+[English](./en/README.md) · 中文
+
 # ARCS 文档索引
 
 本目录按功能拆分 ARCS 的架构与设计文档。README 提供总览，细节在此展开。

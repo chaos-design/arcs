@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-deepseek
 
 ARCS 纠偏能力以 DeepSeek Harness 的 Cordis bundle 形态落地。插件通过 `ctx.on` 订阅会话生命周期与原生事件，把 Harness 事件归一为 ARCS 规范事件，交由 `host-kit` 的唯一运行时做决策，再按平台能力把纠偏效果翻译为宿主决策。全程 fail-open，任何异常都不中断 Agent 任务。

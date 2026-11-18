@@ -1,3 +1,5 @@
+[English](./en/plugins.md) · 中文
+
 # 具体插件 `plugins/*`
 
 具体插件是「核心关键实现」的落地点。每个插件只负责一个宿主，面向 `plugin-kit` 编程，不包含检测或规划算法。所有宿主插件共用 `packages/host-kit` 的入口桥、能力矩阵与效果翻译，禁止各写一套 recorder。

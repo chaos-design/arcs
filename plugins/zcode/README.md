@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-zcode
 
 ARCS ZCode 宿主插件。ZCode 上游兼容 Claude Code 插件形态（复用

@@ -1,3 +1,5 @@
+[English](./en/host-kit.md) · 中文
+
 # 宿主运行时 `packages/host-kit`
 
 ## 包定位

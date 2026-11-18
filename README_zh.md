@@ -1,3 +1,5 @@
+[English](./README.md) · 中文
+
 <div align="center">
 
 ```text
@@ -425,6 +427,8 @@ pnpm build
 # 运行单元测试与纠偏模拟仿真
 pnpm test
 ```
+
+参与贡献前请先阅读 [贡献指南（CONTRIBUTING_zh.md）](./CONTRIBUTING_zh.md) 与 [行为准则（CODE_OF_CONDUCT_zh.md）](./CODE_OF_CONDUCT_zh.md)；发现安全漏洞请勿公开提交 issue，请按 [安全策略（SECURITY_zh.md）](./SECURITY_zh.md) 私密报告。版本变更记录见 [CHANGELOG_zh.md](./CHANGELOG_zh.md)。全部文档均提供中英文对照，英文入口见 [README.md](./README.md) 与 [docs/en/](./docs/en/README.md)。
 
 ---
 

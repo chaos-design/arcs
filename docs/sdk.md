@@ -1,3 +1,5 @@
+[English](./en/sdk.md) · 中文
+
 # SDK 代码级接入 `sdk/*`
 
 SDK 面向自研 Agent 应用，采用 `sdk/xxx` 独立文件夹形式。它把 core 的检测与决策包装成框架原生可插拔件，直接依赖 core，不经过胶水层。

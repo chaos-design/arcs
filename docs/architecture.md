@@ -1,3 +1,5 @@
+[English](./en/architecture.md) · 中文
+
 # ARCS 架构设计
 
 ## 设计总纲

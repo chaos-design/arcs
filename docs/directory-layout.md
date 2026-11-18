@@ -1,3 +1,5 @@
+[English](./en/directory-layout.md) · 中文
+
 # 目录规划
 
 仓库基于 `pnpm workspace` + `Turborepo` 构建，所有包统一发布在 `@chaos-design` 命名空间下。

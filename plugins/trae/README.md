@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-trae
 
 ARCS（Agent Real-time Course Steering）的 Trae 宿主插件。以 Trae 项目级 hook 形态接入，对 13 个事件做采集与审计。

@@ -1,3 +1,5 @@
+[English](./en/extension-points.md) · 中文
+
 # 扩展点
 
 ARCS 在每一层都预留了稳定扩展点，扩展无需改动 core。

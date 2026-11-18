@@ -1,3 +1,5 @@
+[English](./en/telemetry.md) · 中文
+
 # 遥测 `packages/telemetry`
 
 ## 包定位
