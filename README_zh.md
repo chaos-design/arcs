@@ -387,6 +387,7 @@ node scripts/install-host-plugins.mjs --client=claude-code
 | [directory-layout.md](./docs/directory-layout.md) | 目录规划与各目录职责边界 |
 | [core.md](./docs/core.md) | 基础内核职责、抽象、接口边界 |
 | [plugin-kit.md](./docs/plugin-kit.md) | 插件胶水层与 core 的拆分边界 |
+| [host-kit.md](./docs/host-kit.md) | 宿主公共运行时：能力矩阵、Hook 入口桥、效果翻译、审计落盘与会话文件锁 |
 | [plugins.md](./docs/plugins.md) | 各宿主插件的适配方式与配置 |
 | [sdk.md](./docs/sdk.md) | SDK 职责、与插件的边界、示例 |
 | [key-flows.md](./docs/key-flows.md) | 纠偏闭环、运行时序、四级策略、HITL 恢复、失败降级 |
@@ -394,7 +395,17 @@ node scripts/install-host-plugins.mjs --client=claude-code
 | [testing.md](./docs/testing.md) | 测试策略：三层测试与 CI 边界守护 |
 | [extension-points.md](./docs/extension-points.md) | 扩展点与新增插件/算法步骤 |
 | [constraints.md](./docs/constraints.md) | 约束说明（10 条）与术语约定 |
+| [interview.md](./docs/interview.md) | 面试题库（36 题 × 8 组，含考点与参考答案） |
 | [roadmap.md](./docs/roadmap.md) | 分阶段落地计划与完成标准 |
+
+---
+
+## 🚀 部署
+
+文档站点（`site/`）构建时内嵌 `docs/*.md`，产物完全自包含（hash 路由 + 相对资源路径），可托管在任意静态路径。
+
+- **GitHub Pages**：`.github/workflows/site.yml` 在 `docs/**`、`site/**` 变更或手动触发时构建并发布 `site/dist`；仓库 Pages 已配置为 **GitHub Actions** 来源，访问地址为 `https://chaos-design.github.io/arcs/`。
+- **Vercel**：导入仓库后将 **Root Directory** 设为 `site` 即可，`site/vercel.json` 已声明 pnpm workspace 安装命令、Vite 构建命令与输出目录 `dist`，无需额外配置。
 
 ---
 

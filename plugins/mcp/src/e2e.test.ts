@@ -198,10 +198,12 @@ describe('MCP 透明代理 · 稳健性红线（11 号计划加固）', () => {
       { target: ['node', '-e', 'process.exit(0)'], log: (l) => logs.push(l) },
     );
     await new Promise((r) => setTimeout(r, 150)); // 等下游退出
-    // 下游可能尚在启动（转发并登记未决）或已退出（立即回错）——两条路径都必须有应答
+    // 下游退出与请求到达存在竞态：请求可能已被转发（退出时由 failPendingForwarded
+    // 兑现为「请求未完成」），也可能在检查时下游已死（tryForward 失败，立即回「请求未执行」）。
+    // 两条路径都必须回 -32000 且不悬挂，断言协议契约而非依赖时序决定的文案。
     const res = await request('tools/call', { name: 'echo', arguments: { text: 'hi' } }, 3000);
     expect(res.error).toMatchObject({ code: -32000 });
-    expect(String((res.error as { message: string }).message)).toContain('未完成');
+    expect(String((res.error as { message: string }).message)).toMatch(/请求未(完成|执行)/);
     await stop();
   });
 
