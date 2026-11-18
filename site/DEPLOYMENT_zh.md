@@ -11,29 +11,30 @@ ARCS 文档站点是基于 Vite + React 的单页应用。构建时所有 `docs/
 | 形态 | 触发 | 位置 | 是否影响生产？ |
 |---|---|---|---|
 | **本地开发** | `corepack pnpm site:dev` | `http://127.0.0.1:5175` | 否 |
-| **Vercel 预览** | 任何改动 docs/site 的 PR | Vercel Git 集成为每个 PR 自动分配的 URL（配置：根目录 [`vercel.json`](../vercel.json)） | 否——隔离的预览 URL |
+| **Vercel 预览** | 任何改动 docs/site 的 PR | Vercel Git 集成为每个 PR 自动分配的 URL（配置：[`site/vercel.json`](./vercel.json)） | 否——隔离的预览 URL |
 | **GitHub Pages 生产** | 推送到 `main` | `.github/workflows/site.yml` → `github-pages` 环境 | 是——这是生产部署 |
 
 **保证**：本分支不修改 `.github/workflows/site.yml`，`main` 分支现有的 GitHub Pages 生产部署保持原样。Vercel 预览与 PR 验证工作流都不会部署到 Pages，因此不可能覆盖生产站点。
 
 ## Vercel
 
-仓库根目录的 [`vercel.json`](../vercel.json)：
+唯一的 Vercel 项目是 `arcs-site`，其 **Root Directory 设为 `site/`**。配置位于 [`site/vercel.json`](./vercel.json)：
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "corepack pnpm install --frozen-lockfile",
-  "buildCommand": "corepack pnpm site:build",
-  "outputDirectory": "site/dist",
+  "installCommand": "corepack pnpm --dir .. install --frozen-lockfile",
+  "buildCommand": "corepack pnpm build",
+  "outputDirectory": "dist",
   "rewrites": [{ "source": "/((?!.*\\..*).*)", "destination": "/index.html" }]
 }
 ```
 
-- 安装在仓库根执行，以便找到 `pnpm-lock.yaml` 与 `pnpm-workspace.yaml`。
-- `site:build` 通过 workspace filter 运行站点的 `tsc --noEmit && vite build`。
+- `--dir ..` 让安装在仓库根执行，从而使用 workspace 的 `pnpm-lock.yaml`，同时不改变后续构建命令的工作目录。
+- `buildCommand` 在 `site/` 下运行站点包自身的 `tsc --noEmit && vite build`。
 - `base: "./"` 配合 hash 路由，无需服务端 rewrite；`rewrites` 规则只是无害的兜底。
+- 刻意不保留根目录的 `vercel.json`：`arcs-site` 是本仓库唯一的 Vercel 部署。
 - Vercel Git 集成为每个 PR 自动分配独立 Preview URL，本仓库无需配置 token 或额外 Action。
 
 ## GitHub Pages
@@ -42,7 +43,7 @@ ARCS 文档站点是基于 Vite + React 的单页应用。构建时所有 `docs/
 
 PR 上由 `.github/workflows/site-preview.yml` 只做验证：
 
-1. 校验 `vercel.json`。
+1. 校验 `site/vercel.json`。
 2. 构建 Pages/Vercel 将提供的同一份产物（`pnpm site:build`）。
 3. 断言 `site/dist/index.html` 与 `site/dist/assets/` 存在。
 4. 用 `vite preview` + `curl` 对构建产物做冒烟测试。

@@ -4,7 +4,7 @@
 # 并把产物上传为可下载 artifact。本工作流 **不部署、不触碰 GitHub Pages 生产环境**：
 # main 分支的生产部署仍由 site.yml 独占（本文件无意覆盖它）。
 #
-# Vercel 的 Preview URL 由 Vercel 自身的 Git 集成根据根 vercel.json 自动生成，
+# Vercel 的 Preview URL 由 Vercel 自身的 Git 集成根据 site/vercel.json 自动生成，
 # 不需要在本仓库内配置 token 或额外的部署步骤。
 
 name: site-preview
@@ -15,7 +15,7 @@ on:
       - 'docs/**'
       - 'site/**'
       - '.github/workflows/site-preview.yml'
-      - 'vercel.json'
+      - 'site/vercel.json'
       - 'package.json'
       - 'pnpm-lock.yaml'
   workflow_dispatch:
@@ -46,7 +46,7 @@ jobs:
 
       - name: 校验 Vercel 配置
         run: |
-          node -e "const c=JSON.parse(require('fs').readFileSync('vercel.json','utf8')); if(c.outputDirectory!=='site/dist') throw new Error('bad outputDirectory'); console.log('vercel.json OK:', c.outputDirectory)"
+          node -e "const c=JSON.parse(require('fs').readFileSync('site/vercel.json','utf8')); if(c.outputDirectory!=='dist') throw new Error('bad outputDirectory'); console.log('site/vercel.json OK:', c.outputDirectory)"
 
       - name: 构建站点（Pages / Vercel 共用产物）
         run: corepack pnpm site:build
