@@ -47,6 +47,7 @@ jobs:
       - name: 校验 Vercel 配置
         run: |
           node -e "const c=JSON.parse(require('fs').readFileSync('site/vercel.json','utf8')); if(c.outputDirectory!=='dist') throw new Error('bad outputDirectory'); console.log('site/vercel.json OK:', c.outputDirectory)"
+          node -e "const p=JSON.parse(require('fs').readFileSync('site/package.json','utf8')); if(typeof p.scripts['site:build']!=='string') throw new Error('missing site:build alias'); console.log('site/package.json site:build alias OK')"
 
       - name: 构建站点（Pages / Vercel 共用产物）
         run: corepack pnpm site:build

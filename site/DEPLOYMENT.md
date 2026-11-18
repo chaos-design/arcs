@@ -18,23 +18,22 @@ Visual design: a four-layer dark surface palette, condensed display headings plu
 
 ## Vercel
 
-The single Vercel project is `arcs-site`, with its **Root Directory set to `site/`**. Its configuration lives in [`site/vercel.json`](./vercel.json):
+The Vercel project is `arcs-site`, with its **Root Directory set to `site/`**. Its configuration is [`site/vercel.json`](./vercel.json), kept identical to `main`:
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "corepack pnpm --dir .. install --frozen-lockfile",
+  "installCommand": "corepack pnpm install --frozen-lockfile",
   "buildCommand": "corepack pnpm build",
-  "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!.*\\..*).*)", "destination": "/index.html" }]
+  "outputDirectory": "dist"
 }
 ```
 
-- `--dir ..` runs the install at the repository root so the workspace `pnpm-lock.yaml` is used, without changing the working directory for the subsequent build command.
-- `buildCommand` runs the site package's own `tsc --noEmit && vite build` from `site/`.
-- `base: "./"` plus hash routing means no server-side rewrite is required; the `rewrites` rule is a harmless safety net.
-- There is deliberately no root-level `vercel.json`: `arcs-site` is the only Vercel deployment for this repository.
+- `buildCommand` runs the site package's `build` script (`tsc --noEmit && vite build`).
+- `site/package.json` also declares a `site:build` alias pointing to the same build. It is needed because Vercel may invoke `pnpm site:build` from the `site/` Root Directory, where the repository-root script with the same name is not visible — without it the build fails with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL`.
+- `base: "./"` plus hash routing means no server-side rewrite is required.
+- There is no root-level `vercel.json`: `arcs-site` is the only Vercel deployment for this repository, and this PR intentionally leaves its deployment configuration untouched.
 - Vercel's Git integration assigns each PR its own Preview URL automatically. No token or custom Action is needed in this repository.
 
 ## GitHub Pages

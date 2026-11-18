@@ -18,23 +18,22 @@ ARCS 文档站点是基于 Vite + React 的单页应用。构建时所有 `docs/
 
 ## Vercel
 
-唯一的 Vercel 项目是 `arcs-site`，其 **Root Directory 设为 `site/`**。配置位于 [`site/vercel.json`](./vercel.json)：
+Vercel 项目为 `arcs-site`，其 **Root Directory 设为 `site/`**。配置为 [`site/vercel.json`](./vercel.json)，与 `main` 保持一致：
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "corepack pnpm --dir .. install --frozen-lockfile",
+  "installCommand": "corepack pnpm install --frozen-lockfile",
   "buildCommand": "corepack pnpm build",
-  "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!.*\\..*).*)", "destination": "/index.html" }]
+  "outputDirectory": "dist"
 }
 ```
 
-- `--dir ..` 让安装在仓库根执行，从而使用 workspace 的 `pnpm-lock.yaml`，同时不改变后续构建命令的工作目录。
-- `buildCommand` 在 `site/` 下运行站点包自身的 `tsc --noEmit && vite build`。
-- `base: "./"` 配合 hash 路由，无需服务端 rewrite；`rewrites` 规则只是无害的兜底。
-- 刻意不保留根目录的 `vercel.json`：`arcs-site` 是本仓库唯一的 Vercel 部署。
+- `buildCommand` 运行站点包的 `build` 脚本（`tsc --noEmit && vite build`）。
+- `site/package.json` 另外声明了指向同一构建的 `site:build` 别名。它不可省略：Vercel 可能在 `site/` 这个 Root Directory 下执行 `pnpm site:build`，此时仓库根的同名脚本不可见，缺少别名会以 `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` 失败。
+- `base: "./"` 配合 hash 路由，无需服务端 rewrite。
+- 没有根目录的 `vercel.json`：`arcs-site` 是本仓库唯一的 Vercel 部署，本 PR 有意不改动其部署配置。
 - Vercel Git 集成为每个 PR 自动分配独立 Preview URL，本仓库无需配置 token 或额外 Action。
 
 ## GitHub Pages

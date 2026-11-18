@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p . --noEmit && vite build",
+    "site:build": "pnpm build",
     "preview": "vite preview",
     "lint": "tsc -p . --noEmit"
   },
