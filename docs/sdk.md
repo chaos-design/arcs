@@ -22,7 +22,7 @@ sequenceDiagram
     W->>App: PatchArgs 改参 / InjectMessage 注入 / RedirectTool 改道后放行
   else L4 高危
     W->>W: Suspend → 框架内 HITL 回调（如 confirm UI / webhook）
-    W->>App: 通过→放行；拒绝/超时→阻断 + 注入解释
+    W->>App: 通过→放行；拒绝/超时→阻断并注入解释
   end
   W->>W: onSteer(SteerEvent)
 ```

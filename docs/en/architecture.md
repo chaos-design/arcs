@@ -108,7 +108,7 @@ sequenceDiagram
     RT-->>A: [Suspend]
     A->>HL: request(suspend)
     HL-->>A: approved / rejected / timeout
-    A-->>H: approved → pass through original action; rejected/timeout → block + inject explanation, task continues
+    A-->>H: approved → pass through original action; rejected/timeout → block and inject explanation, task continues
   end
   RT->>T: emit AuditEvent
 ```

@@ -108,7 +108,7 @@ sequenceDiagram
     RT-->>A: [Suspend]
     A->>HL: request(suspend)
     HL-->>A: approved / rejected / timeout
-    A-->>H: 通过→放行原动作；拒绝/超时→阻断+注入解释，任务继续
+    A-->>H: 通过→放行原动作；拒绝/超时→阻断并注入解释，任务继续
   end
   RT->>T: emit AuditEvent
 ```

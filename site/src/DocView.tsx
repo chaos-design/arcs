@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { docContent } from './docs';
-import { docTitle, ORDERED_KEYS, t } from './i18n';
+import { docTitle, navFor, ORDERED_KEYS, t } from './i18n';
 import { postProcess, renderMarkdown } from './markdown';
 import { hrefDoc, hrefHome, type Route } from './routes';
 
@@ -62,11 +62,16 @@ async function renderWithRetry(graph: string, attempts = 3): Promise<string> {
   throw lastErr;
 }
 
+interface TocItem {
+  id: string;
+  text: string;
+}
+
 interface DocViewProps {
   route: Route;
 }
 
-/** 文档视图：markdown → HTML → DOM 后处理（高亮/链接改写/mermaid 渲染） */
+/** 文档视图：markdown → HTML → DOM 后处理（高亮/链接改写/mermaid 渲染），右侧粘性 TOC + 灯箱 */
 export function DocView({ route }: DocViewProps) {
   const { key, lang } = route;
   const s = t(lang);
@@ -77,13 +82,23 @@ export function DocView({ route }: DocViewProps) {
   const html = useMemo(() => (source ? renderMarkdown(source) : ''), [source]);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [mermaidFailed, setMermaidFailed] = useState(false);
+  const [toc, setToc] = useState<TocItem[]>([]);
+  const [zoomSvg, setZoomSvg] = useState<string | null>(null);
 
   useEffect(() => {
     const body = bodyRef.current;
     if (!body) return;
     setMermaidFailed(false);
+    setZoomSvg(null);
     // 相对链接按当前文档的物理路径解析：中文 ./core.md → core，英文 ./core.md → en/core
     postProcess(body, doc!.key);
+
+    // TOC 数据源：正文 h2（postProcess 已补 slug id）；仅两节以上才展示
+    setToc(
+      Array.from(body.querySelectorAll('h2'))
+        .filter((h) => h.id)
+        .map((h) => ({ id: h.id, text: h.textContent ?? '' })),
+    );
 
     // mermaid 块逐个替换为 SVG；单块失败保留源码并继续渲染其余块
     const blocks = Array.from(body.querySelectorAll('pre > code.language-mermaid'));
@@ -124,6 +139,20 @@ export function DocView({ route }: DocViewProps) {
     })();
   }, [html, key, lang]);
 
+  // 灯箱：Esc 关闭 + 打开期间锁定滚动容器
+  useEffect(() => {
+    if (!zoomSvg) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setZoomSvg(null);
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.classList.add('zoom-lock');
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.classList.remove('zoom-lock');
+    };
+  }, [zoomSvg]);
+
   // 锚点跳转（#/doc/key/anchor）——滚动容器是 .content，而非 window
   useEffect(() => {
     const content = document.querySelector<HTMLElement>('.content');
@@ -150,40 +179,92 @@ export function DocView({ route }: DocViewProps) {
     );
   }
 
+  // 三级面包屑：ARCS / <分组> / <文档标题>
+  const group = navFor(lang).find((g) => g.entries.some((e) => e.key === key));
   const idx = ORDERED_KEYS.indexOf(key!);
   const prev = idx > 0 ? ORDERED_KEYS[idx - 1] : undefined;
   const next = idx >= 0 && idx < ORDERED_KEYS.length - 1 ? ORDERED_KEYS[idx + 1] : undefined;
 
   return (
-    <article className="doc-view">
-      <div className="doc-crumb">
-        <a href={hrefHome(lang)}>{s.home}</a>
-        <span>/</span>
-        <span>{docTitle(key!, lang)}</span>
-      </div>
-      {mermaidFailed && <p className="doc-warning">{s.mermaidWarning}</p>}
-      <div
-        ref={bodyRef}
-        className="doc-body markdown"
-        // renderMarkdown 的输入是本仓库受控文档（构建时内嵌，非用户输入）
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-      <nav className="doc-pager">
-        {prev ? (
-          <a className="pager-prev" href={hrefDoc(prev, lang)}>
-            ← {docTitle(prev, lang)}
-          </a>
-        ) : (
-          <span />
-        )}
-        {next ? (
-          <a className="pager-next" href={hrefDoc(next, lang)}>
-            {docTitle(next, lang)} →
-          </a>
-        ) : (
-          <span />
-        )}
-      </nav>
-    </article>
+    <div className="doc-layout">
+      <article className="doc-view">
+        <p className="crumb">
+          <a href={hrefHome(lang)}>ARCS</a>
+          <span className="crumb-sep">/</span>
+          {group?.label}
+          <span className="crumb-sep">/</span>
+          {docTitle(key!, lang)}
+        </p>
+        {mermaidFailed && <p className="doc-warning">{s.mermaidWarning}</p>}
+        <div
+          ref={bodyRef}
+          className="doc-body markdown"
+          // renderMarkdown 的输入是本仓库受控文档（构建时内嵌，非用户输入）
+          dangerouslySetInnerHTML={{ __html: html }}
+          onClick={(e) => {
+            // 点击 mermaid 图打开灯箱放大查看
+            const figure = (e.target as HTMLElement).closest<HTMLElement>('.mermaid-figure');
+            if (!figure) return;
+            const svg = figure.querySelector('svg');
+            if (svg) setZoomSvg(svg.outerHTML);
+          }}
+        />
+        <nav className="doc-pager">
+          {prev ? (
+            <a className="pager-cell" href={hrefDoc(prev, lang)}>
+              <span className="pager-kicker">← {s.pagerPrev}</span>
+              <span className="pager-title">{docTitle(prev, lang)}</span>
+            </a>
+          ) : (
+            <span className="pager-cell empty" aria-hidden="true" />
+          )}
+          {next ? (
+            <a className="pager-cell next" href={hrefDoc(next, lang)}>
+              <span className="pager-kicker">{s.pagerNext} →</span>
+              <span className="pager-title">{docTitle(next, lang)}</span>
+            </a>
+          ) : (
+            <span className="pager-cell empty" aria-hidden="true" />
+          )}
+        </nav>
+      </article>
+      {toc.length >= 2 && (
+        <aside className="doc-toc">
+          <h4>{s.tocTitle}</h4>
+          <ol>
+            {toc.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    // SPA hash 路由下禁止改写 location.hash，仅滚动到锚点
+                    e.preventDefault();
+                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      )}
+      {zoomSvg && (
+        <div className="lightbox" onClick={() => setZoomSvg(null)} role="dialog" aria-label={s.closeZoom}>
+          <div className="lightbox-body" dangerouslySetInnerHTML={{ __html: zoomSvg }} />
+          <button
+            className="lightbox-close"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoomSvg(null);
+            }}
+            aria-label={s.closeZoom}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

@@ -22,7 +22,7 @@ sequenceDiagram
     W->>App: PatchArgs modify args / InjectMessage injection / RedirectTool redirect then allow
   else L4 high risk
     W->>W: Suspend → in-framework HITL callback (e.g. confirm UI / webhook)
-    W->>App: approved → allow; rejected/timed out → block + inject explanation
+    W->>App: approved → allow; rejected/timed out → block and inject explanation
   end
   W->>W: onSteer(SteerEvent)
 ```

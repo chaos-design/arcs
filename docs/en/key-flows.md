@@ -75,10 +75,10 @@ sequenceDiagram
     A->>H: release original action, continue from suspension point
   else rejected
     HL-->>A: { approved: false, timeout: false }
-    A->>H: block original action + InjectMessage with rejection reason and reroute hint
+    A->>H: block original action; InjectMessage with rejection reason and reroute hint
   else timeout (default 120s)
     HL-->>A: { approved: false, timeout: true }
-    A->>H: same as rejection + warning audit event
+    A->>H: same as rejection; warning audit event
   end
   Note over H: task continues toward the established goal, never terminated
 ```

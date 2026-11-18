@@ -1,27 +1,22 @@
-import type { CSSProperties } from 'react';
-import { navFor, t } from './i18n';
-import { hrefDoc, type Lang } from './routes';
+import { navFor, quickCardsFor, t } from './i18n';
+import { hrefDoc, hrefHome, type Lang } from './routes';
 
-/** 卡片色条轮换：6 色 accent */
-const ACCENTS = [
-  'var(--blue)',
-  'var(--cyan)',
-  'var(--green)',
-  'var(--purple)',
-  'var(--yellow)',
-  'var(--red)',
-];
-
-function accentAt(i: number, j: number): CSSProperties {
-  return { '--card-accent': ACCENTS[(i + j) % ACCENTS.length] } as CSSProperties;
+/** 卡片 accent 色轮换（memx 同款 40×3 顶边色条）：blue → cyan → green → purple → yellow → red */
+const ACCENTS = ['blue', 'cyan', 'green', 'purple', 'yellow', 'red'] as const;
+function accentAt(i: number): string {
+  return ACCENTS[i % ACCENTS.length];
 }
 
-/** 首页：项目总览 + 文档矩阵入口 */
+/** 首页：面包屑 + hero + 快捷入口 + 核心原则 + 分区式文档矩阵（memx 布局） */
 export function Home({ lang }: { lang: Lang }) {
   const s = t(lang);
   const nav = navFor(lang);
   return (
     <div className="home">
+      <p className="crumb">
+        <a href={hrefHome(lang)}>ARCS</a> · {s.crumbHub}
+      </p>
+
       <section className="hero">
         <div className="hero-kicker">{s.heroKicker}</div>
         <h1>
@@ -60,39 +55,54 @@ export function Home({ lang }: { lang: Lang }) {
         </div>
       </section>
 
-      <section className="principles">
-        <div className="principle">
-          <h3>{s.principle1Title}</h3>
-          <p>{s.principle1Body}</p>
-        </div>
-        <div className="principle">
-          <h3>{s.principle2Title}</h3>
-          <p>{s.principle2Body}</p>
-        </div>
-      </section>
-
-      <section className="doc-grid-wrap">
-        <h2>{s.docMatrix}</h2>
-        {nav.map((group, gi) => (
-          <div className="grid-group" key={group.label}>
-            <div className="grid-label">{group.label}</div>
-            <div className="grid-cards">
-              {group.entries.map((entry, ei) => (
-                <a
-                  className="card"
-                  style={accentAt(gi, ei)}
-                  href={hrefDoc(entry.key, lang)}
-                  key={entry.key}
-                >
-                  <span className="card-kicker">{group.label}</span>
-                  <b>{entry.title}</b>
-                  <span>{entry.desc}</span>
-                </a>
-              ))}
-            </div>
-          </div>
+      <div className="grid quick-grid">
+        {quickCardsFor(lang).map((card, i) => (
+          <a className="card" href={hrefDoc(card.key, lang)} key={card.key}>
+            <i className={`card-accent ${accentAt(i)}`} />
+            <span className="card-kicker">{card.kicker}</span>
+            <b className="card-title">{card.title}</b>
+            <span className="card-body">{card.desc}</span>
+          </a>
         ))}
-      </section>
+      </div>
+
+      <div className="section-head">
+        <h2>{s.principlesTitle}</h2>
+        <p>{s.principlesDesc}</p>
+      </div>
+      <div className="grid">
+        <div className="card static">
+          <i className="card-accent blue" />
+          <span className="card-kicker">PROMISE</span>
+          <b className="card-title">{s.principle1Title}</b>
+          <span className="card-body">{s.principle1Body}</span>
+        </div>
+        <div className="card static">
+          <i className="card-accent cyan" />
+          <span className="card-kicker">PROMISE</span>
+          <b className="card-title">{s.principle2Title}</b>
+          <span className="card-body">{s.principle2Body}</span>
+        </div>
+      </div>
+
+      {nav.map((group) => (
+        <div key={group.label}>
+          <div className="section-head">
+            <h2>{group.label}</h2>
+            <p>{group.desc}</p>
+          </div>
+          <div className="grid">
+            {group.entries.map((entry, ei) => (
+              <a className="card" href={hrefDoc(entry.key, lang)} key={entry.key}>
+                <i className={`card-accent ${accentAt(ei)}`} />
+                <span className="card-kicker">{group.kicker}</span>
+                <b className="card-title">{entry.title}</b>
+                <span className="card-body">{entry.desc}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

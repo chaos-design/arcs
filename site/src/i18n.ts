@@ -8,6 +8,10 @@ export interface DocEntry {
 
 export interface NavGroup {
   label: string;
+  /** 卡片 kicker（mono 大写英文，两种语言共用） */
+  kicker: string;
+  /** 分区头的补充说明（文档矩阵 section-head） */
+  desc: string;
   entries: DocEntry[];
 }
 
@@ -15,6 +19,8 @@ export interface NavGroup {
 const NAV_ZH: NavGroup[] = [
   {
     label: '开始',
+    kicker: 'START',
+    desc: '文档索引与阅读路径。',
     entries: [
       { key: 'README', title: '文档索引', desc: '总览与两条核心要求' },
       { key: 'architecture', title: '架构设计', desc: '分层、能力矩阵、稳健性红线' },
@@ -23,6 +29,8 @@ const NAV_ZH: NavGroup[] = [
   },
   {
     label: '包设计',
+    kicker: 'PACKAGES',
+    desc: '五个包的职责、契约与边界。',
     entries: [
       { key: 'core', title: 'core 基础内核', desc: '传感器、规划器、预算与降级' },
       { key: 'plugin-kit', title: 'plugin-kit 胶水层', desc: 'HostAdapter 契约与运行时' },
@@ -33,6 +41,8 @@ const NAV_ZH: NavGroup[] = [
   },
   {
     label: '插件与流程',
+    kicker: 'PLUGINS',
+    desc: '九种宿主接入与关键纠偏时序。',
     entries: [
       { key: 'plugins', title: '宿主插件（9 家）', desc: 'codex / claude-code / mcp 等' },
       { key: 'key-flows', title: '关键流程', desc: '闭环时序 / 四级策略 / HITL' },
@@ -40,6 +50,8 @@ const NAV_ZH: NavGroup[] = [
   },
   {
     label: '质量与演进',
+    kicker: 'QUALITY',
+    desc: '测试策略、扩展点与落地计划。',
     entries: [
       { key: 'testing', title: '测试策略', desc: '三层测试与 CI 边界守护' },
       { key: 'extension-points', title: '扩展点', desc: '新增宿主 / 算法 / Sink' },
@@ -49,6 +61,8 @@ const NAV_ZH: NavGroup[] = [
   },
   {
     label: '深入',
+    kicker: 'DEEP DIVE',
+    desc: '面向讲解与演练的题库。',
     entries: [{ key: 'interview', title: '面试题库', desc: '36 题分组，含考点与答案' }],
   },
 ];
@@ -56,6 +70,8 @@ const NAV_ZH: NavGroup[] = [
 const NAV_EN: NavGroup[] = [
   {
     label: 'Get started',
+    kicker: 'START',
+    desc: 'The documentation index and the reading path.',
     entries: [
       { key: 'README', title: 'Documentation index', desc: 'Overview and two core requirements' },
       { key: 'architecture', title: 'Architecture', desc: 'Layers, capability matrix, robustness red lines' },
@@ -64,6 +80,8 @@ const NAV_EN: NavGroup[] = [
   },
   {
     label: 'Package design',
+    kicker: 'PACKAGES',
+    desc: 'Responsibilities, contracts and boundaries of the five packages.',
     entries: [
       { key: 'core', title: 'core · Foundations', desc: 'Sensors, planner, budget and degradation' },
       { key: 'plugin-kit', title: 'plugin-kit · Glue layer', desc: 'HostAdapter contract and runtime' },
@@ -74,6 +92,8 @@ const NAV_EN: NavGroup[] = [
   },
   {
     label: 'Plugins and flows',
+    kicker: 'PLUGINS',
+    desc: 'Nine host integrations and the key steering flows.',
     entries: [
       { key: 'plugins', title: 'Host plugins (9)', desc: 'codex / claude-code / mcp, etc.' },
       { key: 'key-flows', title: 'Key flows', desc: 'Closed loop / four-level strategies / HITL' },
@@ -81,6 +101,8 @@ const NAV_EN: NavGroup[] = [
   },
   {
     label: 'Quality and evolution',
+    kicker: 'QUALITY',
+    desc: 'Testing strategy, extension points and the roadmap.',
     entries: [
       { key: 'testing', title: 'Testing strategy', desc: 'Three-layer tests and CI guardrails' },
       { key: 'extension-points', title: 'Extension points', desc: 'New host / algorithm / sink' },
@@ -90,9 +112,37 @@ const NAV_EN: NavGroup[] = [
   },
   {
     label: 'Deep dive',
+    kicker: 'DEEP DIVE',
+    desc: 'The interview bank for walkthroughs and drills.',
     entries: [{ key: 'interview', title: 'Interview bank', desc: '36 questions with key points and answers' }],
   },
 ];
+
+/** 首页快捷入口卡片（hero 下方一排四个，对齐 memx 特性卡） */
+export interface QuickCard {
+  key: string;
+  kicker: string;
+  title: string;
+  desc: string;
+}
+
+const QUICK_ZH: QuickCard[] = [
+  { key: 'architecture', kicker: 'DOCS', title: '架构设计', desc: '分层、能力矩阵与稳健性红线，从这里开始。' },
+  { key: 'plugins', kicker: 'PLUGINS', title: '宿主插件（9 家）', desc: '8 个 Agent 平台 + MCP 网关的接入矩阵与降级行为。' },
+  { key: 'sdk', kicker: 'SDK', title: 'SDK 接入', desc: 'withArcs / createArcsNode 双轨代码级接入。' },
+  { key: 'interview', kicker: 'DRILLS', title: '面试题库', desc: '36 题分组讲解，含考点与答案。' },
+];
+
+const QUICK_EN: QuickCard[] = [
+  { key: 'architecture', kicker: 'DOCS', title: 'Architecture', desc: 'Layers, capability matrix and robustness red lines — start here.' },
+  { key: 'plugins', kicker: 'PLUGINS', title: 'Host plugins (9)', desc: 'Integration matrix and degradation across 8 agent platforms + the MCP gateway.' },
+  { key: 'sdk', kicker: 'SDK', title: 'SDK integration', desc: 'In-process integration via withArcs / createArcsNode.' },
+  { key: 'interview', kicker: 'DRILLS', title: 'Interview bank', desc: '36 grouped questions with key points and answers.' },
+];
+
+export function quickCardsFor(lang: Lang): QuickCard[] {
+  return lang === 'en' ? QUICK_EN : QUICK_ZH;
+}
 
 export function navFor(lang: Lang): NavGroup[] {
   return lang === 'en' ? NAV_EN : NAV_ZH;
@@ -111,7 +161,16 @@ export function docTitle(key: string, lang: Lang): string {
 
 interface Strings {
   home: string;
-  githubRepo: string;
+  brandSub: string;
+  navGroupNav: string;
+  navHome: string;
+  crumbHub: string;
+  principlesTitle: string;
+  principlesDesc: string;
+  pagerPrev: string;
+  pagerNext: string;
+  tocTitle: string;
+  closeZoom: string;
   openNav: string;
   closeNav: string;
   githubAria: string;
@@ -134,7 +193,6 @@ interface Strings {
   principle1Body: string;
   principle2Title: string;
   principle2Body: string;
-  docMatrix: string;
   mermaidWarning: string;
   docNotFound: string;
   docNotFoundHint: string;
@@ -147,7 +205,16 @@ interface Strings {
 const STRINGS: Record<Lang, Strings> = {
   zh: {
     home: '首页',
-    githubRepo: 'GitHub 仓库 ↗',
+    brandSub: 'Agent 实时纠偏系统',
+    navGroupNav: '导航',
+    navHome: '首页 / 总览',
+    crumbHub: '在线文档中心',
+    principlesTitle: '核心原则',
+    principlesDesc: '两条不可妥协的承诺。',
+    pagerPrev: '上一篇',
+    pagerNext: '下一篇',
+    tocTitle: '本页目录',
+    closeZoom: '关闭放大视图',
     openNav: '打开导航',
     closeNav: '关闭导航',
     githubAria: 'GitHub 仓库',
@@ -171,7 +238,6 @@ const STRINGS: Record<Lang, Strings> = {
     principle1Body: '纠偏发生在执行流内部——修复参数、注入提示、重定向工具——任务始终向前推进。',
     principle2Title: '② 偏航立即纠偏',
     principle2Body: '实时检测执行方向与既定目标的偏差，越界即修正，避免 Agent 在错误方向越走越远。',
-    docMatrix: '文档矩阵',
     mermaidWarning: '部分 Mermaid 图渲染失败，已回退显示源码。',
     docNotFound: '文档不存在',
     docNotFoundHint: '未找到 ',
@@ -182,7 +248,16 @@ const STRINGS: Record<Lang, Strings> = {
   },
   en: {
     home: 'Home',
-    githubRepo: 'GitHub repo ↗',
+    brandSub: 'Agent course steering',
+    navGroupNav: 'Navigation',
+    navHome: 'Home / Overview',
+    crumbHub: 'Documentation hub',
+    principlesTitle: 'Core promises',
+    principlesDesc: 'The two non-negotiable promises.',
+    pagerPrev: 'Previous',
+    pagerNext: 'Next',
+    tocTitle: 'On this page',
+    closeZoom: 'Close zoomed view',
     openNav: 'Open navigation',
     closeNav: 'Close navigation',
     githubAria: 'GitHub repository',
@@ -208,7 +283,6 @@ const STRINGS: Record<Lang, Strings> = {
     principle2Title: '② Correct drift immediately',
     principle2Body:
       'Detect deviations between execution direction and stated goals in real time, and correct as soon as boundaries are crossed.',
-    docMatrix: 'Documentation matrix',
     mermaidWarning: 'Some Mermaid diagrams failed to render; source is shown instead.',
     docNotFound: 'Document not found',
     docNotFoundHint: 'No document for ',
