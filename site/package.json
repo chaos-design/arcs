@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ARCS 文档静态站点（Vite + React，构建时内嵌 docs/*.md；参考 chaos-design/memx 的 site/ 形态）。",
+  "description": "ARCS 文档静态站点（Vite + React，构建时内嵌 docs/*.md）。",
   "files": [
     "dist"
   ],

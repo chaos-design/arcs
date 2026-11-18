@@ -28,7 +28,7 @@ export function collectDocKeys(dir: string, base = ''): string[] {
 
 /**
  * 构建时把 docs 目录下的全部 Markdown 内嵌为虚拟模块（站点完全自包含，无运行时 fetch，
- * 产物可直接静态托管于任意子路径）。与 memx 的 docsModule 同构。
+ * 产物可直接静态托管于任意子路径）。
  */
 function docsModule(): Plugin {
   return {

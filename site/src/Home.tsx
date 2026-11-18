@@ -1,5 +1,20 @@
+import type { CSSProperties } from 'react';
 import { NAV } from './docs';
 import { hrefDoc } from './routes';
+
+/** 卡片色条轮换：6 色 accent */
+const ACCENTS = [
+  'var(--blue)',
+  'var(--cyan)',
+  'var(--green)',
+  'var(--purple)',
+  'var(--yellow)',
+  'var(--red)',
+];
+
+function accentAt(i: number, j: number): CSSProperties {
+  return { '--card-accent': ACCENTS[(i + j) % ACCENTS.length] } as CSSProperties;
+}
 
 /** 首页：项目总览 + 文档矩阵入口 */
 export function Home() {
@@ -58,21 +73,20 @@ export function Home() {
 
       <section className="doc-grid-wrap">
         <h2>文档矩阵</h2>
-        <div className="doc-grid">
-          {NAV.map((group) => (
-            <div className="grid-group" key={group.label}>
-              <div className="grid-label">{group.label}</div>
-              <div className="grid-cards">
-                {group.entries.map((entry) => (
-                  <a className="card" href={hrefDoc(entry.key)} key={entry.key}>
-                    <b>{entry.title}</b>
-                    <span>{entry.desc}</span>
-                  </a>
-                ))}
-              </div>
+        {NAV.map((group, gi) => (
+          <div className="grid-group" key={group.label}>
+            <div className="grid-label">{group.label}</div>
+            <div className="grid-cards">
+              {group.entries.map((entry, ei) => (
+                <a className="card" style={accentAt(gi, ei)} href={hrefDoc(entry.key)} key={entry.key}>
+                  <span className="card-kicker">{group.label}</span>
+                  <b>{entry.title}</b>
+                  <span>{entry.desc}</span>
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </section>
     </div>
   );
