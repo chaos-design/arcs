@@ -133,6 +133,30 @@ button { font: inherit; }
 .sidebar-footer a { font: 12px/1 var(--mono); text-decoration: none; color: var(--muted); }
 .sidebar-footer a:hover { color: var(--cyan); }
 
+/* 中/英切换：分段控件，侧栏底部与移动端顶栏共用 */
+.lang-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.lang-switch button {
+  margin: 0;
+  padding: 5px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: 600 11px/1 var(--mono);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-switch button + button { border-left: 1px solid var(--line); }
+.lang-switch button:hover { color: var(--ink); }
+.lang-switch button.active { background: var(--surface-3); color: var(--cyan); }
+.lang-switch.compact button { padding: 6px 7px; font-size: 10px; }
+
 /* ── 主区 ─────────────────────────────── */
 .main { padding: 8px clamp(20px, 3vw, 56px) 0; min-width: 0; }
 .doc-view, .home { max-width: 980px; }

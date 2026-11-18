@@ -15,7 +15,7 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
 import yaml from 'highlight.js/lib/languages/yaml';
 import { Marked } from 'marked';
-import { hrefDoc } from './routes';
+import { hrefDoc, type Lang } from './routes';
 
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('shell', bash);
@@ -71,13 +71,25 @@ export function renderMarkdown(source: string): string {
   return marked.parse(cjkBoldSafe(source), { async: false }) as string;
 }
 
+/** 以当前文档的物理键为基准解析相对 .md 路径，兼容 ./ 与 ../（docs/en/ 下的链接需回到上级） */
+function resolveRelative(currentKey: string, rel: string): string {
+  const slash = currentKey.lastIndexOf('/');
+  const parts = slash < 0 ? [] : currentKey.slice(0, slash).split('/');
+  for (const part of rel.split('/')) {
+    if (!part || part === '.') continue;
+    if (part === '..') parts.pop();
+    else parts.push(part);
+  }
+  return parts.join('/');
+}
+
 /**
  * 渲染后的 DOM 后处理（在挂载/更新的容器内执行）：
  * 1. 标题补 slug id（页内锚点跳转）
  * 2. 代码块 highlight.js 高亮（mermaid 块除外，由 DocView 单独渲染）
- * 3. 文档间 *.md 相对链接改写为 hash 路由
+ * 3. 文档间 *.md 相对链接改写为 hash 路由（按物理路径推导语言，保留原文里的跨语言切换行）
  */
-export function postProcess(container: HTMLElement): HTMLElement[] {
+export function postProcess(container: HTMLElement, currentKey: string): HTMLElement[] {
   // 1) 标题 id
   for (const h of container.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
     if (!h.id) h.id = slugify(h.textContent ?? '');
@@ -95,17 +107,25 @@ export function postProcess(container: HTMLElement): HTMLElement[] {
     if (code.parentElement) codeBlocks.push(code.parentElement as HTMLElement);
   }
 
-  // 3) 文档链接改写：./xxx.md#anchor、xxx.md → #/doc/xxx
+  // 3) 文档链接改写：./xxx.md#anchor、../xxx.md → #/doc/<key>?lang=<推导语言>
   for (const a of container.querySelectorAll('a')) {
-    const href = a.getAttribute('href') ?? '';
-    if (!href) continue;
-    if (/\.md($|#)/.test(href)) {
-      const m = href.match(/^(?:\.\/)?([^#]+?\.md)(?:#(.+))?$/);
-      if (m) {
-        const key = m[1].slice(0, -3);
-        a.setAttribute('href', hrefDoc(key, m[2] ? slugify(decodeURIComponent(m[2])) : undefined));
-      }
-    }
+    const link = resolveDocLink(currentKey, a.getAttribute('href') ?? '');
+    if (link) a.setAttribute('href', hrefDoc(link.key, link.lang, link.anchor));
   }
   return codeBlocks;
+}
+
+/** 把文档内相对 .md 链接解析为逻辑键 + 语言 + 锚点；非文档链接返回 undefined */
+export function resolveDocLink(
+  currentKey: string,
+  href: string,
+): { key: string; lang: Lang; anchor?: string } | undefined {
+  if (!href || /^[a-z]+:/i.test(href)) return undefined;
+  const m = href.match(/^([^#]+?\.md)(?:#(.+))?$/);
+  if (!m) return undefined;
+  const physical = resolveRelative(currentKey, m[1].slice(0, -3));
+  if (!physical) return undefined;
+  const lang: Lang = physical.startsWith('en/') ? 'en' : 'zh';
+  const key = lang === 'en' ? physical.slice(3) : physical;
+  return { key, lang, anchor: m[2] ? slugify(decodeURIComponent(m[2])) : undefined };
 }

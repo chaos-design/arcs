@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import { NAV } from './docs';
-import { hrefDoc } from './routes';
+import { navFor, t } from './i18n';
+import { hrefDoc, type Lang } from './routes';
 
 /** 卡片色条轮换：6 色 accent */
 const ACCENTS = [
@@ -17,68 +17,73 @@ function accentAt(i: number, j: number): CSSProperties {
 }
 
 /** 首页：项目总览 + 文档矩阵入口 */
-export function Home() {
+export function Home({ lang }: { lang: Lang }) {
+  const s = t(lang);
+  const nav = navFor(lang);
   return (
     <div className="home">
       <section className="hero">
-        <div className="hero-kicker">Agent Runtime Correction System</div>
+        <div className="hero-kicker">{s.heroKicker}</div>
         <h1>
-          ARCS：Agent 执行流内的<span className="grad">实时纠偏系统</span>
+          {s.heroTitleLead}
+          <span className="grad">{s.heroTitleGrad}</span>
         </h1>
-        <p className="hero-lead">
-          在工具调用落地前检测偏航——参数幻觉、死循环、任务发散、高危越权——并原地修复：
-          修参数、注入提示、改道工具、请求审批。任务始终向前推进，从不被中断。
-        </p>
+        <p className="hero-lead">{s.heroLead}</p>
         <div className="hero-actions">
-          <a className="btn primary" href={hrefDoc('architecture')}>
-            从架构设计开始 →
+          <a className="btn primary" href={hrefDoc('architecture', lang)}>
+            {s.heroCtaArchitecture}
           </a>
-          <a className="btn" href={hrefDoc('interview')}>
-            面试题库
+          <a className="btn" href={hrefDoc('interview', lang)}>
+            {s.heroCtaInterview}
           </a>
           <a className="btn ghost" href="https://github.com/chaos-design/arcs" target="_blank" rel="noreferrer">
-            GitHub ↗
+            {s.heroCtaGithub}
           </a>
         </div>
         <div className="hero-stats">
           <div>
-            <b>4 级</b>
-            <span>纠偏策略 L1–L4</span>
+            <b>{s.stat1Value}</b>
+            <span>{s.stat1Label}</span>
           </div>
           <div>
-            <b>9 家</b>
-            <span>宿主插件 + 2 个 SDK</span>
+            <b>{s.stat2Value}</b>
+            <span>{s.stat2Label}</span>
           </div>
           <div>
-            <b>p99 &lt; 50ms</b>
-            <span>sense + plan 预算</span>
+            <b>{s.stat3Value}</b>
+            <span>{s.stat3Label}</span>
           </div>
           <div>
-            <b>fail-open</b>
-            <span>绝不成为中断源</span>
+            <b>{s.stat4Value}</b>
+            <span>{s.stat4Label}</span>
           </div>
         </div>
       </section>
 
       <section className="principles">
         <div className="principle">
-          <h3>① 任务不中断</h3>
-          <p>纠偏发生在执行流内部——修复参数、注入提示、重定向工具——任务始终向前推进。</p>
+          <h3>{s.principle1Title}</h3>
+          <p>{s.principle1Body}</p>
         </div>
         <div className="principle">
-          <h3>② 偏航立即纠偏</h3>
-          <p>实时检测执行方向与既定目标的偏差，越界即修正，避免 Agent 在错误方向越走越远。</p>
+          <h3>{s.principle2Title}</h3>
+          <p>{s.principle2Body}</p>
         </div>
       </section>
 
       <section className="doc-grid-wrap">
-        <h2>文档矩阵</h2>
-        {NAV.map((group, gi) => (
+        <h2>{s.docMatrix}</h2>
+        {nav.map((group, gi) => (
           <div className="grid-group" key={group.label}>
             <div className="grid-label">{group.label}</div>
             <div className="grid-cards">
               {group.entries.map((entry, ei) => (
-                <a className="card" style={accentAt(gi, ei)} href={hrefDoc(entry.key)} key={entry.key}>
+                <a
+                  className="card"
+                  style={accentAt(gi, ei)}
+                  href={hrefDoc(entry.key, lang)}
+                  key={entry.key}
+                >
                   <span className="card-kicker">{group.label}</span>
                   <b>{entry.title}</b>
                   <span>{entry.desc}</span>

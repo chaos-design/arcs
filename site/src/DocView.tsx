@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ALL_DOCS, docTitle, NAV } from './docs';
+import { docContent } from './docs';
+import { docTitle, ORDERED_KEYS, t } from './i18n';
 import { postProcess, renderMarkdown } from './markdown';
 import { hrefDoc, hrefHome, type Route } from './routes';
 
@@ -65,15 +66,14 @@ interface DocViewProps {
   route: Route;
 }
 
-/** 侧栏阅读顺序的扁平文档键列表（上一篇/下一篇用） */
-const ORDERED_KEYS: string[] = NAV.flatMap((g) => g.entries.map((e) => e.key));
-
 /** 文档视图：markdown → HTML → DOM 后处理（高亮/链接改写/mermaid 渲染） */
 export function DocView({ route }: DocViewProps) {
-  const key = route.key!;
-  const source = ALL_DOCS[key];
-  // useMemo 按 key 派生：DocView 在路由间复用同一组件实例，useState 初始化器只跑一次
-  // 会导致切换文档时正文停留旧内容；mermaid 状态随每次正文变化复位。
+  const { key, lang } = route;
+  const s = t(lang);
+  const doc = docContent(key!, lang);
+  const source = doc?.source;
+  // useMemo 按 source 派生：DocView 在路由/语言间复用同一组件实例，useState 初始化器只跑一次
+  // 会导致切换文档或语言时正文停留旧内容；mermaid 状态随每次正文变化复位。
   const html = useMemo(() => (source ? renderMarkdown(source) : ''), [source]);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [mermaidFailed, setMermaidFailed] = useState(false);
@@ -82,7 +82,8 @@ export function DocView({ route }: DocViewProps) {
     const body = bodyRef.current;
     if (!body) return;
     setMermaidFailed(false);
-    postProcess(body);
+    // 相对链接按当前文档的物理路径解析：中文 ./core.md → core，英文 ./core.md → en/core
+    postProcess(body, doc!.key);
 
     // mermaid 块逐个替换为 SVG；单块失败保留源码并继续渲染其余块
     const blocks = Array.from(body.querySelectorAll('pre > code.language-mermaid'));
@@ -121,7 +122,7 @@ export function DocView({ route }: DocViewProps) {
         setMermaidFailed(true);
       }
     })();
-  }, [html]);
+  }, [html, key, lang]);
 
   // 锚点跳转（#/doc/key/anchor）——滚动容器是 .content，而非 window
   useEffect(() => {
@@ -138,29 +139,29 @@ export function DocView({ route }: DocViewProps) {
   if (!source) {
     return (
       <div className="doc-view">
-        <h1>文档不存在</h1>
+        <h1>{s.docNotFound}</h1>
         <p>
-          未找到 <code>{key}</code>。请从侧栏选择文档，或
-          <a href={hrefHome()}>返回首页</a>。
+          {s.docNotFoundHint}
+          <code>{key}</code>
+          {s.docNotFoundHint2}
+          <a href={hrefHome(lang)}>{s.backHome}</a>
         </p>
       </div>
     );
   }
 
-  const idx = ORDERED_KEYS.indexOf(key);
+  const idx = ORDERED_KEYS.indexOf(key!);
   const prev = idx > 0 ? ORDERED_KEYS[idx - 1] : undefined;
   const next = idx >= 0 && idx < ORDERED_KEYS.length - 1 ? ORDERED_KEYS[idx + 1] : undefined;
 
   return (
     <article className="doc-view">
       <div className="doc-crumb">
-        <a href={hrefHome()}>首页</a>
+        <a href={hrefHome(lang)}>{s.home}</a>
         <span>/</span>
-        <span>{docTitle(key)}</span>
+        <span>{docTitle(key!, lang)}</span>
       </div>
-      {mermaidFailed && (
-        <p className="doc-warning">部分 Mermaid 图渲染失败，已回退显示源码。</p>
-      )}
+      {mermaidFailed && <p className="doc-warning">{s.mermaidWarning}</p>}
       <div
         ref={bodyRef}
         className="doc-body markdown"
@@ -169,15 +170,15 @@ export function DocView({ route }: DocViewProps) {
       />
       <nav className="doc-pager">
         {prev ? (
-          <a className="pager-prev" href={hrefDoc(prev)}>
-            ← {docTitle(prev)}
+          <a className="pager-prev" href={hrefDoc(prev, lang)}>
+            ← {docTitle(prev, lang)}
           </a>
         ) : (
           <span />
         )}
         {next ? (
-          <a className="pager-next" href={hrefDoc(next)}>
-            {docTitle(next)} →
+          <a className="pager-next" href={hrefDoc(next, lang)}>
+            {docTitle(next, lang)} →
           </a>
         ) : (
           <span />
