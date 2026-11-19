@@ -415,8 +415,13 @@ a:hover{text-decoration:underline}
   min-height:var(--header-h);padding:12px 16px;border-bottom:1px solid var(--line)}
 .brand a{font-weight:700;font-size:16px;color:var(--ink)}
 .brand a:hover{text-decoration:none;color:var(--accent)}
-.brand-link{font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
-.brand-link:hover{text-decoration:none;color:var(--accent)}
+.brand-home,.brand-link{display:inline-flex;align-items:center;gap:8px;
+  font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+.brand-home:hover,.brand-link:hover{text-decoration:none;color:var(--accent)}
+.brand-mark{width:24px;height:24px;flex:0 0 24px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;font-size:13px;font-weight:800;display:inline-flex;
+  align-items:center;justify-content:center;line-height:1}
 .tagline{font-size:12px;color:var(--muted);padding:6px 16px}
 .sidebar-scroll{flex:1;overflow-y:auto;padding:12px}
 /* nav */
@@ -444,6 +449,10 @@ a:hover{text-decoration:underline}
 /* content */
 .content{min-width:0;padding:0}
 .content-inner{padding:clamp(20px,3vw,56px)}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:18px}
+.breadcrumb a{color:var(--muted);font-size:12px}
+.breadcrumb a:hover{color:var(--accent);text-decoration:none}
+.breadcrumb .sep{opacity:.5}
 .page-title{font-size:clamp(26px,4vw,40px);line-height:1.1;margin:4px 0 10px;font-weight:750}
 .page-desc{color:var(--muted);line-height:1.7;max-width:64ch}
 /* doc body */
@@ -502,6 +511,7 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
+.footer-actions{display:flex;flex-wrap:wrap;gap:8px}
 /* theme controls */
 .theme-ctl,.lang-ctl,.brand-meta{display:flex;align-items:center;gap:6px}
 .theme-ctl button,.lang-btn{height:30px;border-radius:8px;border:1px solid var(--line);
@@ -536,10 +546,14 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 .footer a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);
   border-radius:8px;background:var(--card);color:var(--accent);font-weight:600;font-size:13px;text-decoration:none}
 .footer a:hover{border-color:var(--accent);background:rgba(11,95,255,.06);text-decoration:none}
+.footer .lang-btn{height:34px;padding:0 12px;font-size:13px}
 .mermaid-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .mermaid-figure figcaption::before{content:'⛶ '}
 .lightbox-stage .mermaid-svg,.lightbox-stage pre{max-width:100%;max-height:100%;transform-origin:center}
 /* home page */
+.hero{border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3vw,36px);
+  background:linear-gradient(135deg,rgba(11,95,255,.06),rgba(122,60,255,.04)),var(--card);
+  margin-bottom:4px}
 .hero-kicker{color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .hero h1{font-size:clamp(28px,4vw,42px);line-height:1.15;margin:10px 0;font-weight:750}
 .hero h1 .grad{background:linear-gradient(90deg,var(--accent),var(--accent-2));-webkit-background-clip:text;
@@ -556,11 +570,17 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 .hero-stats b{display:block;font-size:20px;color:var(--accent)}
 .hero-stats span{font-size:12px;color:var(--muted)}
 .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:12px 0 8px}
-.doc-card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:10px;color:var(--ink)}
+.doc-card{display:block;position:relative;padding:16px;border:1px solid var(--line);border-radius:10px;color:var(--ink)}
+.doc-card::before{content:'';position:absolute;top:0;left:16px;width:36px;height:3px;
+  border-radius:0 0 3px 3px;background:var(--accent)}
+.doc-grid .doc-card:nth-child(4n+2)::before{background:#06b6d4}
+.doc-grid .doc-card:nth-child(4n+3)::before{background:#8b5cf6}
+.doc-grid .doc-card:nth-child(4n+4)::before{background:#f43f5e}
 .doc-card b{display:block;font-size:15px;margin-bottom:4px}
 .doc-card span{font-size:12px;color:var(--muted)}
 .doc-card:hover{text-decoration:none;border-color:var(--accent);background:rgba(11,95,255,.05)}
 .section-title{font-size:20px;font-weight:750;margin:26px 0 4px}
+.section-sub{color:var(--muted);font-size:13px;margin:0 0 12px}
 /* dark theme */
 [data-theme='dark']{--bg:#0b0d12;--card:#14171f;--ink:#e6e8ee;--muted:#9aa3b2;--line:#2a2f3a}
 [data-theme='dark'] .list-table th{background:rgba(148,163,184,.1)}
@@ -756,6 +776,8 @@ def build_home_html(cfg, lang):
         parts.append("</div>")
 
     parts.append("<h2 class='section-title'>" + html.escape(s("doc_matrix", "Documentation")) + "</h2>")
+    if s("doc_matrix_sub", ""):
+        parts.append("<p class='section-sub'>" + html.escape(s("doc_matrix_sub")) + "</p>")
     for nav in cfg.get("nav", []):
         glabel = nav.get("group_en", nav["group"]) if lang == "en" else nav["group"]
         parts.append("<div class='nav-group-label'>" + html.escape(glabel) + "</div><div class='doc-grid'>")
@@ -814,6 +836,8 @@ def render_page(cfg, page, out_dir, slug, lang):
     home_href = rel_href("index", lang, lang)
     brand = ltext(cfg, lang, "title", cfg.get("title", "ARCS"))
     tagline = ltext(cfg, lang, "tagline", cfg.get("tagline", ""))
+    crumb = (ltext(cfg, lang, "doc_center", "文档中心" if lang == "zh" else "Documentation")
+             if is_home else title)
     asset = "../assets/mermaid.min.js" if lang == "en" else "./assets/mermaid.min.js"
     favicon = "../favicon.svg" if lang == "en" else "./favicon.svg"
     html_lang = "zh-CN" if lang == "zh" else "en"
@@ -830,7 +854,7 @@ def render_page(cfg, page, out_dir, slug, lang):
 <body>
 <header class="topbar">
   <div class="topbar-row">
-    <a class="brand-link" href="{home}">{brand}</a>
+    <a class="brand-link" href="{home}"><span class="brand-mark">A</span>{brand}</a>
     <div class="brand-meta">
       <div class="lang-ctl">{toggle}</div>
       {gh_top}
@@ -841,15 +865,16 @@ def render_page(cfg, page, out_dir, slug, lang):
 <button type="button" class="nav-scrim" aria-label="Close navigation menu" tabindex="-1"></button>
 <div class="shell">
   <aside class="sidebar" id="site-nav">
-    <div class="brand"><div class="brand-row"><a href="{home}">{brand}</a>
-      <div class="brand-meta"><div class="lang-ctl">{toggle}</div>
+    <div class="brand"><div class="brand-row"><a class="brand-home" href="{home}"><span class="brand-mark">A</span><span>{brand}</span></a>
+      <div class="brand-meta">
         <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">◐</button></div></div></div>
     <div class="tagline">{tagline}</div>
     <div class="sidebar-scroll">{nav}</div>
-    <div class="footer">{gh_footer}</div>
+    <div class="footer"><div class="footer-actions">{gh_footer}{toggle}</div></div>
   </aside>
   <main class="content">
     <div class="content-inner">
+      <div class="breadcrumb"><a href="{home}">{brand}</a><span class="sep">/</span><span>{crumb}</span></div>
       {heading}{desc_html}
       {count_html}{body}
       {lightbox}
@@ -872,6 +897,7 @@ def render_page(cfg, page, out_dir, slug, lang):
         css=css,
         home=home_href,
         brand=html.escape(brand),
+        crumb=html.escape(crumb),
         tagline=html.escape(tagline),
         nav=nav_html,
         gh_footer=gh_footer,
@@ -963,6 +989,9 @@ def cmd_check(args):
                 "nav-scrim": "nav-scrim" in text,
                 "theme-switch": "data-theme-toggle" in text,
                 "language-toggle": 'class="lang-btn"' in text,
+                "footer-actions": "footer-actions" in text,
+                "brand-mark": "brand-mark" in text,
+                "breadcrumb": "breadcrumb" in text,
                 "github-link": "github.com/" in text,
                 "mermaid-runtime": "assets/mermaid.min.js" in text or "../assets/mermaid.min.js" in text,
             }
