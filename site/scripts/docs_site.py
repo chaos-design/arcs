@@ -511,7 +511,8 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
-.footer-actions{display:flex;flex-wrap:wrap;gap:8px}
+.footer-actions{display:flex;gap:8px}
+.footer-actions>*{flex:1 1 0;min-width:0;justify-content:center}
 /* theme controls */
 .theme-ctl,.lang-ctl,.brand-meta{display:flex;align-items:center;gap:6px}
 .theme-ctl button,.lang-btn{height:30px;border-radius:8px;border:1px solid var(--line);
