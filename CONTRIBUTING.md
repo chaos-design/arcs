@@ -425,12 +425,12 @@ Adjust the relative path per location (for example `docs/en/architecture.md` use
 2. **Keep links paired:** a link to `docs/constraints.md` in Chinese should point to `docs/en/constraints.md` in English; never leave a broken or cross-language-mismatched link.
 3. **Keep terminology consistent** with the glossary in `docs/constraints.md`: Drift / Steering Arc / Steering Prompt / Goal / Steering (correction) / non-invasive integration / SessionState / Degraded / effect list. Use the same English terms in both versions when referring to code identifiers (`DriftSensor`, `SteeringEffect`, `HostAdapter`, `HitlTransport`, `TelemetrySink`).
 4. **Update both indexes** — `docs/README.md` and `docs/en/README.md` — when adding, renaming or removing a doc.
-5. **Update the site navigation** when adding a doc: `site/src/i18n.ts` holds both the Chinese and English `NAV` lists; register the new doc in both, keeping the reading order and matching each language's docs index.
+5. **Update the site navigation** when adding a doc: register the new doc in both `nav[]` and `pages[]` of `site/site.config.json` (label/desc for both languages), keeping the reading order and matching each language's docs index.
 6. Validate Mermaid diagrams render and relative links resolve; this is part of the documentation DoD in `docs/roadmap.md` and `docs/testing.md`.
 
 ### How the site embeds docs
 
-`site/vite.config.ts` defines the `docsModule()` Vite plugin: at build time it recursively collects every Markdown file under `docs/`, keys them by path relative to `docs/` with `.md` removed (e.g. `README`, `architecture`, `en/architecture`), and inlines their raw text into the virtual module `virtual:arcs-docs`. There is **no runtime fetch** — the output is fully self-contained and can be hosted at any subpath. `site/src/docs.ts` consumes it as `ALL_DOCS` and `docContent()` picks the right language (falling back to Chinese when a translation is missing); `site/src/i18n.ts` holds both languages' `NAV` and UI strings, `site/src/routes.ts` encodes the language in the hash route (`?lang=en`), and `site/src/markdown.ts` rewrites `*.md` links to language-aware hash routes based on the current document's physical path. `pnpm site:build` emits `site/dist` (deployed by `.github/workflows/site.yml`). Consequence: both language versions are embedded and reachable through the 中文/EN switch in the sidebar footer or mobile header; add the new file to both `NAV` lists to make it reachable in the sidebar.
+`site/scripts/docs_site.py` is a zero-dependency static generator driven by `site/site.config.json`. It reads `docs/*.md` and `docs/en/*.md` and emits one self-contained HTML per page per language (`site/dist/<slug>.html` and `site/dist/en/<slug>.html`); there is no runtime fetch of docs. `site/site.config.json` holds the bilingual nav, UI strings and page list; register a new doc in both `nav[]` and `pages[]`. Relative `*.md` links are rewritten to language-aware static links, so the language-switch line at the top of each doc keeps working. Mermaid fences become figures rendered to real SVG in the browser by the local `site/dist/assets/mermaid.min.js` (no CDN). The generated layout includes the light/dark switch, the 860px mobile nav panel, and the GitHub link pinned at the sidebar footer plus a topbar icon on mobile. `pnpm site:build` runs `site/scripts/build.mjs` (generate + structural check) and emits `site/dist`, deployed by `.github/workflows/site.yml`.
 
 ---
 
@@ -481,7 +481,7 @@ Note the two different P-scales: `docs/roadmap.md` uses phases **P0–P5** for i
 - [ ] `SteeringEffect` / `DriftSignal` JSON roundtrip still asserted; `Suspend` alone and last
 - [ ] Latency budget (CPU time) respected; new sensors are pure, sync and I/O-free
 - [ ] Documentation updated in **both** languages with paired links, switch lines, glossary terms and both index files
-- [ ] Both site `NAV` lists updated if a doc was added (`site/src/i18n.ts`); Mermaid and links validated
+- [ ] `site/site.config.json` updated for a new doc (both `nav[]` and `pages[]`); Mermaid and links validated
 - [ ] PR description contains Background / Changes / Verification / Risks / Rollback
 - [ ] Plan status/priority updated in `plans/` if applicable; no secrets, user data or unrelated changes
 - [ ] Real-host tier-3 evidence noted for the integrating party (`scripts/host-real-check.mjs`)

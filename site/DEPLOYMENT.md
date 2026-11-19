@@ -2,9 +2,9 @@
 
 # Site Deployment & Preview Verification
 
-The ARCS docs site is a Vite + React single-page app. It embeds all `docs/**/*.md` at build time into a virtual module, so the production output is fully self-contained (no runtime fetches, no external assets) and can be hosted at any path.
+The ARCS docs site is a config-driven, multi-page static site. `site/scripts/docs_site.py` reads `docs/*.md` and `docs/en/*.md` and emits one self-contained HTML per page per language into `site/dist/`. There is no runtime fetch of document content; the only local asset is the Mermaid runtime JS used to render diagrams as real SVG in the browser (no CDN).
 
-Visual design: a four-layer dark surface palette, condensed display headings plus monospace kickers, a fixed one-screen shell with an independently scrolling content column, six-color accent card strips, and a radial hero glow. ARCS-specific hero statistics are preserved; heavyweight components such as full-screen iframe viewers and gesture-driven diagram lightboxes are intentionally kept out.
+Visual design: a dependency-free responsive documentation layout — 280px sidebar + fluid content on desktop, an 860px mobile breakpoint with a top bar and full-screen navigation panel, a light/dark theme switch, a 中文/EN toggle that switches both the whole document body and the UI labels, a diagram lightbox, and a GitHub link pinned at the sidebar footer (plus an icon button on mobile).
 
 ## Three deployment modes
 
@@ -30,9 +30,9 @@ The Vercel project is `arcs-site`, with its **Root Directory set to `site/`**. I
 }
 ```
 
-- `buildCommand` runs the site package's `build` script (`tsc --noEmit && vite build`).
+- `buildCommand` runs the site package's `build` script, which executes `scripts/build.mjs`: copy the Mermaid runtime into `dist/assets`, generate both language variants from `site.config.json`, and run the structural check.
 - `site/package.json` also declares a `site:build` alias pointing to the same build. It is needed because Vercel may invoke `pnpm site:build` from the `site/` Root Directory, where the repository-root script with the same name is not visible — without it the build fails with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL`.
-- `base: "./"` plus hash routing means no server-side rewrite is required.
+- All links are relative static paths (`./page.html`, `../page.html`), so no server-side rewrite is required on a subpath deployment.
 - There is no root-level `vercel.json`: `arcs-site` is the only Vercel deployment for this repository, and this PR intentionally leaves its deployment configuration untouched.
 - Vercel's Git integration assigns each PR its own Preview URL automatically. No token or custom Action is needed in this repository.
 
@@ -53,15 +53,16 @@ It deliberately contains **no** `actions/deploy-pages` step, so PR runs cannot o
 ## Local commands
 
 ```bash
-corepack pnpm site:dev       # dev server on 127.0.0.1:5175
-corepack pnpm site:build     # type-check + production build → site/dist
+corepack pnpm site:dev       # build, then serve on 127.0.0.1:5175
+corepack pnpm site:build     # generate + structurally check site/dist
 corepack pnpm site:preview   # serve the built dist locally
 ```
 
 ## What to check in a preview
 
-- Sidebar groups and the active item; mobile drawer at ≤ 860px (hamburger, Esc, backdrop click).
-- Hero gradient button / radial glow and the 4-stat strip.
-- Card accent strips and hover lift on the doc matrix.
-- Mermaid diagrams render with the new dark theme variables and show the "click to enlarge" hint.
-- Internal `.md` links rewrite to `#/doc/...` hash routes and still resolve on a subpath deployment.
+- Sidebar groups and the active item; the 860px mobile top bar / full-screen nav panel (hamburger, Esc, backdrop click).
+- Hero gradient and the 4-stat strip; card grid on the doc matrix.
+- 中文/EN toggle switches the whole document body and the UI labels, and links resolve in both variants.
+- Mermaid diagrams render as real SVG and the click-to-enlarge lightbox works.
+- Internal `.md` links rewrite to language-aware static page links and still resolve on a subpath deployment.
+- The GitHub link is reachable from the sidebar footer and the mobile top bar.

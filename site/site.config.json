@@ -1,0 +1,117 @@
+{
+  "title": "ARCS 文档",
+  "tagline": "Agent 执行流内的实时纠偏系统",
+  "description": "ARCS 文档站：架构、包设计、插件、流程与测试策略。",
+  "repo": "github.com/chaos-design/arcs",
+  "theme": "dark",
+  "breakpoint": 860,
+  "locales": {
+    "zh": {
+      "name": "中文",
+      "title": "ARCS 文档",
+      "tagline": "Agent 执行流内的实时纠偏系统",
+      "description": "ARCS 文档站：架构、包设计、插件、流程与测试策略。",
+      "toggle": "EN",
+      "github": "GitHub 仓库 ↗",
+      "caption": "点击放大",
+      "filter": "状态筛选",
+      "search": "搜索",
+      "fit": "适应屏幕",
+      "close": "关闭",
+      "hero_kicker": "Agent Runtime Correction System",
+      "hero_title": "ARCS：Agent 执行流内的",
+      "hero_grad": "实时纠偏系统",
+      "hero_lead": "在工具调用落地前检测偏航——参数幻觉、死循环、任务发散、高危越权——并原地修复：修参数、注入提示、改道工具、请求审批。任务始终向前推进，从不被中断。",
+      "principles_title": "核心原则",
+      "doc_matrix": "文档矩阵"
+    },
+    "en": {
+      "name": "English",
+      "title": "ARCS Docs",
+      "tagline": "Real-time course steering inside the agent loop",
+      "description": "ARCS documentation: architecture, packages, plugins, flows and testing.",
+      "toggle": "中文",
+      "github": "GitHub repo ↗",
+      "caption": "Click to enlarge",
+      "filter": "Filter status",
+      "search": "Search",
+      "fit": "Fit to screen",
+      "close": "Close",
+      "hero_kicker": "Agent Runtime Correction System",
+      "hero_title": "ARCS:",
+      "hero_grad": "real-time course steering for agents",
+      "hero_lead": "Detect drift before tool calls land — hallucinated arguments, loops, goal divergence, privilege escalation — and repair in place: patch parameters, inject prompts, redirect tools, request approval. Tasks keep moving, never interrupted.",
+      "principles_title": "Core principles",
+      "doc_matrix": "Documentation matrix"
+    }
+  },
+  "hero_actions": [
+    {"slug": "architecture", "label": "从架构设计开始 →", "label_en": "Start with architecture →", "primary": true},
+    {"slug": "interview", "label": "面试题库", "label_en": "Interview bank"}
+  ],
+  "hero_stats": [
+    {"value": "4 级", "value_en": "4 levels", "label": "纠偏策略 L1–L4", "label_en": "Correction strategies L1–L4"},
+    {"value": "9 家", "value_en": "9 hosts", "label": "宿主插件 + 2 个 SDK", "label_en": "Host plugins + 2 SDKs"},
+    {"value": "p99 < 50ms", "value_en": "p99 < 50ms", "label": "sense + plan 预算", "label_en": "sense + plan budget"},
+    {"value": "fail-open", "value_en": "fail-open", "label": "绝不成为中断源", "label_en": "Never a source of interruption"}
+  ],
+  "principles": [
+    {
+      "title": "① 任务不中断",
+      "title_en": "① Never interrupt the task",
+      "body": "纠偏发生在执行流内部——修复参数、注入提示、重定向工具——任务始终向前推进。",
+      "body_en": "Correction happens inside the execution flow — patch parameters, inject prompts, redirect tools — so the task keeps moving."
+    },
+    {
+      "title": "② 偏航立即纠偏",
+      "title_en": "② Correct drift immediately",
+      "body": "实时检测执行方向与既定目标的偏差，越界即修正，避免 Agent 在错误方向越走越远。",
+      "body_en": "Detect deviations between execution direction and stated goals in real time, and correct as soon as boundaries are crossed."
+    }
+  ],
+  "nav": [
+    {"group": "开始", "group_en": "Get started", "items": [
+      {"slug": "README", "label": "文档索引", "label_en": "Documentation index", "desc": "总览与两条核心要求", "desc_en": "Overview and two core requirements"},
+      {"slug": "architecture", "label": "架构设计", "label_en": "Architecture", "desc": "分层、能力矩阵、稳健性红线", "desc_en": "Layers, capability matrix, robustness red lines"},
+      {"slug": "directory-layout", "label": "目录规划", "label_en": "Directory layout", "desc": "packages / sdk / plugins / site", "desc_en": "packages / sdk / plugins / site"}
+    ]},
+    {"group": "包设计", "group_en": "Package design", "items": [
+      {"slug": "core", "label": "core 基础内核", "label_en": "core · Foundations", "desc": "传感器、规划器、预算与降级", "desc_en": "Sensors, planner, budget and degradation"},
+      {"slug": "plugin-kit", "label": "plugin-kit 胶水层", "label_en": "plugin-kit · Glue layer", "desc": "HostAdapter 契约与运行时", "desc_en": "HostAdapter contract and runtime"},
+      {"slug": "host-kit", "label": "host-kit 宿主运行时", "label_en": "host-kit · Host runtime", "desc": "能力矩阵 / Hook 桥 / 审计 / 会话锁", "desc_en": "Capability matrix / Hook bridge / audit / session lock"},
+      {"slug": "telemetry", "label": "telemetry 遥测", "label_en": "telemetry · Telemetry", "desc": "AuditEvent、偏移曲线与面板", "desc_en": "AuditEvent, drift curve and dashboard"},
+      {"slug": "sdk", "label": "SDK 接入", "label_en": "SDK integration", "desc": "withArcs / createArcsNode", "desc_en": "withArcs / createArcsNode"}
+    ]},
+    {"group": "插件与流程", "group_en": "Plugins and flows", "items": [
+      {"slug": "plugins", "label": "宿主插件（9 家）", "label_en": "Host plugins (9)", "desc": "codex / claude-code / mcp 等", "desc_en": "codex / claude-code / mcp, etc."},
+      {"slug": "key-flows", "label": "关键流程", "label_en": "Key flows", "desc": "闭环时序 / 四级策略 / HITL", "desc_en": "Closed loop / four-level strategies / HITL"}
+    ]},
+    {"group": "质量与演进", "group_en": "Quality and evolution", "items": [
+      {"slug": "testing", "label": "测试策略", "label_en": "Testing strategy", "desc": "三层测试与 CI 边界守护", "desc_en": "Three-layer tests and CI guardrails"},
+      {"slug": "extension-points", "label": "扩展点", "label_en": "Extension points", "desc": "新增宿主 / 算法 / Sink", "desc_en": "New host / algorithm / sink"},
+      {"slug": "constraints", "label": "约束说明", "label_en": "Constraints", "desc": "10 条红线与术语", "desc_en": "10 red lines and glossary"},
+      {"slug": "roadmap", "label": "落地计划", "label_en": "Roadmap", "desc": "P0–P5 与完成标准", "desc_en": "P0–P5 and completion criteria"}
+    ]},
+    {"group": "深入", "group_en": "Deep dive", "items": [
+      {"slug": "interview", "label": "面试题库", "label_en": "Interview bank", "desc": "36 题分组，含考点与答案", "desc_en": "36 questions with key points and answers"}
+    ]}
+  ],
+  "pages": [
+    {"slug": "index", "type": "home", "title": "首页", "title_en": "Home"},
+    {"slug": "README", "type": "doc", "source": "README.md", "title": "文档索引", "title_en": "Documentation index"},
+    {"slug": "architecture", "type": "doc", "source": "architecture.md", "title": "架构设计", "title_en": "Architecture"},
+    {"slug": "directory-layout", "type": "doc", "source": "directory-layout.md", "title": "目录规划", "title_en": "Directory layout"},
+    {"slug": "core", "type": "doc", "source": "core.md", "title": "core 基础内核", "title_en": "core · Foundations"},
+    {"slug": "plugin-kit", "type": "doc", "source": "plugin-kit.md", "title": "plugin-kit 胶水层", "title_en": "plugin-kit · Glue layer"},
+    {"slug": "host-kit", "type": "doc", "source": "host-kit.md", "title": "host-kit 宿主运行时", "title_en": "host-kit · Host runtime"},
+    {"slug": "telemetry", "type": "doc", "source": "telemetry.md", "title": "telemetry 遥测", "title_en": "telemetry · Telemetry"},
+    {"slug": "sdk", "type": "doc", "source": "sdk.md", "title": "SDK 接入", "title_en": "SDK integration"},
+    {"slug": "plugins", "type": "doc", "source": "plugins.md", "title": "宿主插件（9 家）", "title_en": "Host plugins (9)"},
+    {"slug": "key-flows", "type": "doc", "source": "key-flows.md", "title": "关键流程", "title_en": "Key flows"},
+    {"slug": "testing", "type": "doc", "source": "testing.md", "title": "测试策略", "title_en": "Testing strategy"},
+    {"slug": "extension-points", "type": "doc", "source": "extension-points.md", "title": "扩展点", "title_en": "Extension points"},
+    {"slug": "constraints", "type": "doc", "source": "constraints.md", "title": "约束说明", "title_en": "Constraints"},
+    {"slug": "roadmap", "type": "doc", "source": "roadmap.md", "title": "落地计划", "title_en": "Roadmap"},
+    {"slug": "interview", "type": "doc", "source": "interview.md", "title": "面试题库", "title_en": "Interview bank"}
+  ]
+}

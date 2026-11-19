@@ -2,9 +2,9 @@
 
 # 站点部署与预览验证
 
-ARCS 文档站点是基于 Vite + React 的单页应用。构建时所有 `docs/**/*.md` 会被内嵌为虚拟模块，因此产物完全自包含（无运行时 fetch、无外部资源），可托管在任意子路径下。
+ARCS 文档站点是配置驱动的多页静态站点。`site/scripts/docs_site.py` 读取 `docs/*.md` 与 `docs/en/*.md`，为每篇文档的中英两种语言各产出一个自包含 HTML 到 `site/dist/`。文档内容没有运行时 fetch；唯一的本地资源是用于把图表渲染为真实 SVG 的 Mermaid 运行时 JS（无 CDN）。
 
-视觉设计：四层暗色 surface 色阶、condensed 标题 + 等宽 kicker 双轨排版、一屏固定外壳 + 独立滚动内容列、6 色卡片色条、hero 径向光晕。保留 ARCS 独有的 hero 统计块；刻意不引入全屏 iframe 查看器、Mermaid 手势放大引擎等重型组件。
+视觉设计：零依赖的响应式文档布局——桌面为 280px 侧栏 + 流式内容列，860px 断点切换为顶栏 + 全屏导航面板；包含明暗主题切换、中/EN 切换（同时切换正文与界面文案）、图表放大弹层，以及固定在侧栏底部的 GitHub 链接（移动端另有顶栏图标）。
 
 ## 三种部署形态
 
@@ -30,9 +30,9 @@ Vercel 项目为 `arcs-site`，其 **Root Directory 设为 `site/`**。配置为
 }
 ```
 
-- `buildCommand` 运行站点包的 `build` 脚本（`tsc --noEmit && vite build`）。
+- `buildCommand` 运行站点包的 `build` 脚本，即 `scripts/build.mjs`：把 Mermaid 运行时复制进 `dist/assets`，由 `site.config.json` 生成中英两套页面，并做结构校验。
 - `site/package.json` 另外声明了指向同一构建的 `site:build` 别名。它不可省略：Vercel 可能在 `site/` 这个 Root Directory 下执行 `pnpm site:build`，此时仓库根的同名脚本不可见，缺少别名会以 `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` 失败。
-- `base: "./"` 配合 hash 路由，无需服务端 rewrite。
+- 站内链接均为相对静态路径（`./page.html`、`../page.html`），子路径部署无需服务端 rewrite。
 - 没有根目录的 `vercel.json`：`arcs-site` 是本仓库唯一的 Vercel 部署，本 PR 有意不改动其部署配置。
 - Vercel Git 集成为每个 PR 自动分配独立 Preview URL，本仓库无需配置 token 或额外 Action。
 
@@ -53,15 +53,16 @@ PR 上由 `.github/workflows/site-preview.yml` 只做验证：
 ## 本地命令
 
 ```bash
-corepack pnpm site:dev       # 开发服务器 127.0.0.1:5175
-corepack pnpm site:build     # 类型检查 + 生产构建 → site/dist
+corepack pnpm site:dev       # 构建并在 127.0.0.1:5175 提供预览
+corepack pnpm site:build     # 生成 + 结构校验 site/dist
 corepack pnpm site:preview   # 本地托管已构建产物
 ```
 
 ## 预览中应检查的点
 
-- 侧栏分组与当前项高亮；≤ 860px 移动端抽屉（汉堡按钮、Esc、遮罩点击）。
-- Hero 渐变按钮 / 径向光晕与 4 项统计块。
-- 文档矩阵卡片的色条与 hover 抬升。
-- Mermaid 图使用新的暗色 themeVariables 渲染，并显示"点击放大"提示。
-- 站内 `.md` 链接改写为 `#/doc/...` hash 路由，且在子路径部署下仍可解析。
+- 侧栏分组与当前项高亮；≤ 860px 移动端顶栏 / 全屏导航面板（汉堡按钮、Esc、遮罩点击）。
+- Hero 渐变与 4 项统计块；文档矩阵卡片网格。
+- 中/EN 切换同时改变正文与界面文案，且两种语言的链接都能正确解析。
+- Mermaid 图渲染为真实 SVG，且点击放大弹层可用。
+- 站内 `.md` 链接改写为带语言的静态页面链接，且在子路径部署下仍可解析。
+- 侧栏底部与移动端顶栏均可访问 GitHub 链接。

@@ -155,7 +155,7 @@ arcs/
 ├── examples/
 │   ├── sdk-vercel-demo/       # Mock model demo: L1 arg patching / L2 circuit breaking
 │   └── plugin-mcp-demo/       # Three-process demo: passthrough / L2 circuit breaking / L4 blocking / audit persistence
-├── site/                      # Documentation site (Vite + React, embeds docs/*.md at build time; pnpm site:dev / site:build)
+├── site/                      # Documentation site (config-driven static generator, bilingual pages; pnpm site:dev / site:build)
 ├── docs/                      # Architecture and design docs (see index at the end)
 ├── plans/                     # plan-flow plans
 ├── LICENSE                    # Apache 2.0
@@ -313,7 +313,7 @@ const { text } = await generateText({
 
 ```bash
 corepack pnpm site:dev      # http://127.0.0.1:5175 browse all docs locally
-corepack pnpm site:build    # produce the site/dist static site (embeds docs/*.md at build time, zero external assets)
+corepack pnpm site:build    # generate site/dist: one static HTML per doc in both Chinese and English (local Mermaid runtime, no CDN)
 ```
 
 ### 4. Drift-Curve Dashboard (P5 · Observing Correction Trajectories)

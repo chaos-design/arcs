@@ -425,12 +425,12 @@ ARCS 在每一层都预留了稳定扩展点；面向宿主的扩展无需改动
 2. **保持链接成对**：中文版指向 `docs/constraints.md` 的链接，英文版应指向 `docs/en/constraints.md`；不留断链或跨语言错配的链接。
 3. **保持术语一致**，遵循 `docs/constraints.md` 的术语约定：偏航（Drift）/ 修正弧线（Steering Arc）/ 纠偏指令（Steering Prompt）/ 既定目标（Goal）/ 操舵·纠偏（Steering）/ 无侵入接入 / 会话状态（SessionState）/ 降级（Degraded）/ 效果列表。两版引用代码标识符（`DriftSensor`、`SteeringEffect`、`HostAdapter`、`HitlTransport`、`TelemetrySink`）时使用相同英文写法。
 4. **更新两个索引**——新增、重命名或删除文档时，同时更新 `docs/README.md` 与 `docs/en/README.md`。
-5. **更新站点导航**：新增文档时在 `site/src/i18n.ts` 的中英两套 `NAV` 列表中成对登记，其顺序即阅读顺序，描述与对应语言的文档索引一致。
+5. **更新站点导航**：新增文档时在 `site/site.config.json` 的 `nav[]` 与 `pages[]` 中成对登记（中英 label/desc 均填），顺序即阅读顺序，描述与对应语言的文档索引一致。
 6. 验证 Mermaid 图可渲染、相对链接可解析；这是 `docs/roadmap.md` 与 `docs/testing.md` 中文档 DoD 的一部分。
 
 ### 站点如何内嵌文档
 
-`site/vite.config.ts` 定义 `docsModule()` Vite 插件：构建时递归收集 `docs/` 下所有 Markdown，以相对 `docs/` 的路径去掉 `.md` 作为键（如 `README`、`architecture`、`en/architecture`），把原文内联进虚拟模块 `virtual:arcs-docs`。**没有运行时 fetch**——产物完全自包含，可托管于任意子路径。`site/src/docs.ts` 将其作为 `ALL_DOCS` 消费，并由 `docContent()` 按语言取原文（缺译回退中文）；`site/src/i18n.ts` 维护中英双语 `NAV` 与界面文案，`site/src/routes.ts` 把语言编码进 hash 路由（`?lang=en`），`site/src/markdown.ts` 按当前文档的物理路径把 `*.md` 链接改写为带语言的 hash 路由，`pnpm site:build` 产出 `site/dist`（由 `.github/workflows/site.yml` 部署）。结果：两种语言版本都会被内嵌并通过底部/顶栏的中英切换访问；新增文件须在中英两套 `NAV` 中成对登记才能从侧栏访问。
+`site/scripts/docs_site.py` 是由 `site/site.config.json` 驱动的零依赖静态生成器：直接读取 `docs/*.md` 与 `docs/en/*.md`，为每篇文档的中英两种语言各产出一个自包含 HTML（`site/dist/<slug>.html` 与 `site/dist/en/<slug>.html`），**没有文档内容的运行时 fetch**。`site/site.config.json` 维护双语导航、界面文案与页面清单；新增文档须在 `nav[]` 与 `pages[]` 中成对登记。文档内的相对 `*.md` 链接会被改写为带语言的静态链接，因此每篇文档顶部的语言切换行依然有效。Mermaid 代码块会渲染为图表，由本地 `site/dist/assets/mermaid.min.js` 在浏览器内渲染为真实 SVG（无 CDN）。生成的布局包含明暗主题切换、860px 移动端导航面板，以及侧栏底部 GitHub 链接与移动端顶栏 GitHub 图标。`pnpm site:build` 运行 `site/scripts/build.mjs`（生成 + 结构校验）产出 `site/dist`，由 `.github/workflows/site.yml` 部署。
 
 ---
 
@@ -481,7 +481,7 @@ ARCS 在每一层都预留了稳定扩展点；面向宿主的扩展无需改动
 - [ ] `SteeringEffect` / `DriftSignal` 的 JSON roundtrip 仍有断言；`Suspend` 独立且在末位
 - [ ] 延迟预算（CPU 时间）未被突破；新传感器纯函数、同步、无 I/O
 - [ ] 文档**两种语言**均已更新，链接、切换行、术语表与两个索引文件成对一致
-- [ ] 新增文档时已成对更新站点中英 `NAV`（`site/src/i18n.ts`）；Mermaid 与链接已验证
+- [ ] 新增文档时已更新 `site/site.config.json`（`nav[]` 与 `pages[]` 成对）；Mermaid 与链接已验证
 - [ ] PR 描述包含背景 / 变更 / 验证 / 风险 / 回滚
 - [ ] 适用时已更新 `plans/` 中的计划状态/优先级；无密钥、用户数据或无关变更
 - [ ] 已为集成方标注第三层真实宿主证据（`scripts/host-real-check.mjs`）

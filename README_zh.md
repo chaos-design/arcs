@@ -155,7 +155,7 @@ arcs/
 ├── examples/
 │   ├── sdk-vercel-demo/       # mock 模型演示 L1 补参 / L2 熔断
 │   └── plugin-mcp-demo/       # 三进程演示透传 / L2 熔断 / L4 阻断 / 审计落盘
-├── site/                      # 文档站点（Vite + React，构建时内嵌 docs/*.md；pnpm site:dev / site:build）
+├── site/                      # 文档站点（配置驱动静态生成器，中英双语页面；pnpm site:dev / site:build）
 ├── docs/                      # 架构与设计文档（见文末索引）
 ├── plans/                     # plan-flow 计划
 ├── LICENSE                    # Apache 2.0
@@ -313,7 +313,7 @@ const { text } = await generateText({
 
 ```bash
 corepack pnpm site:dev      # http://127.0.0.1:5175 本地浏览全部文档
-corepack pnpm site:build    # 产出 site/dist 静态站点（构建时内嵌 docs/*.md，零外部资源）
+corepack pnpm site:build    # 生成 site/dist：每篇文档的中英各一个静态 HTML（Mermaid 运行时为本地资源，无 CDN）
 ```
 
 ### 4. 偏移曲线面板（P5 · 观测纠偏轨迹）
