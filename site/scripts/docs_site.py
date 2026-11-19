@@ -415,6 +415,8 @@ a:hover{text-decoration:underline}
   min-height:var(--header-h);padding:12px 16px;border-bottom:1px solid var(--line)}
 .brand a{font-weight:700;font-size:16px;color:var(--ink)}
 .brand a:hover{text-decoration:none;color:var(--accent)}
+.brand-link{font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+.brand-link:hover{text-decoration:none;color:var(--accent)}
 .tagline{font-size:12px;color:var(--muted);padding:6px 16px}
 .sidebar-scroll{flex:1;overflow-y:auto;padding:12px}
 /* nav */
@@ -499,20 +501,27 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 .lightbox .lb-btn{width:40px;height:40px;border-radius:9px;border:1px solid rgba(255,255,255,.25);
   background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px}
 /* footer */
-.footer{border-top:1px solid var(--line);padding:18px 0;color:var(--muted);font-size:13px}
+.footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
 /* theme controls */
 .theme-ctl,.lang-ctl,.brand-meta{display:flex;align-items:center;gap:6px}
-.theme-ctl button,.lang-ctl button{width:36px;height:30px;border-radius:8px;border:1px solid var(--line);
-  background:var(--card);color:var(--ink);cursor:pointer;font-size:12px}
+.theme-ctl button,.lang-btn{height:30px;border-radius:8px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);cursor:pointer;font-size:12px;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.theme-ctl button{width:36px}
+/* mobile scrim: sibling of the drawer so it can actually receive clicks */
+.nav-scrim{display:none}
 /* ===== MOBILE (≤ breakpoint) ===== */
 @media (max-width:{bp}px){
   .shell{display:block}
-  .sidebar{position:fixed;inset:0;top:var(--header-h);width:100%;height:calc(100dvh - var(--header-h));
-    z-index:40;transform:translateY(-120%);transition:transform .18s ease;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+  .sidebar{position:fixed;top:var(--header-h);right:0;bottom:0;left:0;width:100%;height:auto;
+    z-index:40;transform:translateY(-120%);transition:transform .2s ease;box-shadow:0 12px 30px rgba(0,0,0,.25)}
   body.nav-open .sidebar{transform:translateY(0)}
-  .sidebar::after{content:'';position:fixed;inset:0;top:var(--header-h);background:rgba(15,23,42,.4);z-index:-1}
-  .topbar{display:block}
-  .topbar-row{position:sticky}
+  .nav-scrim{display:none;position:fixed;top:var(--header-h);right:0;bottom:0;left:0;z-index:35;
+    background:rgba(15,23,42,.45);border:0;padding:0;margin:0;cursor:default}
+  body.nav-open .nav-scrim{display:block}
+  .topbar{display:block;position:sticky;top:0;z-index:50}
+  .topbar-row{position:static}
+  .topbar .lang-btn{height:36px}
   .nav-toggle.is-open span{background:transparent}
   .nav-toggle.is-open span::before{top:0;transform:rotate(45deg)}
   .nav-toggle.is-open span::after{top:0;transform:rotate(-45deg)}
@@ -522,9 +531,11 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   .hero-stats b{font-size:18px}
 }
 /* ---- bilingual site additions ---- */
-.lang-btn{width:auto!important;padding:0 11px;font-weight:700;color:var(--accent)}
-.footer a{color:var(--accent);font-weight:600}
-.footer a:hover{text-decoration:underline}
+.lang-btn{min-width:40px;padding:0 10px;font-weight:700;color:var(--accent);text-decoration:none}
+.lang-btn:hover{border-color:var(--accent);background:rgba(11,95,255,.06);text-decoration:none}
+.footer a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);
+  border-radius:8px;background:var(--card);color:var(--accent);font-weight:600;font-size:13px;text-decoration:none}
+.footer a:hover{border-color:var(--accent);background:rgba(11,95,255,.06);text-decoration:none}
 .mermaid-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .mermaid-figure figcaption::before{content:'⛶ '}
 .lightbox-stage .mermaid-svg,.lightbox-stage pre{max-width:100%;max-height:100%;transform-origin:center}
@@ -633,9 +644,11 @@ NAV_JS = """
   var toggle=document.querySelector('.nav-toggle');
   var body=document.body;
   if(!toggle)return;
-  function close(){body.classList.remove('nav-open');toggle.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');}
-  function open(){body.classList.add('nav-open');toggle.classList.add('is-open');toggle.setAttribute('aria-expanded','true');}
+  var scrim=document.querySelector('.nav-scrim');
+  function close(){body.classList.remove('nav-open');body.style.overflow='';toggle.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');}
+  function open(){body.classList.add('nav-open');body.style.overflow='hidden';toggle.classList.add('is-open');toggle.setAttribute('aria-expanded','true');}
   toggle.addEventListener('click',function(){body.classList.contains('nav-open')?close():open();});
+  if(scrim)scrim.addEventListener('click',close);
   document.querySelectorAll('.nav-link').forEach(function(a){
     a.addEventListener('click',function(){close();});
   });
@@ -825,6 +838,7 @@ def render_page(cfg, page, out_dir, slug, lang):
     </div>
   </div>
 </header>
+<button type="button" class="nav-scrim" aria-label="Close navigation menu" tabindex="-1"></button>
 <div class="shell">
   <aside class="sidebar" id="site-nav">
     <div class="brand"><div class="brand-row"><a href="{home}">{brand}</a>
@@ -946,6 +960,7 @@ def cmd_check(args):
                 "responsive-breakpoint": "max-width:" in text,
                 "mobile-topbar": "topbar" in text,
                 "nav-panel": "nav-toggle" in text,
+                "nav-scrim": "nav-scrim" in text,
                 "theme-switch": "data-theme-toggle" in text,
                 "language-toggle": 'class="lang-btn"' in text,
                 "github-link": "github.com/" in text,
