@@ -87,7 +87,7 @@ export function App() {
   }, [navOpen]);
 
   return (
-    <div className="app">
+    <div className={`app${navOpen ? ' nav-open' : ''}`}>
       <Header navOpen={navOpen} lang={lang} onLang={changeLang} onMenu={() => setNavOpen((v) => !v)} />
       <Sidebar
         route={route}

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Mobile drawer geometry: `height: 100%` overrode the top/bottom stretch under fixed positioning, pushing the drawer's bottom edge off screen by one header height; now `height: auto` for an exact fit, shadow flipped to the right side, and `.app.nav-open .content { overflow: hidden }` actually locks background scrolling (body overflow never locked the real scroller); `.app` prefers `100dvh` where available.
 - `scripts/build-host-plugins.mjs` now builds the `mcp` plugin too, so `examples/plugin-mcp-demo` works by following its README.
 - DeepSeek installation no longer references a nonexistent `--deepseek-profile` flag; the plugin's README and the installer print honest Cordis-bundle integration steps.
 - Mermaid sequence diagrams in `architecture` / `sdk` / `key-flows` (both languages) no longer fall back to source: ` + ` inside message lines is parsed as an activation token.

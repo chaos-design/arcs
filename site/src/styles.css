@@ -58,6 +58,8 @@ button { font: inherit; }
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   height: 100vh;
+  /* 移动端动态视口：地址栏收展时 100vh 会偏大导致底部裁切，dvh 可用时优先 */
+  height: 100dvh;
   min-height: 0;
   overflow: hidden;
 }
@@ -525,12 +527,17 @@ a.card:hover { border-color: var(--blue); text-decoration: none; transform: tran
     top: var(--header-h);
     bottom: 0;
     left: 0;
+    /* 覆盖基础样式的 height:100%：fixed 定位下 height 优先于 top/bottom 拉伸，
+       不重置会让抽屉超出屏幕底部一个 header 高度 */
+    height: auto;
     width: min(86vw, var(--sidebar-w));
     transform: translateX(-102%);
     transition: transform 0.22s ease;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.45);
   }
   .sidebar.open { transform: none; }
+  /* 抽屉打开时锁定背景滚动（真正的滚动容器是 .content，body overflow 锁不住它） */
+  .app.nav-open .content { overflow: hidden; }
   .nav-scrim {
     display: block;
     position: fixed;

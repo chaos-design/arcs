@@ -18,6 +18,7 @@
 
 ### 修复（Fixed）
 
+- 移动端抽屉几何修复：`height: 100%` 在 fixed 定位下压过 top/bottom 拉伸，抽屉底部曾超出屏幕一个 header 高度；改 `height: auto` 精确贴合，阴影改朝右侧，并以 `.app.nav-open .content { overflow: hidden }` 真正锁定背景滚动（body 锁不住实际滚动容器）；`.app` 高度优先用 `100dvh`。
 - `scripts/build-host-plugins.mjs` 现在也构建 `mcp` 插件，按 README 操作 `examples/plugin-mcp-demo` 不再因缺产物启动失败。
 - DeepSeek 安装不再引用不存在的 `--deepseek-profile` flag；插件 README 与安装器改为如实的 Cordis bundle 接入指引。
 - `architecture` / `sdk` / `key-flows`（中英）的 mermaid 时序图不再回退源码：消息行中的 ` + ` 会被词法器误判为激活语法，已改写。
