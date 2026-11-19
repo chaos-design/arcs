@@ -544,10 +544,15 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 /* ---- bilingual site additions ---- */
 .lang-btn{min-width:40px;padding:0 10px;font-weight:700;color:var(--accent);text-decoration:none}
 .lang-btn:hover{border-color:var(--accent);background:rgba(11,95,255,.06);text-decoration:none}
-.footer a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);
-  border-radius:8px;background:var(--card);color:var(--accent);font-weight:600;font-size:13px;text-decoration:none}
-.footer a:hover{border-color:var(--accent);background:rgba(11,95,255,.06);text-decoration:none}
-.footer .lang-btn{height:34px;padding:0 12px;font-size:13px}
+.footer a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);
+  border-radius:8px;background:rgba(148,163,184,.08);color:var(--ink);
+  font-weight:500;font-size:13px;text-decoration:none}
+.footer a:hover{border-color:var(--accent);background:rgba(11,95,255,.1);color:var(--accent);text-decoration:none}
+.footer .gh-icon{width:15px;height:15px;flex:0 0 15px}
+.footer .gh-ext{margin-left:auto;opacity:.65;font-size:12px}
+.footer .lang-btn{height:34px;padding:0 12px;font-size:13px;color:var(--ink);
+  background:rgba(148,163,184,.08);font-weight:500}
+.footer .lang-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(11,95,255,.1)}
 .mermaid-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .mermaid-figure figcaption::before{content:'⛶ '}
 .lightbox-stage .mermaid-svg,.lightbox-stage pre{max-width:100%;max-height:100%;transform-origin:center}
@@ -830,8 +835,18 @@ def render_page(cfg, page, out_dir, slug, lang):
         html.escape(ltext(cfg, other, "name", other)), html.escape(toggle_label))
 
     gh = repo_url(cfg)
-    gh_footer = ('<a href="%s" target="_blank" rel="noreferrer">%s</a>' % (
-        html.escape(gh), html.escape(ltext(cfg, lang, "github", "GitHub ↗")))) if gh else ""
+    gh_footer = ('<a href="%s" target="_blank" rel="noreferrer">'
+                 "<svg class='gh-icon' viewBox='0 0 16 16' fill='currentColor' aria-hidden='true'>"
+                 "<path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 "
+                 "0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13"
+                 "-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66"
+                 ".07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15"
+                 "-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 "
+                 "1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27"
+                 ".82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 "
+                 "2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z'/>"
+                 "</svg><span>%s</span><span class='gh-ext' aria-hidden='true'>↗</span></a>" % (
+        html.escape(gh), html.escape(ltext(cfg, lang, "github", "GitHub")))) if gh else ""
     gh_top = ('<a class="icon-btn" href="%s" target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub">↗</a>' % html.escape(gh)) if gh else ""
 
     home_href = rel_href("index", lang, lang)
