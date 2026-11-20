@@ -560,6 +560,8 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   display:inline-flex;align-items:center;justify-content:center;line-height:1;padding:0}
 /* 字符与适应屏幕图标统一 20px，在 40×40 按钮里协调不顶边；按钮本身大小不变 */
 .lightbox .lb-btn .lb-ico{width:20px;height:20px;flex:0 0 20px}
+/* 缩放 +/− 字符单独加大到 24px（✕ 与适应屏幕图标保持 20px） */
+.lightbox .lb-btn[data-lb-plus],.lightbox .lb-btn[data-lb-minus]{font-size:24px}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
 .footer-actions{display:flex;gap:8px}
