@@ -122,6 +122,17 @@ GITHUB_SVG = (
     "</svg>"
 )
 
+# 每篇文档首行的中英互链（仓库约定），站点已有顶栏/侧栏语言切换，页内这行属冗余。
+# 只在生成站点时剥离，不改动 docs/ 源文件。模式严格：整行 = [语言标签](xx.md) 可选「 · 另一标签」。
+BILINGUAL_SWITCH_RE = re.compile(
+    r"^\s*\[(English|中文版|中文)\]\([^)]+\.md\)(?:\s*·\s*(English|中文版|中文))?\s*\n?"
+)
+
+
+def strip_bilingual_switch(body_md):
+    """删除正文首行的双语互链（若匹配），返回剩余正文。"""
+    return BILINGUAL_SWITCH_RE.sub("", body_md, count=1)
+
 
 def read_file(path):
     if not os.path.isfile(path):
@@ -564,7 +575,6 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   font-weight:500;font-size:13px;text-decoration:none}
 .footer a:hover{border-color:var(--accent);background:rgba(11,95,255,.1);color:var(--accent);text-decoration:none}
 .footer .gh-icon{width:15px;height:15px;flex:0 0 15px}
-.footer .gh-ext{margin-left:auto;opacity:.65;font-size:12px}
 .topbar .gh-top .gh-icon{width:18px;height:18px;flex:0 0 18px}
 .topbar .gh-top:hover .gh-icon{color:var(--accent)}
 .footer .lang-btn{height:34px;padding:0 12px;font-size:13px;color:var(--ink);
@@ -855,8 +865,7 @@ def render_page(cfg, page, out_dir, slug, lang):
     if gh:
         gh_url = html.escape(gh)
         gh_label = html.escape(ltext(cfg, lang, "github", "GitHub"))
-        gh_footer = ('<a href="%s" target="_blank" rel="noreferrer">%s<span>%s</span>'
-                     '<span class="gh-ext" aria-hidden="true">↗</span></a>') % (
+        gh_footer = ('<a href="%s" target="_blank" rel="noreferrer">%s<span>%s</span></a>') % (
             gh_url, GITHUB_SVG, gh_label)
         gh_top = ('<a class="icon-btn gh-top" href="%s" target="_blank" rel="noreferrer" '
                   'aria-label="GitHub" title="GitHub">%s</a>') % (gh_url, GITHUB_SVG)
@@ -980,6 +989,7 @@ def cmd_generate(args):
                 rel = md_path if lang == "zh" else "en/" + md_path
                 raw = read_file(os.path.join(content_dir, rel))
                 meta, body_md = split_front_matter(raw)
+                body_md = strip_bilingual_switch(body_md)  # 站点剥离首行中英互链（源文件不动）
                 if meta.get("title"):
                     p["title" if lang == "zh" else "title_en"] = meta["title"]
                 if meta.get("description"):
