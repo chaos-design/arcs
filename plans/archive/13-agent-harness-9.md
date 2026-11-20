@@ -2,7 +2,7 @@
 title: Agent harness 插件统一架构与 9 平台覆盖
 priority: P1
 created: 2026-11-21 00:53:27
-updated: 2026-11-21 01:30:52
+updated: 2026-11-21 01:34:57
 ---
 
 # Agent harness 插件统一架构与 9 平台覆盖
@@ -32,7 +32,7 @@ updated: 2026-11-21 01:30:52
 - [x] 同步 CLI 清单、安装脚本与 verify:contracts 护栏
 - [x] 同步中文/英文文档与 README 插件清单
 - [x] 全量验证：build / test / lint / verify:contracts / scan
-- [ ] 提交并推送分支，创建 PR
+- [x] 提交并推送分支，创建 PR
 
 ## 完成标准
 
@@ -80,3 +80,6 @@ updated: 2026-11-21 01:30:52
 - 2026-11-21 01:30:52 pnpm build 20/20 成功；node scripts/host-real-check.mjs 探测 11 个插件产物；packages/cli dist/cli.js list 输出 12 个插件
 - 2026-11-21 01:30:52 完成 #19 status: 状态、剩余风险（真实宿主实测）与回滚方式已记录
 - 2026-11-21 01:30:52 状态：实现与验证完成，待提交 PR；剩余风险：ChatGPT/PL Agent/Qwen Code 真实宿主契约待集成方实测；回滚：revert PR 或将插件目录重置到 origin/main
+- 2026-11-21 01:34:57 完成 #14 提交并推送分支，创建 PR
+- 2026-11-21 01:34:57 提交 957a8e6，推送 feat/agent-harness-plugins，创建 PR #5（base main）：https://github.com/chaos-design/arcs/pull/5
+- 2026-11-21 01:34:57 归档：任务与完成标准全部满足
