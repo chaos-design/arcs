@@ -549,10 +549,10 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   width:100%;height:100%;margin:0;overflow:hidden}
 .lightbox-scaler pre{overflow:auto;white-space:pre}
 .lightbox .lb-btn{width:40px;height:40px;border-radius:9px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px;
+  background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:20px;
   display:inline-flex;align-items:center;justify-content:center;line-height:1;padding:0}
-/* 适应屏幕图标统一 18px 描边，与 +/-/✕ 视觉一致；按钮本身保持 40×40 不变 */
-.lightbox .lb-btn .lb-ico{width:18px;height:18px;flex:0 0 18px}
+/* 字符与适应屏幕图标统一 20px，在 40×40 按钮里更醒目；按钮本身大小不变 */
+.lightbox .lb-btn .lb-ico{width:20px;height:20px;flex:0 0 20px}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
 .footer-actions{display:flex;gap:8px}
