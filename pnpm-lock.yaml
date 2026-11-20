@@ -80,6 +80,25 @@ importers:
         specifier: ^3.25.0
         version: 3.25.76
 
+  plugins/chatgpt:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
   plugins/claude-code:
     dependencies:
       '@chaos-design/arcs-core':
@@ -179,6 +198,44 @@ importers:
         version: 22.20.5
 
   plugins/pi:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/pl-agent:
+    dependencies:
+      '@chaos-design/arcs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@chaos-design/arcs-host-kit':
+        specifier: workspace:*
+        version: link:../../packages/host-kit
+      '@chaos-design/arcs-plugin-kit':
+        specifier: workspace:*
+        version: link:../../packages/plugin-kit
+      zod:
+        specifier: ^3.25.0
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+
+  plugins/qwen-code:
     dependencies:
       '@chaos-design/arcs-core':
         specifier: workspace:*

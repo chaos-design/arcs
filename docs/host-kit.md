@@ -4,7 +4,7 @@
 
 ## 包定位
 
-8 家平台插件共用的运行时层：把「平台差异」收敛到一个包里，让 `plugins/*` 只保留宿主特有的 hooks 清单、payload 别名与序列化怪癖。
+11 家平台插件共用的运行时层：把「平台差异」收敛到一个包里，让 `plugins/*` 只保留宿主特有的 hooks 清单、字段别名与决策策略。
 
 - **依赖方向**：`plugins/* → host-kit → plugin-kit → telemetry → core` 单链。
 - **唯一的 packages 层 I/O 包**：审计落盘、会话文件锁、Hook stdin/stdout 桥都收在这里，由 `scripts/scan-deps.mjs` 红线扫描锁定（每项 node 内建按理由逐条登记）。
@@ -20,12 +20,14 @@
 | opencode | A | `tool.execute.before` 中间件可改参、`permission.ask` 可挂起 |
 | zcode / workbuddy / pi / deepseek | B | 可拒绝但无改参通道：L1/L3 降为注入，L4 降为 block |
 | trae | C | 项目级 hooks 只读：always allow + `additionalContext` 采集 |
+| chatgpt | A | Codex 兼容：改参 + deny，`ask` 降为带原因的 deny |
+| pl-agent / qwen-code | B | 通用 / Gemini 兼容 hooks：可注入 + deny，无稳定改参通道 |
 
 矩阵一致性由两层锁定：`conformance.test.ts`（能力矩阵 ↔ 行为一致性）与 `scripts/verify-host-contracts.mjs`（静态断言 + Codex 官方 schema 行为级校验）。
 
 ## Hook 入口桥 `runHookEntry`
 
-Hook 型平台（codex / claude-code / zcode / workbuddy / trae）每个事件 fork 一次 Hook 进程，`runHookEntry` 把这一的一次性往返收敛为固定管线：
+Hook 型平台（codex / claude-code / zcode / workbuddy / trae / chatgpt / pl-agent / qwen-code）每个事件 fork 一次 Hook 进程，`runHookEntry` 把这一的一次性往返收敛为固定管线：
 
 ```
 stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRuntime.run
@@ -36,6 +38,20 @@ stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRunt
 - **Suspend 不在 hook 内同步调 HITL**（hook 有 ~5s 超时），而是按能力翻译为 `ask`（A 级）或 `block`（B 级）；真正的异步 HITL 仅由具备事件订阅能力的平台（opencode/pi）在专用 adapter 内完成。
 - `shouldSteer` 过滤非纠偏事件（避免 prompt 文本误触发引擎）。
 - fail-open 兜底：管线任何异常都会序列化出「放行 + 降级原因」的决策，绝不把异常抛给宿主进程。
+
+## 统一 Hook 原语（13 号计划）
+
+所有 Hook 插件不再各写一份解析与序列化，而是声明式复用原语：
+
+| 原语 | 职责 |
+|---|---|
+| `parseHookPayload(text, env, options)` | stdin JSON → `NativeEvent`；字段别名、事件兜底、字符串实参包裹、宿主自有 payload 钩子；畸形 JSON 不抛异常 |
+| `withHookEvent(eventArg, parse)` | 把 hook 命令的 `--event` 固化为 parse 闭包 |
+| `serializeHookDecision(decision, native, profile)` | `HostDecision` → 宿主 hook JSON；权限映射、deny 理由、改参字段、顶层 `continue` 由 profile 声明 |
+| `hookContextText(decision)` | 注入提示与能力降级说明的统一拼装 |
+| `makeNativeEvent` / `shouldSteerPreToolUse` | 事件订阅型插件共用的构造与决策门槛 |
+
+插件只保留宿主差异：`CHATGPT_PROFILE`（Codex 规则）、`PL_AGENT_PROFILE` / `QWEN_CODE_PROFILE`（Tier B 保守策略）等。契约护栏会实际执行各插件的序列化函数并断言输出合法，确保共享算法不会掩盖宿主差异。
 
 ## 效果翻译 `applyEffect` / `translateEffects`
 

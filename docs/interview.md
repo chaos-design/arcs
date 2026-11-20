@@ -40,7 +40,7 @@
 
 **考点**：包职责演化；DRY 与边界。
 
-**参考答案**：plugin-kit 是「胶水层契约」：`HostAdapter` 四方法契约（subscribe/normalize/materialize/setup）、`PluginRuntime` 编排流水线、三级配置合并、SessionStore。host-kit 是「8 家平台插件的最大公约数」：能力矩阵、`runHookEntry` stdin→决策管线、效果→宿主决策翻译、FileAuditSink、SessionClaim 文件锁。最初这些逻辑散在各插件里，八家重复实现「翻译 + 降级 + 审计」；抽成 host-kit 后插件只剩宿主怪癖（codex 的 ask 不支持、workbuddy 的 modifiedInput 字段名），且能力矩阵有一致性测试锁定（[host-kit.md](./host-kit.md)）。
+**参考答案**：plugin-kit 是「胶水层契约」：`HostAdapter` 四方法契约（subscribe/normalize/materialize/setup）、`PluginRuntime` 编排流水线、三级配置合并、SessionStore。host-kit 是「11 家平台插件的最大公约数」：能力矩阵、`runHookEntry` stdin→决策管线、统一 Hook 原语（解析/序列化/降级拼装只有一份）、效果→宿主决策翻译、FileAuditSink、SessionClaim 文件锁。最初这些逻辑散在各插件里，各家重复实现「翻译 + 降级 + 审计」；抽成 host-kit 后插件只剩宿主怪癖（codex 的 ask 不支持、workbuddy 的 modifiedInput 字段名），且能力矩阵有一致性测试锁定（[host-kit.md](./host-kit.md)）。
 
 ### Q6. 为什么 sdk/* 绕过 plugin-kit 直连 core？这个「直线原则」的代价是什么？
 

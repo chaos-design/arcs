@@ -95,6 +95,30 @@ export const PLUGINS: readonly PluginInfo[] = [
     capability: '项目级 hooks（13）· 仅采集与审计',
     enableHint: 'node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/workspace',
   },
+  {
+    name: 'chatgpt',
+    package: '@chaos-design/arcs-plugin-chatgpt',
+    host: 'ChatGPT / Codex 兼容 Hook',
+    kind: 'host-managed',
+    capability: '原生 Hook（13）· L1 改参 / L2 注入 / L4 deny（ask 降级）',
+    enableHint: 'node scripts/install-host-plugins.mjs --client=chatgpt',
+  },
+  {
+    name: 'pl-agent',
+    package: '@chaos-design/arcs-plugin-pl-agent',
+    host: 'PL Agent',
+    kind: 'host-managed',
+    capability: '通用 Hook（13）· L2 注入 / L4 deny',
+    enableHint: 'node scripts/install-host-plugins.mjs --client=pl-agent',
+  },
+  {
+    name: 'qwen-code',
+    package: '@chaos-design/arcs-plugin-qwen-code',
+    host: 'Qwen Code CLI',
+    kind: 'host-managed',
+    capability: 'Gemini 兼容 Hook（13）· L2 注入 / L4 deny',
+    enableHint: 'node scripts/install-host-plugins.mjs --client=qwen-code',
+  },
 ];
 
 export function findPlugin(name: string | undefined): PluginInfo | undefined {

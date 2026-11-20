@@ -11,6 +11,9 @@ export const PLATFORMS = [
   'pi',
   'deepseek',
   'trae',
+  'chatgpt',
+  'pl-agent',
+  'qwen-code',
 ] as const;
 
 export type PlatformName = (typeof PLATFORMS)[number];

@@ -8,7 +8,7 @@
 |---|---|
 | core stays pure logic | Performs only "detection + decision": it knows no host SDK, does no I/O, touches no processes, and holds no state |
 | The glue layer absorbs coupling | All host-related concerns—event collection, context normalization, decision materialization, session state, and configuration/approval/telemetry bridges—are consolidated into `plugin-kit` |
-| Shared host runtime | All 8 platform plugins share `host-kit` (capability matrix, native event mapping, effect translation, Hook entry bridge, audit persistence, session file locks) |
+| Shared host runtime | All 11 platform plugins share `host-kit` (capability matrix, native event mapping, shared hook primitives, effect translation, Hook entry bridge, audit persistence, session file locks) |
 | Lightweight plugins | `plugins/*` implement only host-specific differences (hooks manifests, payload aliases, serialization quirks) and contain almost no algorithms |
 | SDKs take a direct path | `sdk/*` are in-process, code-level integrations that depend directly on core and bypass the glue layer |
 | Fail open on failure | Any detection/planning exception or budget overrun is passed through and marked degraded—ARCS must never become a source of task interruption |
@@ -28,9 +28,9 @@ flowchart TB
       SV["sdk/vercel<br/>withArcs"]
       SL["sdk/langchain<br/>createArcsNode"]
     end
-    subgraph PL["Host Plugins plugins/ (8 Providers + MCP Proxy)"]
+    subgraph PL["Host Plugins plugins/ (11 Providers + MCP Proxy)"]
       direction LR
-      NATIVE["Hook-based: codex · claude-code<br/>zcode · workbuddy · trae"]
+      NATIVE["Hook-based: codex · claude-code<br/>zcode · workbuddy · trae<br/>chatgpt · pl-agent · qwen-code"]
       EXT["Extension-based: opencode · pi · deepseek"]
       MCPP["plugins/mcp<br/>Transparent Proxy (Resident Service)"]
     end

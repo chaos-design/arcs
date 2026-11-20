@@ -1,7 +1,9 @@
 import {
+  makeNativeEvent,
   nativeToRaw,
   pickRecord,
   pickString,
+  shouldSteerPreToolUse,
   type HostDecision,
   type NativeEvent,
 } from '@chaos-design/arcs-host-kit';
@@ -140,23 +142,21 @@ export function mapHarnessEvent(input: HarnessEvent | null | undefined): NativeE
       eventName = 'Notification';
   }
 
-  return {
+  return makeNativeEvent({
     eventName,
     sessionId,
-    timestamp: typeof event['timestamp'] === 'number' ? (event['timestamp'] as number) : Date.now(),
+    timestamp: typeof event['timestamp'] === 'number' ? (event['timestamp'] as number) : undefined,
     toolUseId: toolUseId || undefined,
     toolName: toolName || undefined,
     toolArgs: toolArgs && Object.keys(toolArgs).length > 0 ? toolArgs : undefined,
     thought: thought || undefined,
     // 保留原生语义，便于审计与未知事件回放
     payload: { ...event, nativeType: type, sourceKind: kindOf(event['source']) },
-  };
+  });
 }
 
 /** 仅对工具调用前置事件纠偏（dangerous command 在此拦截），其余事件 fail-open 放行 */
-export function shouldSteerDeepseek(native: NativeEvent): boolean {
-  return native.eventName === 'PreToolUse';
-}
+export const shouldSteerDeepseek = shouldSteerPreToolUse;
 
 /** 决策 → 规范序列化（审计/宿主可读，保留原生语义） */
 export function serializeDeepseek(decision: HostDecision, native?: NativeEvent): string {

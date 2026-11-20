@@ -14,6 +14,9 @@ const NATIVE = {
   zcode: { manifest: '.zcode-plugin/plugin.json', hooks: 7, env: 'CLAUDE_PLUGIN_ROOT' },
   workbuddy: { manifest: '.codebuddy-plugin/plugin.json', hooks: 25, env: 'CODEBUDDY_PLUGIN_ROOT' },
   trae: { manifest: null, hooks: 13, env: null },
+  chatgpt: { manifest: '.chatgpt-plugin/plugin.json', hooks: 13, env: 'CHATGPT_PLUGIN_ROOT' },
+  'pl-agent': { manifest: '.pl-agent-plugin/plugin.json', hooks: 13, env: 'PL_AGENT_PLUGIN_ROOT' },
+  'qwen-code': { manifest: '.qwen-code-plugin/plugin.json', hooks: 13, env: 'QWEN_CODE_PLUGIN_ROOT' },
 };
 
 const EXTENSIONS = ['opencode', 'pi', 'deepseek'];
@@ -64,15 +67,13 @@ function verifyNative(name, spec) {
 
   const mapping = join(dir, 'src/mapping.ts');
   const source = existsSync(mapping) ? readFileSync(mapping, 'utf8') : '';
-  if (name === 'claude-code' || name === 'codex') {
-    for (const token of ['hookSpecificOutput', 'hookEventName', 'permissionDecision', 'updatedInput']) {
-      check(source.includes(token), `${name}: 输出 schema 含 ${token}`);
-    }
-    check(source.includes('additionalContext'), `${name}: 输出 schema 含 additionalContext`);
-  }
-  if (name === 'codex') {
-    check(/permissionDecision'\]\s*=\s*'deny'/.test(source),
-      'codex: ask 已降级为 deny（不得透传宿主不支持的 ask）');
+  // 统一架构：所有 Hook 插件必须经 host-kit 的 serializeHookDecision，不再各写序列化分支
+  check(source.includes('serializeHookDecision'), `${name}: 使用 host-kit 统一序列化原语`);
+  check(source.includes('shouldSteerPreToolUse') || source.includes('shouldSteer'),
+    `${name}: 使用统一 PreToolUse 决策门槛`);
+  if (name === 'codex' || name === 'chatgpt') {
+    check(source.includes("kind === 'ask'") && source.includes("'deny'"),
+      `${name}: ask 已降级为 deny（不得透传不支持的 ask）`);
   }
 }
 
@@ -95,8 +96,12 @@ function verifyExtension(name) {
 function verifyCapabilities() {
   const source = readFileSync(join(ROOT, 'packages/host-kit/src/capabilities.ts'), 'utf8');
   const redirects = (source.match(/redirectTool:\s*(true|false)/g) ?? []);
-  check(redirects.length === 8 && redirects.every((r) => r.includes('false')),
-    `能力矩阵: 8 个宿主插件均声明 redirectTool=false（${redirects.length} 条）`);
+  check(redirects.length === 11 && redirects.every((r) => r.includes('false')),
+    `能力矩阵: 11 个宿主插件均声明 redirectTool=false（${redirects.length} 条）`);
+  const hookSource = readFileSync(join(ROOT, 'packages/host-kit/src/hook.ts'), 'utf8');
+  for (const token of ['hookSpecificOutput', 'hookEventName', 'permissionDecision', 'updatedInput', 'additionalContext']) {
+    check(hookSource.includes(token), `统一序列化原语含 ${token}`);
+  }
   check(/source:\s*'codex'[\s\S]*?suspend:\s*false/.test(source),
     '能力矩阵: codex suspend=false（ask 不被宿主支持）');
   const conformance = existsSync(join(ROOT, 'packages/host-kit/src/conformance.test.ts'));
@@ -118,6 +123,9 @@ async function verifyBehavior() {
     'zcode': zcodeFile,
     'workbuddy': join(ROOT, 'plugins/workbuddy/dist/mapping.js'),
     'trae': join(ROOT, 'plugins/trae/dist/mapping.js'),
+    'chatgpt': join(ROOT, 'plugins/chatgpt/dist/mapping.js'),
+    'pl-agent': join(ROOT, 'plugins/pl-agent/dist/mapping.js'),
+    'qwen-code': join(ROOT, 'plugins/qwen-code/dist/mapping.js'),
   };
   if (Object.values(hookFiles).some((f) => !existsSync(f))) {
     console.warn('WARN: 插件 dist 不存在，跳过行为级校验（先运行 pnpm build）');
@@ -128,6 +136,9 @@ async function verifyBehavior() {
   const zcode = await import(pathToFileURL(zcodeFile).href);
   const workbuddy = await import(pathToFileURL(hookFiles['workbuddy']).href);
   const trae = await import(pathToFileURL(hookFiles['trae']).href);
+  const chatgpt = await import(pathToFileURL(hookFiles['chatgpt']).href);
+  const plAgent = await import(pathToFileURL(hookFiles['pl-agent']).href);
+  const qwenCode = await import(pathToFileURL(hookFiles['qwen-code']).href);
   const native = { eventName: 'PreToolUse', sessionId: 'contract' };
   const decisions = [
     ['PassThrough', { kind: 'allow', injected: [], degraded: [], level: null }],
@@ -141,11 +152,18 @@ async function verifyBehavior() {
     const errors = validateCodexPreToolUse(output, { toolName: 'Bash' });
     check(errors.length === 0, `codex 行为级: ${name} 输出合法${errors.length ? `（${errors.join('; ')}）` : ''}`);
   }
+  for (const [name, decision] of decisions) {
+    const output = JSON.parse(chatgpt.serializeChatgpt(decision, native));
+    const errors = validateCodexPreToolUse(output, { toolName: 'Bash' });
+    check(errors.length === 0, `chatgpt 行为级: ${name} 输出合法${errors.length ? `（${errors.join('; ')}）` : ''}`);
+  }
   const compatible = [
     ['claude-code', claude.serializeClaude, {}],
     ['zcode', zcode.serializeZcode, {}],
     ['workbuddy', workbuddy.serializeWorkbuddy, { modifiedInputKey: 'modifiedInput' }],
     ['trae', trae.serializeTrae, {}],
+    ['pl-agent', plAgent.serializePlAgent, {}],
+    ['qwen-code', qwenCode.serializeQwenCode, {}],
   ];
   for (const [platform, serialize, options] of compatible) {
     for (const [name, decision] of decisions) {
@@ -163,4 +181,4 @@ if (violations.length > 0) {
   process.exit(1);
 }
 console.log(`宿主契约校验通过：${checks.length} 项，0 违规`);
-console.log('  覆盖 8 个平台（5 原生 hooks + 3 扩展/bundle）、能力矩阵一致性与 Codex/Claude 行为级输出规则');
+console.log('  覆盖 11 个平台（8 原生 hooks + 3 扩展/bundle）、能力矩阵一致性与 Codex/Claude 行为级输出规则');

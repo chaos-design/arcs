@@ -29,6 +29,18 @@ const MARKETPLACE = {
     `# patch 清单：plugins/deepseek/cordis.patch.yml（由 package.json 的 dsh.bundle.patch 声明，供宿主 bundle 工具消费）`,
     '# 接入步骤见 plugins/deepseek/README.md',
   ],
+  chatgpt: [
+    'pnpm build:native-plugins',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/chatgpt')}；npm 包名 @chaos-design/arcs-plugin-chatgpt`,
+  ],
+  'pl-agent': [
+    'pnpm build:native-plugins',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/pl-agent')}；npm 包名 @chaos-design/arcs-plugin-pl-agent`,
+  ],
+  'qwen-code': [
+    'pnpm build:native-plugins',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/qwen-code')}；npm 包名 @chaos-design/arcs-plugin-qwen-code`,
+  ],
 };
 
 const COPY_PLUGINS = {

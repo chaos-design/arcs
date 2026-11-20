@@ -28,6 +28,17 @@ export {
   type NativeEvent,
 } from './mapping.js';
 export {
+  makeNativeEvent,
+  parseHookPayload,
+  pickToolArgs,
+  withHookEvent,
+  shouldSteerPreToolUse,
+  hookContextText,
+  serializeHookDecision,
+  type HookParseOptions,
+  type HookSerializeOptions,
+} from './hook.js';
+export {
   HookEntryAdapter,
   goalFromArgs,
   readInput,

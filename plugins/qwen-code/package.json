@@ -1,0 +1,41 @@
+{
+  "name": "@chaos-design/arcs-plugin-qwen-code",
+  "version": "0.1.0",
+  "description": "ARCS Qwen Code CLI 插件：BeforeTool 前置纠偏（L2/L4）",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "arcs-plugin-qwen-code": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "hooks",
+    ".qwen-code-plugin",
+    "README.md",
+    "README.en.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@chaos-design/arcs-core": "workspace:*",
+    "@chaos-design/arcs-host-kit": "workspace:*",
+    "@chaos-design/arcs-plugin-kit": "workspace:*",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

@@ -15,7 +15,7 @@ arcs/
 ├── sdk/                       # 代码级接入（sdk/xxx 形式，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   └── langchain/             # @chaos-design/arcs-sdk-langchain
-├── plugins/                   # 宿主插件（8 个 Agent 平台 + MCP 网关）
+├── plugins/                   # 宿主插件（11 个 Agent 平台 + MCP 网关）
 │   ├── claude-code/           # @chaos-design/arcs-plugin-claude-code
 │   ├── codex/                 # @chaos-design/arcs-plugin-codex
 │   ├── opencode/              # @chaos-design/arcs-plugin-opencode
@@ -24,6 +24,9 @@ arcs/
 │   ├── workbuddy/             # @chaos-design/arcs-plugin-workbuddy
 │   ├── zcode/                 # @chaos-design/arcs-plugin-zcode
 │   ├── trae/                  # @chaos-design/arcs-plugin-trae
+│   ├── chatgpt/               # @chaos-design/arcs-plugin-chatgpt
+│   ├── pl-agent/              # @chaos-design/arcs-plugin-pl-agent
+│   ├── qwen-code/             # @chaos-design/arcs-plugin-qwen-code
 │   └── mcp/                   # @chaos-design/arcs-plugin-mcp（常驻透明代理网关，唯一可改工具名）
 ├── examples/
 │   ├── sdk-vercel-demo/       # Vercel AI SDK 集成示例（mock 模型，L1/L2）

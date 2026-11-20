@@ -114,6 +114,36 @@ export const HOST_CAPABILITIES: Readonly<Record<PlatformName, HostCapabilities>>
     block: false,
     note: '项目级只读 hooks，仅采集与审计；注入仅在宿主允许 hook 输出追加上下文时生效',
   },
+  chatgpt: {
+    source: 'chatgpt',
+    tier: 'A',
+    patchArgs: true,
+    redirectTool: false,
+    injectMessage: true,
+    suspend: false,
+    block: true,
+    note: 'ChatGPT / Codex 兼容 PreToolUse 契约：updatedInput + deny，ask 降为 deny；真实宿主版本需集成方验证',
+  },
+  'pl-agent': {
+    source: 'pl-agent',
+    tier: 'B',
+    patchArgs: false,
+    redirectTool: false,
+    injectMessage: true,
+    suspend: false,
+    block: true,
+    note: 'PL Agent 通用 Hook 契约：仅注入与 deny，无改参与审批通道；真实宿主版本需集成方验证',
+  },
+  'qwen-code': {
+    source: 'qwen-code',
+    tier: 'B',
+    patchArgs: false,
+    redirectTool: false,
+    injectMessage: true,
+    suspend: false,
+    block: true,
+    note: 'Qwen Code CLI 的 Gemini 兼容 BeforeTool hook：可阻断与注入，改参契约待核实；按 Tier B 保守降级',
+  },
 };
 
 export function capabilitiesFor(source: PlatformName): HostCapabilities {

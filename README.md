@@ -71,7 +71,7 @@ flowchart TB
       SV["sdk/vercel"]
       SL["sdk/langchain"]
     end
-    subgraph PL["Host Plugins plugins/ (8 platforms + MCP gateway)"]
+    subgraph PL["Host Plugins plugins/ (11 platforms + MCP gateway)"]
       CC["claude-code"]
       CODEX["codex"]
       OC["opencode"]
@@ -80,6 +80,9 @@ flowchart TB
       WB["workbuddy"]
       ZC["zcode"]
       TR["trae"]
+      CG["chatgpt"]
+      PA["pl-agent"]
+      QC["qwen-code"]
       MCP["mcp transparent proxy"]
     end
   end
@@ -121,7 +124,7 @@ flowchart TB
   TELE --> CORE
 ```
 
-The dependency graph is a one-way chain: `plugins/* → host-kit → plugin-kit → telemetry → core`; core never perceives the upper layers in reverse. The 8 hook/extension plugins go through `host-kit`'s capability matrix and entry bridge, while the mcp gateway is orchestrated by `plugin-kit` and reuses `host-kit`'s audit persistence. The `AuditEvent` and `TelemetrySink` contracts are defined in `packages/telemetry`; `sdk/*` depends directly on core, bypassing the glue layer. Correction results are ultimately returned to the host to continue execution — this is the technical foundation that makes "uninterrupted tasks" possible.
+The dependency graph is a one-way chain: `plugins/* → host-kit → plugin-kit → telemetry → core`; core never perceives the upper layers in reverse. The 11 hook/extension plugins go through `host-kit`'s capability matrix, entry bridge and shared hook primitives, while the mcp gateway is orchestrated by `plugin-kit` and reuses `host-kit`'s audit persistence. The `AuditEvent` and `TelemetrySink` contracts are defined in `packages/telemetry`; `sdk/*` depends directly on core, bypassing the glue layer. Correction results are ultimately returned to the host to continue execution — this is the technical foundation that makes "uninterrupted tasks" possible.
 
 > For the full architecture and interaction sequence, see [docs/architecture.md](./docs/en/architecture.md).
 
@@ -142,7 +145,7 @@ arcs/
 ├── sdk/                       # Code-level access (sdk/xxx, in-process)
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   └── langchain/             # @chaos-design/arcs-sdk-langchain
-├── plugins/                   # Host plugins (8 agent platforms + MCP gateway)
+├── plugins/                   # Host plugins (11 agent platforms + MCP gateway)
 │   ├── claude-code/           # Native hooks (17) · L1/L2/L4 ask
 │   ├── codex/                 # Native hooks (12) · L1/L2/L4 deny
 │   ├── opencode/              # Global plugin + tool middleware · L1/L2/L4 suspend
@@ -151,6 +154,9 @@ arcs/
 │   ├── pi/                    # Global extension · L2/L4 block
 │   ├── deepseek/              # Cordis bundle · L2/L4 event broadcast
 │   ├── trae/                  # Project-level hooks · collection and audit only
+│   ├── chatgpt/               # Codex-compatible hooks (13) · L1/L2/L4 deny
+│   ├── pl-agent/              # Generic hooks (13) · L2/L4 block
+│   ├── qwen-code/             # Gemini-compatible hooks (13) · L2/L4 block
 │   └── mcp/                   # Transparent proxy gateway · L1–L4 (the only one that can rewrite tool names)
 ├── examples/
 │   ├── sdk-vercel-demo/       # Mock model demo: L1 arg patching / L2 circuit breaking
@@ -245,7 +251,7 @@ flowchart LR
 | **P0** | Core foundation | Type checking passes; algorithm unit-test coverage; fail-open unit tests pass; dependency scan confirms zero host dependencies |
 | **P1** | plugin-kit runtime | ReplayHarness replay simulation passes; mock adapter runs the full capture→sense→plan→apply chain in unit tests |
 | **P2** | First plugin (MCP) | Real MCP Server attached; L1/L2 correction is observable |
-| **P3** | Plugins for 8 agent platforms | ✅ 8 plugins + `host-kit` implemented; mock-host end-to-end fixtures pass; capability matrix and degradation behavior locked by conformance tests (real-host integration testing is pending integrators, see [plugins.md](./docs/en/plugins.md)) |
+| **P3** | Plugins for 11 agent platforms | ✅ 11 plugins + `host-kit` implemented; mock-host end-to-end fixtures pass; capability matrix and degradation behavior locked by conformance tests (real-host integration testing is pending integrators, see [plugins.md](./docs/en/plugins.md)) |
 | **P4** | SDK adapters | ✅ `sdk/vercel` / `sdk/langchain` complete; runnable demos provided in examples/ |
 | **P5** | Documentation and telemetry | ✅ README and docs in sync; `pnpm dashboard` generates drift-curve dashboards (terminal + HTML) |
 
@@ -275,7 +281,7 @@ npx @chaos-design/arcs-cli start mcp --dry-run -- --goal "..." --target "..."
 npx @chaos-design/arcs-cli start claude-code
 ```
 
-`mcp` is the only plugin with a standalone persistent service; the other 8 host plugins are hooks / global extensions invoked from within the host. You can also install globally and use the short command `arcs` (`pnpm add -g @chaos-design/arcs-cli`).
+`mcp` is the only plugin with a standalone persistent service; the other 11 host plugins are hooks / global extensions invoked from within the host. You can also install globally and use the short command `arcs` (`pnpm add -g @chaos-design/arcs-cli`).
 
 ### 2. Code-Level SDK Integration (for Custom Agent Applications)
 
@@ -378,7 +384,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 
 ---
 
-### 6. Install Host Plugins for Each Platform (8 Agents)
+### 6. Install Host Plugins for Each Platform (11 Agents)
 
 Platform plugins come as native manifests / hooks.json or global extensions, all reusing `host-kit`'s capability matrix and fail-open entry bridge:
 

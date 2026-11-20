@@ -4,7 +4,7 @@
 
 ## Package Role
 
-The runtime layer shared by eight platform plugins: it consolidates "platform differences" into a single package, leaving `plugins/*` with only host-specific hook lists, payload aliases, and serialization quirks.
+The runtime layer shared by eleven platform plugins: it consolidates "platform differences" into a single package, leaving `plugins/*` with only host-specific hook lists, field aliases, and decision profiles.
 
 - **Dependency direction**: a single chain `plugins/* → host-kit → plugin-kit → telemetry → core`.
 - **The only I/O package in the packages layer**: audit persistence, session file locks, and the Hook stdin/stdout bridge all live here, locked down by the red-line scan in `scripts/scan-deps.mjs` (each Node built-in is registered individually with a justification).
@@ -20,12 +20,14 @@ Each host has one `HostCapabilities` record: a `tier` (A/B/C) plus five capabili
 | opencode | A | `tool.execute.before` middleware can modify arguments; `permission.ask` can suspend |
 | zcode / workbuddy / pi / deepseek | B | Can deny but has no argument-modification channel: L1/L3 downgrade to injection, L4 downgrades to block |
 | trae | C | Project-level hooks are read-only: always allow + `additionalContext` collection |
+| chatgpt | A | Codex-compatible: arg patching + deny; `ask` downgraded to a reasoned deny |
+| pl-agent / qwen-code | B | Generic / Gemini-compatible hooks: injection + deny, no stable arg-patching channel |
 
 Matrix consistency is enforced at two levels: `conformance.test.ts` (capability matrix ↔ behavioral consistency) and `scripts/verify-host-contracts.mjs` (static assertions + behavior-level validation against Codex's official schema).
 
 ## Hook Entry Bridge `runHookEntry`
 
-Hook-based platforms (codex / claude-code / zcode / workbuddy / trae) fork a Hook process for each event; `runHookEntry` collapses this one-shot round trip into a fixed pipeline:
+Hook-based platforms (codex / claude-code / zcode / workbuddy / trae / chatgpt / pl-agent / qwen-code) fork a Hook process for each event; `runHookEntry` collapses this one-shot round trip into a fixed pipeline:
 
 ```
 stdin text → parse(text, env) → NativeEvent → nativeToRaw → PluginRuntime.run
@@ -36,6 +38,20 @@ stdin text → parse(text, env) → NativeEvent → nativeToRaw → PluginRuntim
 - **Suspend does not call HITL synchronously inside the hook** (hooks have a ~5s timeout); instead it is translated by capability into `ask` (tier A) or `block` (tier B); genuine asynchronous HITL is performed only by platforms with event-subscription capabilities (opencode/pi) inside dedicated adapters.
 - `shouldSteer` filters out non-steering events (avoiding false triggers of the engine from prompt text).
 - fail-open fallback: any exception in the pipeline is serialized into an "allow + degradation reason" decision, and exceptions are never thrown to the host process.
+
+## Shared Hook Primitives (plan 13)
+
+Hook plugins no longer duplicate parsing and serialization. They declare host differences and reuse primitives:
+
+| Primitive | Responsibility |
+|---|---|
+| `parseHookPayload(text, env, options)` | stdin JSON → `NativeEvent`; field aliases, event fallback, string-arg wrapping, host-specific payload hook; malformed JSON never throws |
+| `withHookEvent(eventArg, parse)` | Binds the hook command's `--event` into a parse closure |
+| `serializeHookDecision(decision, native, profile)` | `HostDecision` → host hook JSON; permission mapping, deny reason, write-back field and top-level `continue` are declared by the profile |
+| `hookContextText(decision)` | Single assembly rule for injected text and capability-degradation notes |
+| `makeNativeEvent` / `shouldSteerPreToolUse` | Shared construction and decision gate for subscription-based plugins |
+
+Plugins retain only profiles such as `CHATGPT_PROFILE` (Codex rules), `PL_AGENT_PROFILE` / `QWEN_CODE_PROFILE` (conservative tier B). The contract guardrail actually executes each plugin's serializer and asserts the output, so a shared algorithm cannot hide host differences.
 
 ## Effect Translation `applyEffect` / `translateEffects`
 

@@ -13,9 +13,12 @@ function deps(overrides: Partial<RunDeps> = {}) {
 }
 
 describe('插件清单', () => {
-  it('覆盖全部 9 个插件，mcp 为唯一 service 型', () => {
-    expect(PLUGINS).toHaveLength(9);
+  it('覆盖全部 12 个插件，mcp 为唯一 service 型', () => {
+    expect(PLUGINS).toHaveLength(12);
     expect(PLUGINS.filter((p) => p.kind === 'service').map((p) => p.name)).toEqual(['mcp']);
+    expect(PLUGINS.map((p) => p.name)).toContain('chatgpt');
+    expect(PLUGINS.map((p) => p.name)).toContain('pl-agent');
+    expect(PLUGINS.map((p) => p.name)).toContain('qwen-code');
   });
 
   it('findPlugin 按短名命中，未知名返回 undefined', () => {

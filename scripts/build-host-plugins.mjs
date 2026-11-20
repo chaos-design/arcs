@@ -15,6 +15,9 @@ const FILTERS = [
   '@chaos-design/arcs-plugin-pi',
   '@chaos-design/arcs-plugin-deepseek',
   '@chaos-design/arcs-plugin-trae',
+  '@chaos-design/arcs-plugin-chatgpt',
+  '@chaos-design/arcs-plugin-pl-agent',
+  '@chaos-design/arcs-plugin-qwen-code',
   '@chaos-design/arcs-plugin-mcp',
 ];
 
