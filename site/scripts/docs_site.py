@@ -122,6 +122,15 @@ GITHUB_SVG = (
     "</svg>"
 )
 
+# lightbox「适应屏幕」图标：四角放大框。用 stroke 描边的 SVG 代替 ⛶ 字符
+# （⛶ 字形在 40px 按钮里渲染偏小且基线不齐，与 +/-/✕ 不一致），尺寸由 CSS 统一
+FIT_ICON = (
+    "<svg class='lb-ico' viewBox='0 0 20 20' fill='none' stroke='currentColor' "
+    "stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>"
+    "<path d='M7 3H4a1 1 0 0 0-1 1v3'/><path d='M13 3h3a1 1 0 0 1 1 1v3'/>"
+    "<path d='M17 13v3a1 1 0 0 1-1 1h-3'/><path d='M7 17H4a1 1 0 0 1-1-1v-3'/></svg>"
+)
+
 # 每篇文档首行的中英互链（仓库约定），站点已有顶栏/侧栏语言切换，页内这行属冗余。
 # 只在生成站点时剥离，不改动 docs/ 源文件。模式严格：整行 = [语言标签](xx.md) 可选「 · 另一标签」。
 BILINGUAL_SWITCH_RE = re.compile(
@@ -540,7 +549,10 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
   width:100%;height:100%;margin:0;overflow:hidden}
 .lightbox-scaler pre{overflow:auto;white-space:pre}
 .lightbox .lb-btn{width:40px;height:40px;border-radius:9px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px}
+  background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1;padding:0}
+/* 适应屏幕图标统一 18px 描边，与 +/-/✕ 视觉一致；按钮本身保持 40×40 不变 */
+.lightbox .lb-btn .lb-ico{width:18px;height:18px;flex:0 0 18px}
 /* footer */
 .footer{border-top:1px solid var(--line);padding:18px 16px;color:var(--muted);font-size:13px}
 .footer-actions{display:flex;gap:8px}
@@ -787,10 +799,10 @@ def lightbox_html(page):
         return (
             "<div class='lightbox' role='dialog' aria-modal='true' aria-label='Diagram enlarged'>"
             "<div class='lightbox-head'><div class='lb-title'>Diagram</div>"
-            "<button class='lb-btn' data-lb-fit title='Fit'>⛶</button>"
-            "<button class='lb-btn' data-lb-plus title='Zoom in'>+</button>"
-            "<button class='lb-btn' data-lb-minus title='Zoom out'>−</button>"
-            "<button class='lb-btn' data-lb-close aria-label='Close'>✕</button></div>"
+            + ("<button class='lb-btn' data-lb-fit title='Fit' aria-label='Fit'>" + FIT_ICON + "</button>")
+            + "<button class='lb-btn' data-lb-plus title='Zoom in' aria-label='Zoom in'>+</button>"
+            + "<button class='lb-btn' data-lb-minus title='Zoom out' aria-label='Zoom out'>−</button>"
+            + "<button class='lb-btn' data-lb-close aria-label='Close'>✕</button></div>"
             "<div class='lightbox-stage'></div></div>"
         )
     return ""
