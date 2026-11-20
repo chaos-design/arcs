@@ -15,6 +15,7 @@ const FILTERS = [
   '@chaos-design/arcs-plugin-pi',
   '@chaos-design/arcs-plugin-deepseek',
   '@chaos-design/arcs-plugin-trae',
+  '@chaos-design/arcs-plugin-mcp',
 ];
 
 const args = ['--filter', FILTERS[0]];

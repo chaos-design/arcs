@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-opencode
 
 ARCS OpenCode 全局插件：通过全局事件订阅采集生命周期，并在 `tool.execute.before` 前置中间件中完成 L1–L4 纠偏。属于 Tier A（可改参 + 可挂起 + 可阻断）。构建产物在 `dist/`，`main` 指向 `dist/index.js`，安装脚本会把它复制到全局插件目录。

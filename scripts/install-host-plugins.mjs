@@ -8,26 +8,26 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
+// 各平台按「本地插件目录」方式加载（与各插件 README、docs/plugins.md 的安装说明一致）；
+// 不再引用不存在的仓库根 marketplace 清单（历史 astro-* 命名已随改名废弃）。
 const MARKETPLACE = {
   'claude-code': [
-    `claude plugin marketplace add ${ROOT}`,
-    'claude plugin install arcs-claude-code@astro-local --scope user',
+    `claude --plugin-dir ${join(ROOT, 'plugins/claude-code')}`,
   ],
   codex: [
-    `codex plugin marketplace add ${ROOT}`,
-    'codex plugin add arcs-codex@astro-local',
+    `codex --plugin-dir ${join(ROOT, 'plugins/codex')}`,
   ],
   workbuddy: [
-    `codebuddy plugin marketplace add ${ROOT}`,
-    'codebuddy plugin install arcs-workbuddy@astro-local --scope user',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/workbuddy')}（含 .codebuddy-plugin/plugin.json 与 hooks/hooks.json），命令见 plugins/workbuddy/README.md`,
   ],
   zcode: [
-    `codex plugin marketplace add ${join(ROOT, 'plugins/zcode')}`,
-    'codex plugin add arcs-zcode@astro-zcode-local',
+    `# 通过本地 marketplace（plugins/zcode/marketplace.json，名称 arcs-zcode-marketplace）或插件目录加载 ${join(ROOT, 'plugins/zcode')}，命令见 plugins/zcode/README.md`,
   ],
   deepseek: [
-    `pnpm build:native-plugins`,
-    'pnpm install-plugins -- --clients=deepseek --deepseek-profile=web',
+    'pnpm build:native-plugins',
+    `# Cordis bundle 宿主：把 plugins/deepseek 构建产物作为 bundle 接入 DeepSeek Harness`,
+    `# patch 清单：plugins/deepseek/cordis.patch.yml（由 package.json 的 dsh.bundle.patch 声明，供宿主 bundle 工具消费）`,
+    '# 接入步骤见 plugins/deepseek/README.md',
   ],
 };
 
@@ -42,8 +42,15 @@ function parseArgs(argv) {
     const arg = argv[i] ?? '';
     if (arg.startsWith('--client=')) out.client = arg.slice('--client='.length);
     else if (arg === '--client' && argv[i + 1]) out.client = argv[++i];
+    else if (arg.startsWith('--clients=')) out.clients = arg.slice('--clients='.length);
+    else if (arg === '--clients' && argv[i + 1]) out.clients = argv[++i];
     else if (arg.startsWith('--target=')) out.target = arg.slice('--target='.length);
     else if (arg === '--target' && argv[i + 1]) out.target = argv[++i];
+  }
+  // --clients 支持逗号分隔多平台（与 --client 单数形式等价，取并集）
+  if (out.clients) {
+    const list = out.clients.split(',').map((s) => s.trim()).filter(Boolean);
+    out.client = out.client ? `${out.client},${list.join(',')}` : list.join(',');
   }
   return out;
 }
@@ -87,7 +94,18 @@ function copyPlugin(name, destination) {
   const source = join(ROOT, 'plugins', name);
   if (!existsSync(source)) throw new Error(`插件目录不存在：${source}`);
   mkdirSync(destination, { recursive: true });
-  cpSync(source, destination, { recursive: true, force: true });
+  // 只复制宿主加载所需的产物：排除构建副产物与包管理器符号链接
+  // （node_modules 内是 pnpm 相对符号链接，复制到全局目录后会悬空）
+  const EXCLUDED = new Set(['node_modules', 'dist', '.turbo', '.DS_Store']);
+  cpSync(source, destination, {
+    recursive: true,
+    force: true,
+    filter: (src) => {
+      const rel = src.slice(source.length + 1);
+      if (!rel) return true;
+      return !rel.split('/').some((part) => EXCLUDED.has(part));
+    },
+  });
   console.log(`[${name}] 已复制到 ${destination}`);
 }
 
@@ -98,7 +116,10 @@ function printMarketplace(name) {
 
 export function main(argv = process.argv.slice(2)) {
   const { client = 'all', target } = parseArgs(argv);
-  const names = client === 'all' ? Object.keys({ ...MARKETPLACE, ...COPY_PLUGINS, trae: 1 }) : [client];
+  const names =
+    client === 'all'
+      ? Object.keys({ ...MARKETPLACE, ...COPY_PLUGINS, trae: 1 })
+      : client.split(',').map((s) => s.trim()).filter(Boolean);
   for (const name of names) {
     if (name === 'trae') installTrae(target);
     else if (COPY_PLUGINS[name]) copyPlugin(name, COPY_PLUGINS[name]);

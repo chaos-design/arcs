@@ -1,3 +1,5 @@
+[English](./README.md) · 中文
+
 <div align="center">
 
 ```text
@@ -69,11 +71,23 @@ flowchart TB
       SV["sdk/vercel"]
       SL["sdk/langchain"]
     end
-    subgraph PL["宿主插件 plugins/"]
-      CODEX["plugins/codex"]
-      DS["plugins/deepseek"]
-      MCP["plugins/mcp"]
+    subgraph PL["宿主插件 plugins/（8 平台 + MCP 网关）"]
+      CC["claude-code"]
+      CODEX["codex"]
+      OC["opencode"]
+      PI["pi"]
+      DS["deepseek"]
+      WB["workbuddy"]
+      ZC["zcode"]
+      TR["trae"]
+      MCP["mcp 透明代理"]
     end
+  end
+  subgraph HK["宿主插件共用运行时 packages/host-kit"]
+    CAP["能力矩阵 HOST_CAPABILITIES"]
+    HOOK["HookEntryAdapter / runHookEntry"]
+    DEC["效果 → 决策翻译"]
+    AUDIT["FileAuditSink 审计落盘"]
   end
   subgraph KIT["插件胶水层 packages/plugin-kit"]
     HA["HostAdapter 契约"]
@@ -92,14 +106,22 @@ flowchart TB
 
   SV --> CORE
   SL --> CORE
-  CODEX --> KIT
-  DS --> KIT
+  CC --> HK
+  CODEX --> HK
+  OC --> HK
+  PI --> HK
+  DS --> HK
+  WB --> HK
+  ZC --> HK
+  TR --> HK
   MCP --> KIT
+  MCP -.审计落盘.-> HK
+  HK --> KIT
   KIT --> TELE
   TELE --> CORE
 ```
 
-依赖关系为单向链：`plugins/* → plugin-kit → telemetry → core`，core 绝不反向感知上层；`AuditEvent` 与 `TelemetrySink` 契约定义在 `packages/telemetry`；`sdk/*` 直接依赖 core，绕过胶水层。纠偏结果最终返回宿主继续执行——这是「任务不中断」得以成立的技术基础。
+依赖关系为单向链：`plugins/* → host-kit → plugin-kit → telemetry → core`，core 绝不反向感知上层；8 个 Hook/扩展型插件统一经 `host-kit` 的能力矩阵与入口桥，mcp 网关经 `plugin-kit` 编排并复用 `host-kit` 的审计落盘。`AuditEvent` 与 `TelemetrySink` 契约定义在 `packages/telemetry`；`sdk/*` 直接依赖 core，绕过胶水层。纠偏结果最终返回宿主继续执行——这是「任务不中断」得以成立的技术基础。
 
 > 完整架构与交互时序见 [docs/architecture.md](./docs/architecture.md)。
 
@@ -119,8 +141,7 @@ arcs/
 │   └── telemetry/             # 轨迹偏移曲线与纠偏审计数据模型/接收端
 ├── sdk/                       # 代码级接入（sdk/xxx，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
-│   ├── langchain/             # @chaos-design/arcs-sdk-langchain
-│   └── README.md
+│   └── langchain/             # @chaos-design/arcs-sdk-langchain
 ├── plugins/                   # 宿主插件（8 家 Agent 平台 + MCP 网关）
 │   ├── claude-code/           # 原生 Hook（17）· L1/L2/L4 ask
 │   ├── codex/                 # 原生 Hook（12）· L1/L2/L4 deny
@@ -134,7 +155,7 @@ arcs/
 ├── examples/
 │   ├── sdk-vercel-demo/       # mock 模型演示 L1 补参 / L2 熔断
 │   └── plugin-mcp-demo/       # 三进程演示透传 / L2 熔断 / L4 阻断 / 审计落盘
-├── site/                      # 文档站点（Vite + React，构建时内嵌 docs/*.md；pnpm site:dev / site:build）
+├── site/                      # 文档站点（配置驱动静态生成器，中英双语页面；pnpm site:dev / site:build）
 ├── docs/                      # 架构与设计文档（见文末索引）
 ├── plans/                     # plan-flow 计划
 ├── LICENSE                    # Apache 2.0
@@ -292,7 +313,7 @@ const { text } = await generateText({
 
 ```bash
 corepack pnpm site:dev      # http://127.0.0.1:5175 本地浏览全部文档
-corepack pnpm site:build    # 产出 site/dist 静态站点（构建时内嵌 docs/*.md，零外部资源）
+corepack pnpm site:build    # 生成 site/dist：每篇文档的中英各一个静态 HTML（Mermaid 运行时为本地资源，无 CDN）
 ```
 
 ### 4. 偏移曲线面板（P5 · 观测纠偏轨迹）
@@ -425,6 +446,8 @@ pnpm build
 # 运行单元测试与纠偏模拟仿真
 pnpm test
 ```
+
+参与贡献前请先阅读 [贡献指南（CONTRIBUTING_zh.md）](./CONTRIBUTING_zh.md) 与 [行为准则（CODE_OF_CONDUCT_zh.md）](./CODE_OF_CONDUCT_zh.md)；发现安全漏洞请勿公开提交 issue，请按 [安全策略（SECURITY_zh.md）](./SECURITY_zh.md) 私密报告。版本变更记录见 [CHANGELOG_zh.md](./CHANGELOG_zh.md)。全部文档均提供中英文对照，英文入口见 [README.md](./README.md) 与 [docs/en/](./docs/en/README.md)。
 
 ---
 

@@ -1,3 +1,5 @@
+[English](./en/key-flows.md) · 中文
+
 # 关键流程
 
 ## 纠偏闭环主流程
@@ -73,10 +75,10 @@ sequenceDiagram
     A->>H: 放行原动作，从挂起点继续
   else rejected 拒绝
     HL-->>A: { approved: false, timeout: false }
-    A->>H: 阻断原动作 + InjectMessage 注入拒绝原因与改道提示
+    A->>H: 阻断原动作，InjectMessage 注入拒绝原因与改道提示
   else timeout 超时（默认 120s）
     HL-->>A: { approved: false, timeout: true }
-    A->>H: 同拒绝处理 + 告警审计事件
+    A->>H: 同拒绝处理，并告警审计事件
   end
   Note over H: 任务继续朝既定目标推进，从未被终止
 ```

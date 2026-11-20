@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-pi
 
 ARCS Pi 全局扩展：通过 `pi.on(...)` 订阅全局事件，在工具调用前置环节完成 L1–L3 纠偏与注入；L4（危险命令）因宿主无挂起通道降级为 `block`。属于 Tier B。构建产物在 `dist/`，`main` 指向 `dist/index.js`，安装脚本会把它复制到全局扩展目录。

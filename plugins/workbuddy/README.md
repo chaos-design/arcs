@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-workbuddy
 
 ARCS（Agent Real-time Course Steering）的 WorkBuddy 宿主插件。以 WorkBuddy 原生插件形态接入，在工具执行前对 Agent 做实时纠偏，任务全程不中断（fail-open）。

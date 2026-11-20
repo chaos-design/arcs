@@ -318,7 +318,13 @@ if (isEntry) {
     if (err.code === 'EPIPE') process.exit(0);
     throw err;
   });
-  main().then((code) => {
-    if (code !== 0) process.exitCode = code;
-  });
+  main()
+    .then((code) => {
+      if (code !== 0) process.exitCode = code;
+    })
+    .catch((err) => {
+      // 渲染/写盘失败给出一行原因并置非零退出码，避免 unhandledRejection 裸崩
+      process.stderr.write(`[dashboard] 执行失败：${err?.stack ?? err}\n`);
+      process.exitCode = 1;
+    });
 }

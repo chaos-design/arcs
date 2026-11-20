@@ -1,3 +1,5 @@
+[English](./en/constraints.md) · 中文
+
 # 约束说明
 
 | # | 约束 | 理由 | 保障方式 |

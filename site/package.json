@@ -3,28 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ARCS 文档静态站点（Vite + React，构建时内嵌 docs/*.md；参考 chaos-design/memx 的 site/ 形态）。",
+  "description": "ARCS 文档静态站点（配置驱动的多页静态生成器，构建时内嵌 docs 中英双语，真实 Mermaid SVG 渲染）。",
   "files": [
     "dist"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p . --noEmit && vite build",
+    "dev": "node scripts/build.mjs && vite preview --host 127.0.0.1 --port 5175",
+    "build": "node scripts/build.mjs",
+    "site:build": "pnpm build",
     "preview": "vite preview",
-    "lint": "tsc -p . --noEmit"
+    "lint": "python3 -c \"import ast, pathlib; ast.parse(pathlib.Path('scripts/docs_site.py').read_text(encoding='utf-8'))\" && node -e \"JSON.parse(require('fs').readFileSync('site.config.json','utf8'))\""
   },
   "dependencies": {
-    "highlight.js": "^11.11.1",
-    "marked": "^15.0.0",
-    "mermaid": "^11.11.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "mermaid": "^11.11.0"
   },
   "devDependencies": {
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "^5.9.0",
     "vite": "^7.3.8"
   }
 }

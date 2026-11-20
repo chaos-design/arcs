@@ -1,3 +1,5 @@
+[English](./README.en.md) · 中文
+
 # plugin-mcp-demo
 
 `plugins/mcp` 透明代理网关端到端演示：真实三进程拓扑（客户端 → 代理 → 下游 MCP Server），无需 API Key。

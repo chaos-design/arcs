@@ -1,16 +1,22 @@
+[English](./README.en.md) · 中文
+
 # @chaos-design/arcs-plugin-deepseek
 
 ARCS 纠偏能力以 DeepSeek Harness 的 Cordis bundle 形态落地。插件通过 `ctx.on` 订阅会话生命周期与原生事件，把 Harness 事件归一为 ARCS 规范事件，交由 `host-kit` 的唯一运行时做决策，再按平台能力把纠偏效果翻译为宿主决策。全程 fail-open，任何异常都不中断 Agent 任务。
 
 ## 安装
 
-通过仓库的插件安装脚本，将本插件加入 DeepSeek 客户端的 bundle：
+构建插件并把 bundle patch 接入 DeepSeek Harness：
 
 ```bash
-pnpm install-plugins -- --clients=deepseek
+corepack pnpm --filter @chaos-design/arcs-plugin-deepseek build
+pnpm install-plugins -- --client=deepseek   # 打印构建与接入指引
 ```
 
-安装脚本会把 `plugins/deepseek` 作为 bundle 注入，并应用包清单中的 `dsh.bundle.patch`（`cordis.patch.yml`）向 DeepSeek 配置插入 `arcs-steering` 段：
+本插件是 Cordis bundle 形态：接入由 DeepSeek Harness 的 bundle 工具消费
+`cordis.patch.yml` 完成——该清单由包内 `cordis.patch.yml` 声明，并经
+`package.json` 的 `dsh.bundle.patch` 字段登记，向 DeepSeek 配置插入
+`arcs-steering` 段：
 
 ```yaml
 - insert:

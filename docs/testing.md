@@ -1,3 +1,5 @@
+[English](./en/testing.md) · 中文
+
 # 测试策略
 
 三层测试对应 [roadmap.md](./roadmap.md) 各阶段 DoD，前两层完全离线可跑（不依赖真实宿主与网络），第三层才进真实宿主。

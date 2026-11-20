@@ -1,3 +1,5 @@
+[English](./en/sdk.md) · 中文
+
 # SDK 代码级接入 `sdk/*`
 
 SDK 面向自研 Agent 应用，采用 `sdk/xxx` 独立文件夹形式。它把 core 的检测与决策包装成框架原生可插拔件，直接依赖 core，不经过胶水层。
@@ -20,7 +22,7 @@ sequenceDiagram
     W->>App: PatchArgs 改参 / InjectMessage 注入 / RedirectTool 改道后放行
   else L4 高危
     W->>W: Suspend → 框架内 HITL 回调（如 confirm UI / webhook）
-    W->>App: 通过→放行；拒绝/超时→阻断 + 注入解释
+    W->>App: 通过→放行；拒绝/超时→阻断并注入解释
   end
   W->>W: onSteer(SteerEvent)
 ```
@@ -64,8 +66,7 @@ interface SteerEvent {
 ```text
 sdk/
 ├── vercel/      # @chaos-design/arcs-sdk-vercel — withArcs 模型包装器（LanguageModelV4）
-├── langchain/   # @chaos-design/arcs-sdk-langchain — createArcsNode（LangGraph 兼容节点，零框架依赖）
-└── README.md    # SDK 职责与边界总览
+└── langchain/   # @chaos-design/arcs-sdk-langchain — createArcsNode（LangGraph 兼容节点，零框架依赖）
 ```
 
 ## 使用示例

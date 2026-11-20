@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "@ai-sdk/provider": "*",
-    "ai": "*",
-    "zod-to-json-schema": "^3.24.0"
+    "ai": "*"
   }
 }

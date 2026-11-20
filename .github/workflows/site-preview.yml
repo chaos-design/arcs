@@ -1,0 +1,79 @@
+# ARCS 文档站点 · PR 预览验证
+#
+# 目标：在 Pull Request 上验证「Vercel / GitHub Pages 共用的构建产物」是否正确，
+# 并把产物上传为可下载 artifact。本工作流 **不部署、不触碰 GitHub Pages 生产环境**：
+# main 分支的生产部署仍由 site.yml 独占（本文件无意覆盖它）。
+#
+# Vercel 的 Preview URL 由 Vercel 自身的 Git 集成根据 site/vercel.json 自动生成，
+# 不需要在本仓库内配置 token 或额外的部署步骤。
+
+name: site-preview
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'site/**'
+      - '.github/workflows/site-preview.yml'
+      - 'site/vercel.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 按 PR 号隔离并发组：不同 PR 的验证互不取消
+concurrency:
+  group: site-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: 校验 Vercel 配置
+        run: |
+          node -e "const c=JSON.parse(require('fs').readFileSync('site/vercel.json','utf8')); if(c.outputDirectory!=='dist') throw new Error('bad outputDirectory'); console.log('site/vercel.json OK:', c.outputDirectory)"
+          node -e "const p=JSON.parse(require('fs').readFileSync('site/package.json','utf8')); if(typeof p.scripts['site:build']!=='string') throw new Error('missing site:build alias'); console.log('site/package.json site:build alias OK')"
+
+      - name: 构建站点（Pages / Vercel 共用产物）
+        run: corepack pnpm site:build
+
+      - name: 校验构建产物
+        run: |
+          test -s site/dist/index.html
+          test -d site/dist/assets
+          grep -q 'ARCS' site/dist/index.html
+          echo "构建产物校验通过：index.html + assets/"
+
+      - name: 冒烟测试（本地预览可访问）
+        run: |
+          corepack pnpm --filter @chaos-design/arcs-site preview --host 127.0.0.1 --port 4173 > /tmp/arcs-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill $PREVIEW_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/ -o /tmp/arcs-preview.html; then break; fi
+            sleep 1
+          done
+          grep -q 'ARCS' /tmp/arcs-preview.html
+          echo "冒烟测试通过：站点返回 200 且包含 ARCS 标识"
+
+      - name: 上传预览产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-preview-pr-${{ github.event.pull_request.number || 'manual' }}
+          path: site/dist
+          retention-days: 14
