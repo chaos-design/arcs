@@ -178,6 +178,7 @@ def md_to_html(md, caption="Click to enlarge"):
     list_stack = []  # [(indent, 'ul'|'ol')] — supports nested lists
     in_table = False
     table_rows = []
+    current_heading = ""  # 最近一个标题的纯文本，用作 mermaid 图的 lightbox 标题
 
     def close_lists():
         while list_stack:
@@ -235,8 +236,13 @@ def md_to_html(md, caption="Click to enlarge"):
             else:
                 if code_lang == "mermaid":
                     graph = "\n".join(code_buf)
+                    # 图前最近的标题作为 lightbox 头部的图题（去掉行内 markdown 记号）
+                    title_attr = (
+                        " data-lb-title='" + html.escape(current_heading, quote=True) + "'"
+                        if current_heading else ""
+                    )
                     out.append(
-                        "<figure class='doc-figure mermaid-figure' data-mermaid='true' data-lightbox='true' tabindex='0'>"
+                        "<figure class='doc-figure mermaid-figure' data-mermaid='true' data-lightbox='true'" + title_attr + " tabindex='0'>"
                         "<pre class='mermaid'>" + html.escape(graph) + "</pre>"
                         "<figcaption>" + html.escape(caption) + "</figcaption></figure>"
                     )
@@ -269,6 +275,7 @@ def md_to_html(md, caption="Click to enlarge"):
             lvl = len(stripped) - len(stripped.lstrip("#"))
             lvl = min(lvl, 6)
             text = stripped.lstrip("#").strip()
+            current_heading = re.sub(r"[`*_\[\]<>]", "", text).strip()
             plain = re.sub(r"<[^>]+>", "", text).strip().lower()
             plain = re.sub(r"[`*_~]", "", plain)
             plain = re.sub(r"[（）()：:，,。.？?！!【】\[\]\"']", "", plain)
@@ -735,6 +742,7 @@ LIGHTBOX_JS = """
   var lb=document.querySelector('.lightbox');
   if(!lb)return;
   var stage=lb.querySelector('.lightbox-stage');
+  var titleEl=lb.querySelector('.lb-title');
   var cur=1;
   // scaler 盒子尺寸 = 内容尺寸 × cur；放大超过视口后 stage（overflow:auto）可滚动查看。
   // 内容用 width/height:100% 填充 scaler（transform 不影响布局盒子，无法产生滚动）
@@ -752,6 +760,9 @@ LIGHTBOX_JS = """
     var scaler=document.createElement('div');scaler.className='lightbox-scaler';
     if(src){var clone=src.cloneNode(true);clone.dataset.bw=bw;clone.dataset.bh=bh;scaler.appendChild(clone);}
     stage.appendChild(scaler);
+    // 头部显示该图的标题（生成期写入 data-lb-title=图前最近的章节标题），缺失时回退 Diagram
+    var lbTitle=titleEl?(fig.getAttribute('data-lb-title')||'Diagram'):'Diagram';
+    if(titleEl)titleEl.textContent=lbTitle;
     lb.classList.add('is-open');document.body.style.overflow='hidden';
     cur=1;
     fit();
