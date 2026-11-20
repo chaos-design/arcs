@@ -530,9 +530,15 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 .lightbox.is-open{display:flex;flex-direction:column}
 .lightbox-head{display:flex;align-items:center;gap:10px;color:#e2e8f0;margin-bottom:10px}
 .lightbox-head .lb-title{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lightbox-stage{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  transform-origin:center}
-.lightbox pre{max-width:100%;max-height:100%;margin:0;transform-origin:center}
+/* stage 为可滚动容器：放大超过视口时可滚动查看；scaler 盒子尺寸 = 内容尺寸 × cur，
+   margin:auto 在放小时居中、放大时退化为左上对齐并允许滚动。内容用 width/height:100%
+   填充 scaler（不用 transform，因为 transform 不影响布局盒子，放大后无法产生滚动） */
+.lightbox-stage{flex:1;min-height:0;display:flex;overflow:auto}
+/* flex:0 0 auto：不随 stage 收缩，保持 set 尺寸 → 放大后超出 stage 才产生滚动 */
+.lightbox-scaler{margin:auto;position:relative;flex:0 0 auto}
+.lightbox-scaler .mermaid-svg,.lightbox-scaler pre{position:absolute;top:0;left:0;
+  width:100%;height:100%;margin:0;overflow:hidden}
+.lightbox-scaler pre{overflow:auto;white-space:pre}
 .lightbox .lb-btn{width:40px;height:40px;border-radius:9px;border:1px solid rgba(255,255,255,.25);
   background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:15px}
 /* footer */
@@ -582,7 +588,7 @@ blockquote{border-left:3px solid var(--accent);margin:12px 0;padding:6px 14px;
 .footer .lang-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(11,95,255,.1)}
 .mermaid-figure svg{max-width:100%;height:auto;display:block;margin:0 auto}
 .mermaid-figure figcaption::before{content:'⛶ '}
-.lightbox-stage .mermaid-svg,.lightbox-stage pre{max-width:100%;max-height:100%;transform-origin:center}
+.lightbox-scaler .mermaid-svg svg{display:block;width:100%;height:100%}
 /* home page */
 .hero{border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3vw,36px);
   background:linear-gradient(135deg,rgba(11,95,255,.06),rgba(122,60,255,.04)),var(--card);
@@ -718,10 +724,27 @@ LIGHTBOX_JS = """
   if(!lb)return;
   var stage=lb.querySelector('.lightbox-stage');
   var cur=1;
-  // stage 里可能是 <pre>（代码块）或 .mermaid-svg（mermaid 渲染后替换了 pre），两者都要缩放
-  function fit(){var el=stage.querySelector('pre')||stage.querySelector('.mermaid-svg');if(!el)return;el.style.transform='scale('+cur+')';}
-  function open(fig){var src=fig.querySelector('pre')||fig.querySelector('.mermaid-svg');stage.innerHTML='';
-    if(src)stage.appendChild(src.cloneNode(true));lb.classList.add('is-open');cur=1;fit();document.body.style.overflow='hidden';}
+  // scaler 盒子尺寸 = 内容尺寸 × cur；放大超过视口后 stage（overflow:auto）可滚动查看。
+  // 内容用 width/height:100% 填充 scaler（transform 不影响布局盒子，无法产生滚动）
+  function fit(){
+    var scaler=stage.querySelector('.lightbox-scaler');if(!scaler)return;
+    var el=scaler.querySelector('.mermaid-svg')||scaler.querySelector('pre');if(!el)return;
+    var bw=Number(el.dataset.bw)||0,bh=Number(el.dataset.bh)||0;
+    scaler.style.width=(bw*cur)+'px';scaler.style.height=(bh*cur)+'px';
+  }
+  function open(fig){
+    var src=fig.querySelector('.mermaid-svg')||fig.querySelector('pre');
+    // 用源 figure 中已正常布局的元素尺寸作「自然尺寸」基准（lightbox 内克隆体可能测不准）
+    var bw=src?src.offsetWidth:0,bh=src?src.offsetHeight:0;
+    stage.innerHTML='';
+    var scaler=document.createElement('div');scaler.className='lightbox-scaler';
+    if(src){var clone=src.cloneNode(true);clone.dataset.bw=bw;clone.dataset.bh=bh;scaler.appendChild(clone);}
+    stage.appendChild(scaler);
+    lb.classList.add('is-open');document.body.style.overflow='hidden';
+    cur=1;
+    fit();
+    stage.scrollTop=0;stage.scrollLeft=0;
+  }
   function closeLb(){lb.classList.remove('is-open');document.body.style.overflow='';}
   document.querySelectorAll('.doc-figure[data-lightbox]').forEach(function(f){
     f.addEventListener('click',function(){open(f);});
