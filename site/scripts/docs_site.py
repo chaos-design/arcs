@@ -718,7 +718,8 @@ LIGHTBOX_JS = """
   if(!lb)return;
   var stage=lb.querySelector('.lightbox-stage');
   var cur=1;
-  function fit(){var pre=stage.querySelector('pre');if(!pre)return;pre.style.transform='scale('+cur+')';}
+  // stage 里可能是 <pre>（代码块）或 .mermaid-svg（mermaid 渲染后替换了 pre），两者都要缩放
+  function fit(){var el=stage.querySelector('pre')||stage.querySelector('.mermaid-svg');if(!el)return;el.style.transform='scale('+cur+')';}
   function open(fig){var src=fig.querySelector('pre')||fig.querySelector('.mermaid-svg');stage.innerHTML='';
     if(src)stage.appendChild(src.cloneNode(true));lb.classList.add('is-open');cur=1;fit();document.body.style.overflow='hidden';}
   function closeLb(){lb.classList.remove('is-open');document.body.style.overflow='';}
