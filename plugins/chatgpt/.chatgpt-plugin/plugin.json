@@ -1,0 +1,10 @@
+{
+  "name": "arcs-chatgpt",
+  "version": "0.1.0",
+  "description": "Agent Real-time Course Steering — ChatGPT / Codex 兼容 Hook 前置纠偏",
+  "author": {
+    "name": "Chaos Design"
+  },
+  "keywords": ["arcs", "chatgpt", "codex", "steering", "hooks"],
+  "hooks": "./hooks/hooks.json"
+}

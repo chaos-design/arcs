@@ -121,7 +121,7 @@ corepack pnpm dashboard -- --home ~/.arcs --html dashboard.html
 arcs/
 ├── packages/          # core、plugin-kit、host-kit、cli、telemetry
 ├── sdk/               # 代码级接入：vercel、langchain（另含 README.md）
-├── plugins/           # 宿主插件：codex、deepseek、claude-code、mcp、
+├── plugins/           # 宿主插件：chatgpt、deepseek、claude-code、mcp、
 │                      # zcode、workbuddy、opencode、pi、trae
 ├── examples/          # sdk-vercel-demo、plugin-mcp-demo
 ├── site/              # Vite + React 文档站点；构建时内嵌 docs/**/*.md
@@ -153,7 +153,7 @@ sdk/*  →  core   （直连，刻意绕过胶水层）
 | `packages/plugin-kit/src` | `zod`、core、telemetry | 无——不得 import 任何宿主 SDK |
 | `packages/host-kit/src` | `zod`、core、telemetry、plugin-kit、host-kit | `node:fs`、`node:os`、`node:path`、`node:process`、`node:crypto`（`claim.ts` 用 `crypto` 为超长 sessionId 计算防碰撞短哈希） |
 | `plugins/mcp/src` | `zod`、core、host-kit、telemetry、plugin-kit | `node:child_process`（spawn 下游 MCP Server）、`node:process`、`node:url` |
-| `plugins/{claude-code,codex,zcode,workbuddy,trae,opencode,pi,deepseek}/src` | 宿主依赖（`zod`、core、telemetry、plugin-kit、host-kit） | 逐插件窄白名单（如 `node:url` 用于 CLI 入口守卫；`node:fs`/`node:os` 用于会话 claim 文件） |
+| `plugins/{claude-code,chatgpt,zcode,workbuddy,trae,opencode,pi,deepseek,qwen-code}/src` | 宿主依赖（`zod`、core、telemetry、plugin-kit、host-kit） | 逐插件窄白名单（如 `node:url` 用于 CLI 入口守卫；`node:fs`/`node:os` 用于会话 claim 文件） |
 | `sdk/vercel/src` | `zod`、`@chaos-design/arcs-core`、`@ai-sdk/provider` | 无 |
 | `sdk/langchain/src` | `@chaos-design/arcs-core` | 无 |
 

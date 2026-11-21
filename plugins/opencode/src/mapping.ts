@@ -1,9 +1,9 @@
 import {
+  makeNativeEvent,
   nativeToRaw,
   pickRecord,
   pickString,
   type HostDecision,
-  type NativeEvent,
 } from '@chaos-design/arcs-host-kit';
 import type { RawEvent } from '@chaos-design/arcs-plugin-kit';
 
@@ -79,16 +79,16 @@ export function opencodeEventToRaw(event: OpencodeEvent): RawEvent {
   const toolArgs = pickRecord(props, ['args', 'arguments', 'input', 'parameters']);
   const thought = pickString(props, ['text', 'prompt', 'thought', 'content']) || undefined;
 
-  const native: NativeEvent = {
+  const native = makeNativeEvent({
     eventName: canonical,
     sessionId: opencodeSessionId(event),
-    timestamp: typeof props['timestamp'] === 'number' ? (props['timestamp'] as number) : Date.now(),
+    timestamp: typeof props['timestamp'] === 'number' ? (props['timestamp'] as number) : undefined,
     toolUseId,
     toolName,
     toolArgs,
     thought,
     payload: { ...props, nativeType: event.type, canonical },
-  };
+  });
   return nativeToRaw('opencode', native);
 }
 
@@ -96,14 +96,14 @@ export function opencodeEventToRaw(event: OpencodeEvent): RawEvent {
 export function opencodeToolInputToRaw(
   input: { tool?: string; toolName?: string; callID?: string; sessionID?: string; args?: Record<string, unknown> },
 ): RawEvent {
-  const native: NativeEvent = {
+  const native = makeNativeEvent({
     eventName: 'PreToolUse',
-    sessionId: input.sessionID ?? 'unknown-session',
+    sessionId: input.sessionID,
     toolUseId: input.callID,
     toolName: input.tool ?? input.toolName,
     toolArgs: input.args ?? {},
     payload: { nativeType: 'session.tool.called', canonical: 'PreToolUse' },
-  };
+  });
   return nativeToRaw('opencode', native);
 }
 

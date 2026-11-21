@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Unified Hook primitives in `host-kit` (`parseHookPayload`, `withHookEvent`, `serializeHookDecision`, `hookContextText`, `makeNativeEvent`, `shouldSteerPreToolUse`): all 11 host plugins now declare field aliases and decision profiles instead of duplicating JSON parsing/serialization; the 8 existing plugins were migrated without behavior changes (259 tests stayed green).
+- Three new host plugins: `chatgpt` (Codex-compatible hooks, tier A), `pl-agent` and `qwen-code` (tier B), each with hooks/manifest/CLI/README and behavior-level contract checks; CLI list, installer, build script, real-check probe and bilingual docs updated to 11 platforms.
 - Bilingual docs site: language encoded in the hash route (`?lang=en`, `en/` physical keys) with a 中文/EN toggle in the sidebar footer and mobile header; switching preserves the current page and anchor, missing translations fall back to Chinese; UI strings and both navigation lists live in `site/src/i18n.ts` (`2b26ed9`).
 - New bilingual READMEs for the `claude-code` and `mcp` plugins: 17-hook output contract (`permissionDecision` / `updatedInput`) and the MCP proxy's L1–L4 landing semantics, CLI arguments, serial queue and fail-open guarantees (`854f1a6`).
 - README.md for every publishable package: `packages/{core,telemetry,plugin-kit,host-kit}` and `sdk/{vercel,langchain}`.
@@ -17,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bilingual documentation set: a new English `README.md` mirrors the Chinese `README_zh.md`, covering architecture, module split, four-level steering policy, quick start and documentation index.
 - Bilingual community and governance files: `CONTRIBUTING.md` / `CONTRIBUTING_zh.md`, `CODE_OF_CONDUCT.md` / `CODE_OF_CONDUCT_zh.md`, `SECURITY.md` / `SECURITY_zh.md`, and this changelog (`CHANGELOG.md` / `CHANGELOG_zh.md`).
 - Full English translations of all 15 documents under `docs/en/`: [README](./docs/en/README.md), [architecture](./docs/en/architecture.md), [directory-layout](./docs/en/directory-layout.md), [core](./docs/en/core.md), [plugin-kit](./docs/en/plugin-kit.md), [host-kit](./docs/en/host-kit.md), [plugins](./docs/en/plugins.md), [sdk](./docs/en/sdk.md), [key-flows](./docs/en/key-flows.md), [telemetry](./docs/en/telemetry.md), [testing](./docs/en/testing.md), [extension-points](./docs/en/extension-points.md), [constraints](./docs/en/constraints.md), [roadmap](./docs/en/roadmap.md) and [interview](./docs/en/interview.md).
-- English companion READMEs for every plugin and example: all 9 `plugins/*` directories plus both demos (`examples/sdk-vercel-demo`, `examples/plugin-mcp-demo`).
+- English companion READMEs for every plugin and example: all 12 `plugins/*` directories plus both demos (`examples/sdk-vercel-demo`, `examples/plugin-mcp-demo`).
 
 ### Fixed
 
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Platform consolidation: the OpenAI host is now covered by the single `chatgpt` plugin (the duplicate `codex` plugin removed — same Codex-compatible contract and identical source), and the Pi host by the single `pi` plugin (the duplicate `pl-agent` plugin removed); `PLATFORMS`/`HOST_CAPABILITIES`, the CLI list, installer, build script, real-check probe, contract guards and bilingual docs are synced to 9 platforms (10 plugins in the CLI).
 - Documentation indexes in both languages now cross-link the English and Chinese variants of every document.
 - Site layout aligned to the memx reference: sectioned documentation matrix with top-accent cards, breadcrumb + quick-entry cards, single-line sidebar nav with a leading 导航 group and dual footer buttons, mobile header with GitHub icon and animated hamburger, right-hand sticky TOC, mermaid lightbox, and a two-line previous/next pager (`be09700`).
 - `scripts/install-host-plugins.mjs` now prints verified local-plugin-directory commands instead of nonexistent `astro-*` marketplace names, accepts `--clients=a,b` multi-selection, and excludes `node_modules`/`dist` when copying global plugins.

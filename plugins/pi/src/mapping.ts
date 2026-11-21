@@ -1,9 +1,9 @@
 import {
+  makeNativeEvent,
   nativeToRaw,
   pickRecord,
   pickString,
   type HostDecision,
-  type NativeEvent,
 } from '@chaos-design/arcs-host-kit';
 import type { RawEvent } from '@chaos-design/arcs-plugin-kit';
 
@@ -66,16 +66,16 @@ export function piEventToRaw(
   const toolArgs = pickRecord(props, ['args', 'arguments', 'input', 'parameters']);
   const thought = pickString(props, ['text', 'prompt', 'message', 'content']) || undefined;
 
-  const native: NativeEvent = {
+  const native = makeNativeEvent({
     eventName: canonical,
-    sessionId: pickString(props, ['sessionId', 'sessionID'], 'unknown-session'),
-    timestamp: typeof props['timestamp'] === 'number' ? (props['timestamp'] as number) : Date.now(),
+    sessionId: pickString(props, ['sessionId', 'sessionID']),
+    timestamp: typeof props['timestamp'] === 'number' ? (props['timestamp'] as number) : undefined,
     toolUseId,
     toolName,
     toolArgs,
     thought,
     payload: { ...props, nativeType: eventName, canonical },
-  };
+  });
   return nativeToRaw('pi', native);
 }
 

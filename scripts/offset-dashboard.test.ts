@@ -14,7 +14,7 @@ function makeModel(overrides: Partial<typeof base> = {}) {
     eventCount: 3,
     sessionCount: 1,
     degradedCount: 0,
-    hostCounts: { codex: 3 },
+    hostCounts: { chatgpt: 3 },
     levelCounts: { '1': 1, '2': 0, '3': 0, '4': 0, null: 2 },
     hitl: { asked: 0, approved: 0, rejected: 0, timeout: 0 },
     passThroughRatio: 2 / 3,
@@ -22,7 +22,7 @@ function makeModel(overrides: Partial<typeof base> = {}) {
     sessions: [
       {
         sessionId: 'sess-a',
-        host: 'codex',
+        host: 'chatgpt',
         eventCount: 3,
         curve: {
           sessionId: 'sess-a',
@@ -45,7 +45,7 @@ function makeModel(overrides: Partial<typeof base> = {}) {
 
 describe('parseAuditJsonl', () => {
   it('解析合法行、跳过损坏行并计数', () => {
-    const good = JSON.stringify({ ts: 1, sessionId: 'a', host: 'codex', level: null, signals: [], effects: [], latencyMs: 0, degraded: false });
+    const good = JSON.stringify({ ts: 1, sessionId: 'a', host: 'chatgpt', level: null, signals: [], effects: [], latencyMs: 0, degraded: false });
     const { events, skipped } = parseAuditJsonl(`${good}\nnot-json\n{}\n\n${good}\n`, 'f.jsonl');
     expect(events).toHaveLength(2);
     expect(skipped).toBe(2);

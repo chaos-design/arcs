@@ -8,7 +8,7 @@
 |---|---|
 | core 保持纯逻辑 | 只做「检测 + 决策」，不认识任何宿主 SDK、不做 I/O、不碰进程、不持有状态 |
 | 胶水层承接耦合 | 所有宿主相关的事件采集、上下文归一、决策落地、会话状态、配置/审批/遥测桥接收进 `plugin-kit` |
-| 宿主运行时共用 | 8 家平台插件共享 `host-kit`（能力矩阵、原生事件映射、效果翻译、Hook 入口桥、审计落盘、会话文件锁） |
+| 宿主运行时共用 | 9 家平台插件共享 `host-kit`（能力矩阵、原生事件映射、统一 Hook 原语、效果翻译、Hook 入口桥、审计落盘、会话文件锁） |
 | 插件轻量化 | `plugins/*` 只实现宿主差异（hooks 清单、payload 别名、序列化怪癖），几乎不含算法 |
 | SDK 走直线 | `sdk/*` 是进程内代码级接入，直接依赖 core，不经过胶水层 |
 | 失败即降级（fail-open） | 检测/规划异常或超预算一律放行并标记 degraded——ARCS 绝不成为任务中断源 |
@@ -28,9 +28,9 @@ flowchart TB
       SV["sdk/vercel<br/>withArcs"]
       SL["sdk/langchain<br/>createArcsNode"]
     end
-    subgraph PL["宿主插件 plugins/（8 家 + MCP 代理）"]
+    subgraph PL["宿主插件 plugins/（9 家 + MCP 代理）"]
       direction LR
-      NATIVE["Hook 型：codex · claude-code<br/>zcode · workbuddy · trae"]
+      NATIVE["Hook 型：claude-code · chatgpt<br/>zcode · workbuddy · trae<br/>qwen-code"]
       EXT["扩展型：opencode · pi · deepseek"]
       MCPP["plugins/mcp<br/>透明代理（常驻服务）"]
     end
@@ -121,7 +121,7 @@ sequenceDiagram
 
 | Tier | 宿主 | L1 补参 | L2 注入 | L3 改道 | L4 挂起/阻断 |
 |---|---|---|---|---|---|
-| A | codex · claude-code · opencode · mcp | ✅ | ✅ | mcp 独有（改工具名） | A 级原生 hooks 可 ask；mcp 走 HITL 三分支 |
+| A | chatgpt · claude-code · opencode · mcp | ✅ | ✅ | mcp 独有（改工具名） | A 级原生 hooks 可 ask；mcp 走 HITL 三分支 |
 | B | zcode · workbuddy · pi · deepseek | ❌ → 注入 | ✅ | ❌ → 注入 | ❌ 挂起 → block 阻断 |
 | C | trae | ❌ | 只读 `additionalContext` | ❌ | 仅采集与审计，不阻断 |
 
@@ -131,7 +131,7 @@ sequenceDiagram
 
 | 形态 | 插件 | 拓扑 | 状态边界 |
 |---|---|---|---|
-| Hook 子进程 | codex / claude-code / zcode / workbuddy / trae | 宿主每个事件 fork 一次 Hook 进程，stdin→stdout 单次往返 | 无常驻状态；会话上下文经 `SessionClaim` 文件锁跨进程续接 |
+| Hook 子进程 | claude-code / chatgpt / zcode / workbuddy / trae | 宿主每个事件 fork 一次 Hook 进程，stdin→stdout 单次往返 | 无常驻状态；会话上下文经 `SessionClaim` 文件锁跨进程续接 |
 | 全局扩展 | opencode / pi / deepseek | 插件以扩展/bundle 形态常驻宿主进程内，事件订阅驱动 | 会话 Map（带容量上限）+ claim 锁 |
 | 常驻代理 | plugins/mcp | `arcs-plugin-mcp` 作为 stdio JSON-RPC 透明代理，串行队列拦截 `tools/call` | 代理内存态（会话缓冲 + 审计事件），下游 MCP Server 由其 spawn |
 | 进程内 SDK | sdk/vercel · sdk/langchain | 包装模型/LangGraph 节点，随宿主应用运行 | 包装实例内滑动历史快照 |

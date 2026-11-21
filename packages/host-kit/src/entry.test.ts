@@ -74,7 +74,7 @@ describe('事件映射', () => {
   });
 
   it('prompt 事件映射为 thought', () => {
-    const raw = nativeToRaw('codex', {
+    const raw = nativeToRaw('chatgpt', {
       eventName: 'UserPromptSubmit',
       sessionId: 's-2',
       thought: '请继续',

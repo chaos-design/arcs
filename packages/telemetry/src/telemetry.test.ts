@@ -10,7 +10,7 @@ import {
 const baseEvent = {
   ts: 1700000000000,
   sessionId: 's1',
-  host: 'codex',
+  host: 'chatgpt',
   level: 2 as const,
   signals: [{ kind: 'loop' as const, severity: 0.6, score: 3, evidence: '连续重复 3 次' }],
   effects: [{ type: 'InjectMessage' as const, role: 'tool' as const, content: '提示' }],
@@ -84,14 +84,14 @@ describe('InMemorySink 容量上限（11 号计划加固）', () => {
   it('设置 maxEvents 后 FIFO 逐出最旧事件；缺省保持无上限', () => {
     const capped = new InMemorySink(3);
     for (let i = 0; i < 5; i++) {
-      capped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'codex', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
+      capped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'chatgpt', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
     }
     expect(capped.events).toHaveLength(3);
     expect(capped.events.map((e) => e.ts)).toEqual([2, 3, 4]);
 
     const uncapped = new InMemorySink();
     for (let i = 0; i < 5; i++) {
-      uncapped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'codex', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
+      uncapped.emit(buildAuditEvent({ ts: i, sessionId: 's', host: 'chatgpt', level: null, signals: [], effects: [], latencyMs: 1, degraded: false }));
     }
     expect(uncapped.events).toHaveLength(5);
   });
@@ -100,7 +100,7 @@ describe('InMemorySink 容量上限（11 号计划加固）', () => {
 describe('buildDashboardModel 面板聚合（P5 · 11 号计划）', () => {
   const ev = (over: Partial<Parameters<typeof buildAuditEvent>[0]> & { ts: number; sessionId: string }) =>
     buildAuditEvent({
-      host: 'codex',
+      host: 'chatgpt',
       level: null,
       signals: [],
       effects: [],
@@ -124,7 +124,7 @@ describe('buildDashboardModel 面板聚合（P5 · 11 号计划）', () => {
     expect(model.eventCount).toBe(7);
     expect(model.sessionCount).toBe(2);
     expect(model.degradedCount).toBe(1);
-    expect(model.hostCounts).toEqual({ codex: 7 });
+    expect(model.hostCounts).toEqual({ chatgpt: 7 });
     expect(model.levelCounts).toEqual({ '1': 1, '2': 1, '3': 0, '4': 1, null: 4 });
     expect(model.hitl).toEqual({ asked: 1, approved: 1, rejected: 0, timeout: 0 });
     expect(model.passThroughRatio).toBeCloseTo(4 / 7);

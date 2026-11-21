@@ -15,15 +15,16 @@ arcs/
 ├── sdk/                       # Code-level integration (sdk/xxx form, in-process)
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   └── langchain/             # @chaos-design/arcs-sdk-langchain
-├── plugins/                   # Host plugins (8 agent platforms + MCP gateway)
+├── plugins/                   # Host plugins (9 agent platforms + MCP gateway)
 │   ├── claude-code/           # @chaos-design/arcs-plugin-claude-code
-│   ├── codex/                 # @chaos-design/arcs-plugin-codex
 │   ├── opencode/              # @chaos-design/arcs-plugin-opencode
 │   ├── pi/                    # @chaos-design/arcs-plugin-pi
 │   ├── deepseek/              # @chaos-design/arcs-plugin-deepseek
 │   ├── workbuddy/             # @chaos-design/arcs-plugin-workbuddy
 │   ├── zcode/                 # @chaos-design/arcs-plugin-zcode
 │   ├── trae/                  # @chaos-design/arcs-plugin-trae
+│   ├── chatgpt/               # @chaos-design/arcs-plugin-chatgpt
+│   ├── qwen-code/             # @chaos-design/arcs-plugin-qwen-code
 │   └── mcp/                   # @chaos-design/arcs-plugin-mcp (resident transparent proxy gateway, the only one that can rewrite tool names)
 ├── examples/
 │   ├── sdk-vercel-demo/       # Vercel AI SDK integration example (mock model, L1/L2)

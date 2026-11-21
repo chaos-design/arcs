@@ -14,9 +14,6 @@ const MARKETPLACE = {
   'claude-code': [
     `claude --plugin-dir ${join(ROOT, 'plugins/claude-code')}`,
   ],
-  codex: [
-    `codex --plugin-dir ${join(ROOT, 'plugins/codex')}`,
-  ],
   workbuddy: [
     `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/workbuddy')}（含 .codebuddy-plugin/plugin.json 与 hooks/hooks.json），命令见 plugins/workbuddy/README.md`,
   ],
@@ -28,6 +25,14 @@ const MARKETPLACE = {
     `# Cordis bundle 宿主：把 plugins/deepseek 构建产物作为 bundle 接入 DeepSeek Harness`,
     `# patch 清单：plugins/deepseek/cordis.patch.yml（由 package.json 的 dsh.bundle.patch 声明，供宿主 bundle 工具消费）`,
     '# 接入步骤见 plugins/deepseek/README.md',
+  ],
+  chatgpt: [
+    'pnpm build:native-plugins',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/chatgpt')}；npm 包名 @chaos-design/arcs-plugin-chatgpt`,
+  ],
+  'qwen-code': [
+    'pnpm build:native-plugins',
+    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/qwen-code')}；npm 包名 @chaos-design/arcs-plugin-qwen-code`,
   ],
 };
 

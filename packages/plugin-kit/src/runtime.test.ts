@@ -15,7 +15,7 @@ import {
 
 function makeRaw(overrides: Partial<RawEvent> = {}): RawEvent {
   return {
-    host: 'codex',
+    host: 'chatgpt',
     type: 'tool-call',
     sessionId: 's1',
     timestamp: Date.now(),

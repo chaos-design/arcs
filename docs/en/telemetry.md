@@ -15,7 +15,7 @@ The data model and receiver-contract package: it defines `AuditEvent` and `Telem
 interface AuditEvent {
   ts: number;
   sessionId: string;
-  host: string;                   // codex / deepseek / claude-code / mcp / sdk-vercel / sdk-langchain
+  host: string;                   // chatgpt / deepseek / claude-code / mcp / sdk-vercel / sdk-langchain
   level: 1 | 2 | 3 | 4 | null;    // trigger level, null = no-drift pass-through
   signals: DriftSignal[];
   effects: SteeringEffect[];      // ordered effect list actually materialized

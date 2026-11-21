@@ -10,13 +10,14 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
 const CLIENTS = [
   { name: 'claude-code', cli: 'claude', label: 'Claude Code' },
-  { name: 'codex', cli: 'codex', label: 'Codex' },
   { name: 'opencode', cli: 'opencode', label: 'OpenCode' },
   { name: 'pi', cli: 'pi', label: 'Pi' },
   { name: 'deepseek', cli: 'dsh', label: 'DeepSeek Harness' },
   { name: 'zcode', cli: 'zcode', label: 'ZCode' },
   { name: 'workbuddy', cli: 'codebuddy', label: 'WorkBuddy / CodeBuddy' },
   { name: 'trae', cli: null, label: 'Trae（IDE 项目 hooks）' },
+  { name: 'chatgpt', cli: 'chatgpt', label: 'ChatGPT / Codex 兼容 Hook' },
+  { name: 'qwen-code', cli: 'qwen', label: 'Qwen Code CLI' },
 ];
 
 function parseArgs(argv) {

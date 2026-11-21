@@ -40,7 +40,7 @@ A question set designed for scenarios such as "participating in ARCS development
 
 **Key points**: evolution of package responsibilities; DRY and boundaries.
 
-**Reference answer**: plugin-kit is the "glue-layer contract": the four-method `HostAdapter` contract (subscribe/normalize/materialize/setup), `PluginRuntime` orchestrating the pipeline, three-level configuration merging, and SessionStore. host-kit is the "greatest common denominator of the 8 platform plugins": the capability matrix, the `runHookEntry` stdin→decision pipeline, effect→host-decision translation, FileAuditSink, and the SessionClaim file lock. Initially this logic was scattered across the plugins, with all eight reimplementing "translation + degradation + auditing"; after extracting host-kit, the plugins retain only host quirks (codex's lack of ask support, workbuddy's `modifiedInput` field name), and the capability matrix is locked down by consistency tests ([host-kit.md](./host-kit.md)).
+**Reference answer**: plugin-kit is the "glue-layer contract": the four-method `HostAdapter` contract (subscribe/normalize/materialize/setup), `PluginRuntime` orchestrating the pipeline, three-level configuration merging, and SessionStore. host-kit is the "greatest common denominator of the 9 platform plugins": the capability matrix, the `runHookEntry` stdin→decision pipeline, shared hook primitives (parsing, serialization and degradation text have a single implementation), effect→host-decision translation, FileAuditSink, and the SessionClaim file lock. Initially this logic was scattered across the plugins, with each reimplementing "translation + degradation + auditing"; after extracting host-kit, the plugins retain only host quirks .(chatgpt's lack of ask support, workbuddy's `modifiedInput` field name), and the capability matrix is locked down by consistency tests ([host-kit.md](./host-kit.md)).
 
 ### Q6. Why does sdk/* bypass plugin-kit and connect directly to core? What is the cost of this "straight-line principle"?
 
@@ -102,7 +102,7 @@ A question set designed for scenarios such as "participating in ARCS development
 
 **Key points**: host capability modeling.
 
-**Reference answer**: Differences in host output contracts are an objective reality: codex's ask is "parsed but not supported," Trae's hooks are read-only, zcode has no argument-modification channel. ARCS's principle is **degrade but leave a trace**: when `applyEffect` hits a capability gap it does not pretend success, but degrades to an action the host can express (patchArgs missing→inject a hint, suspend missing→block) and records it in `HostDecision.degraded` (e.g., `suspend→block`); the degradation is observable through audit events. The matrix is double-locked by conformance tests + verify-host-contracts ([host-kit.md](./host-kit.md), [plugins.md](./plugins.md)).
+**Reference answer**: Differences in host output contracts are an objective reality: chatgpt's ask (Codex-compatible contract) is "parsed but not supported," Trae's hooks are read-only, zcode has no argument-modification channel. ARCS's principle is **degrade but leave a trace**: when `applyEffect` hits a capability gap it does not pretend success, but degrades to an action the host can express (patchArgs missing→inject a hint, suspend missing→block) and records it in `HostDecision.degraded` (e.g., `suspend→block`); the degradation is observable through audit events. The matrix is double-locked by conformance tests + verify-host-contracts ([host-kit.md](./host-kit.md), [plugins.md](./plugins.md)).
 
 ### Q15. Why is the MCP proxy the only form that can perform L3 redirection (changing the tool name)?
 
@@ -220,7 +220,7 @@ A question set designed for scenarios such as "participating in ARCS development
 
 **Key points**: extension workflow (corresponds to extension-points.md).
 
-**Reference answer**: (1) Research the host's hook/extension contract → register `HOST_CAPABILITIES` (tier + capability switches + note); (2) implement `parse` (stdin/events→NativeEvent) and `serialize` (decision→host output), with hook-based types reusing `runHookEntry` directly; (3) write hooks.json/manifest; (4) conformance tests + verify:contracts registration; (5) documentation (plugins.md matrix). The most likely pitfalls: hidden quirks of the host schema (e.g., codex's ask) and field naming (updatedInput vs modifiedInput)—precisely why behavioral contract validation exists.
+**Reference answer**: (1) Research the host's hook/extension contract → register `HOST_CAPABILITIES` (tier + capability switches + note); (2) implement `parse` (stdin/events→NativeEvent) and `serialize` (decision→host output), with hook-based types reusing `runHookEntry` directly; (3) write hooks.json/manifest; (4) conformance tests + verify:contracts registration; (5) documentation (plugins.md matrix). The most likely pitfalls: hidden quirks of the host schema (e.g., chatgpt's ask) and field naming (updatedInput vs modifiedInput)—precisely why behavioral contract validation exists.
 
 ### Q32. If ARCS introduced 200ms of latency per orchestration, where would you start? Give a priority order.
 

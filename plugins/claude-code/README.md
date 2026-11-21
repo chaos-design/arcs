@@ -36,7 +36,7 @@ ARCS 需要一个目标（goal）来判断 Agent 是否偏航，二选一：
 两者都为空时纠偏退化为只做观测。
 
 事件名从 stdin JSON 的 `hook_event_name` / `event` / `eventName` 读取，
-`ARCS_EVENT` 为兜底；命令行 `--event=<Name>` 用于宿主侧登记，与 codex
+`ARCS_EVENT` 为兜底；命令行 `--event=<Name>` 用于宿主侧登记，与 chatgpt
 插件保持同一形态。
 
 ## Hook 输出 JSON schema

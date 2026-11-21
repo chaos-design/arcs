@@ -44,7 +44,7 @@ flowchart LR
 
 ```typescript
 interface RawEvent {
-  host: string;                // 'codex' | 'deepseek' | 'claude-code' | 'mcp' | ...
+  host: string;                // 'chatgpt' | 'deepseek' | 'claude-code' | 'mcp' | ...
   type: 'tool-call' | 'thought' | 'command';
   sessionId: string;           // host session identifier, used as sessionKey
   timestamp: number;

@@ -44,16 +44,6 @@ export const HOST_CAPABILITIES: Readonly<Record<PlatformName, HostCapabilities>>
     block: true,
     note: 'PreToolUse 支持 updatedInput + permissionDecision(allow|deny|ask)，可落地 L1/L2/L4；工具名不可改，L3 降级为注入',
   },
-  codex: {
-    source: 'codex',
-    tier: 'A',
-    patchArgs: true,
-    redirectTool: false,
-    injectMessage: true,
-    suspend: false,
-    block: true,
-    note: 'PreToolUse 支持 permissionDecision allow/deny 与 updatedInput；官方 schema 中的 ask 当前「parsed but not supported」，故 L4 按 deny 阻断而非挂起',
-  },
   opencode: {
     source: 'opencode',
     tier: 'A',
@@ -113,6 +103,26 @@ export const HOST_CAPABILITIES: Readonly<Record<PlatformName, HostCapabilities>>
     suspend: false,
     block: false,
     note: '项目级只读 hooks，仅采集与审计；注入仅在宿主允许 hook 输出追加上下文时生效',
+  },
+  chatgpt: {
+    source: 'chatgpt',
+    tier: 'A',
+    patchArgs: true,
+    redirectTool: false,
+    injectMessage: true,
+    suspend: false,
+    block: true,
+    note: 'ChatGPT / Codex 兼容 PreToolUse 契约：permissionDecision allow/deny 与 updatedInput；官方 schema 中的 ask 当前「parsed but not supported」，ask 一律降为 deny；真实宿主版本需集成方验证',
+  },
+  'qwen-code': {
+    source: 'qwen-code',
+    tier: 'B',
+    patchArgs: false,
+    redirectTool: false,
+    injectMessage: true,
+    suspend: false,
+    block: true,
+    note: 'Qwen Code CLI 的 Gemini 兼容 BeforeTool hook：可阻断与注入，改参契约待核实；按 Tier B 保守降级',
   },
 };
 

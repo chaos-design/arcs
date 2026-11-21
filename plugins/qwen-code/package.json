@@ -1,7 +1,7 @@
 {
-  "name": "@chaos-design/arcs-plugin-codex",
+  "name": "@chaos-design/arcs-plugin-qwen-code",
   "version": "0.1.0",
-  "description": "ARCS Codex 宿主插件：PreToolUse 前置纠偏（L1/L2/L4，含输入改写）",
+  "description": "ARCS Qwen Code CLI 插件：BeforeTool 前置纠偏（L2/L4）",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -16,13 +16,14 @@
     }
   },
   "bin": {
-    "arcs-plugin-codex": "./dist/cli.js"
+    "arcs-plugin-qwen-code": "./dist/cli.js"
   },
   "files": [
     "dist",
     "hooks",
-    ".codex-plugin",
-    "README.md"
+    ".qwen-code-plugin",
+    "README.md",
+    "README.en.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

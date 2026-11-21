@@ -121,7 +121,7 @@ The repository uses `pnpm workspace` + `Turborepo`; all published packages live 
 arcs/
 ├── packages/          # core, plugin-kit, host-kit, cli, telemetry
 ├── sdk/               # code-level integration: vercel, langchain (+ README.md)
-├── plugins/           # host plugins: codex, deepseek, claude-code, mcp,
+├── plugins/           # host plugins: chatgpt, deepseek, claude-code, mcp,
 │                      # zcode, workbuddy, opencode, pi, trae
 ├── examples/          # sdk-vercel-demo, plugin-mcp-demo
 ├── site/              # Vite + React docs site; embeds docs/**/*.md at build time
@@ -153,7 +153,7 @@ The scan is implemented in `scripts/scan-deps.mjs`; it reads non-relative import
 | `packages/plugin-kit/src` | `zod`, core, telemetry | none — must not import any host SDK |
 | `packages/host-kit/src` | `zod`, core, telemetry, plugin-kit, host-kit | `node:fs`, `node:os`, `node:path`, `node:process`, `node:crypto` (`claim.ts` uses `crypto` for collision-resistant short hashes of long session IDs) |
 | `plugins/mcp/src` | `zod`, core, host-kit, telemetry, plugin-kit | `node:child_process` (spawn downstream MCP Server), `node:process`, `node:url` |
-| `plugins/{claude-code,codex,zcode,workbuddy,trae,opencode,pi,deepseek}/src` | host deps (`zod`, core, telemetry, plugin-kit, host-kit) | narrow, per-plugin allowlist (e.g. `node:url` for the CLI entry guard; `node:fs`/`node:os` for session claim files) |
+| `plugins/{claude-code,chatgpt,zcode,workbuddy,trae,opencode,pi,deepseek,qwen-code}/src` | host deps (`zod`, core, telemetry, plugin-kit, host-kit) | narrow, per-plugin allowlist (e.g. `node:url` for the CLI entry guard; `node:fs`/`node:os` for session claim files) |
 | `sdk/vercel/src` | `zod`, `@chaos-design/arcs-core`, `@ai-sdk/provider` | none |
 | `sdk/langchain/src` | `@chaos-design/arcs-core` | none |
 

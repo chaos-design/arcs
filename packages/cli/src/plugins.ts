@@ -40,14 +40,6 @@ export const PLUGINS: readonly PluginInfo[] = [
     enableHint: 'claude --plugin-dir /abs/path/to/arcs/plugins/claude-code',
   },
   {
-    name: 'codex',
-    package: '@chaos-design/arcs-plugin-codex',
-    host: 'OpenAI Codex CLI',
-    kind: 'host-managed',
-    capability: '原生 Hook（12）· L1 改参 / L2 注入 / L4 deny',
-    enableHint: 'codex plugin marketplace add /abs/path/to/arcs',
-  },
-  {
     name: 'opencode',
     package: '@chaos-design/arcs-plugin-opencode',
     host: 'OpenCode',
@@ -94,6 +86,22 @@ export const PLUGINS: readonly PluginInfo[] = [
     kind: 'host-managed',
     capability: '项目级 hooks（13）· 仅采集与审计',
     enableHint: 'node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/workspace',
+  },
+  {
+    name: 'chatgpt',
+    package: '@chaos-design/arcs-plugin-chatgpt',
+    host: 'ChatGPT / Codex 兼容 Hook',
+    kind: 'host-managed',
+    capability: '原生 Hook（13）· L1 改参 / L2 注入 / L4 deny（ask 降级）',
+    enableHint: 'node scripts/install-host-plugins.mjs --client=chatgpt',
+  },
+  {
+    name: 'qwen-code',
+    package: '@chaos-design/arcs-plugin-qwen-code',
+    host: 'Qwen Code CLI',
+    kind: 'host-managed',
+    capability: 'Gemini 兼容 Hook（13）· L2 注入 / L4 deny',
+    enableHint: 'node scripts/install-host-plugins.mjs --client=qwen-code',
   },
 ];
 

@@ -1,0 +1,10 @@
+{
+  "name": "arcs-qwen-code",
+  "version": "0.1.0",
+  "description": "Agent Real-time Course Steering — Qwen Code CLI Hook 前置纠偏",
+  "author": {
+    "name": "Chaos Design"
+  },
+  "keywords": ["arcs", "qwen-code", "steering", "hooks"],
+  "hooks": "./hooks/hooks.json"
+}
