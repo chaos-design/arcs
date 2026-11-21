@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Platform consolidation: the OpenAI host is now covered by the single `chatgpt` plugin (the duplicate `codex` plugin removed — same Codex-compatible contract and identical source), and the Pi host by the single `pi` plugin (the duplicate `pl-agent` plugin removed); `PLATFORMS`/`HOST_CAPABILITIES`, the CLI list, installer, build script, real-check probe, contract guards and bilingual docs are synced to 9 platforms (10 plugins in the CLI).
 - Documentation indexes in both languages now cross-link the English and Chinese variants of every document.
 - Site layout aligned to the memx reference: sectioned documentation matrix with top-accent cards, breadcrumb + quick-entry cards, single-line sidebar nav with a leading 导航 group and dual footer buttons, mobile header with GitHub icon and animated hamburger, right-hand sticky TOC, mermaid lightbox, and a two-line previous/next pager (`be09700`).
 - `scripts/install-host-plugins.mjs` now prints verified local-plugin-directory commands instead of nonexistent `astro-*` marketplace names, accepts `--clients=a,b` multi-selection, and excludes `node_modules`/`dist` when copying global plugins.

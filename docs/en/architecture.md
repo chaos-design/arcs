@@ -8,7 +8,7 @@
 |---|---|
 | core stays pure logic | Performs only "detection + decision": it knows no host SDK, does no I/O, touches no processes, and holds no state |
 | The glue layer absorbs coupling | All host-related concerns—event collection, context normalization, decision materialization, session state, and configuration/approval/telemetry bridges—are consolidated into `plugin-kit` |
-| Shared host runtime | All 11 platform plugins share `host-kit` (capability matrix, native event mapping, shared hook primitives, effect translation, Hook entry bridge, audit persistence, session file locks) |
+| Shared host runtime | All 9 platform plugins share `host-kit` (capability matrix, native event mapping, shared hook primitives, effect translation, Hook entry bridge, audit persistence, session file locks) |
 | Lightweight plugins | `plugins/*` implement only host-specific differences (hooks manifests, payload aliases, serialization quirks) and contain almost no algorithms |
 | SDKs take a direct path | `sdk/*` are in-process, code-level integrations that depend directly on core and bypass the glue layer |
 | Fail open on failure | Any detection/planning exception or budget overrun is passed through and marked degraded—ARCS must never become a source of task interruption |
@@ -28,9 +28,9 @@ flowchart TB
       SV["sdk/vercel<br/>withArcs"]
       SL["sdk/langchain<br/>createArcsNode"]
     end
-    subgraph PL["Host Plugins plugins/ (11 Providers + MCP Proxy)"]
+    subgraph PL["Host Plugins plugins/ (9 Providers + MCP Proxy)"]
       direction LR
-      NATIVE["Hook-based: codex · claude-code<br/>zcode · workbuddy · trae<br/>chatgpt · pl-agent · qwen-code"]
+      NATIVE["Hook-based: claude-code · chatgpt<br/>zcode · workbuddy · trae<br/>qwen-code"]
       EXT["Extension-based: opencode · pi · deepseek"]
       MCPP["plugins/mcp<br/>Transparent Proxy (Resident Service)"]
     end
@@ -121,7 +121,7 @@ Host capability differences are explicitly modeled by `host-kit`'s `HOST_CAPABIL
 
 | Tier | Host | L1 Argument Patch | L2 Injection | L3 Redirection | L4 Suspend/Block |
 |---|---|---|---|---|---|
-| A | codex · claude-code · opencode · mcp | ✅ | ✅ | mcp-only (change tool name) | Tier A native hooks can ask; mcp uses the three-branch HITL |
+| A | chatgpt · claude-code · opencode · mcp | ✅ | ✅ | mcp-only (change tool name) | Tier A native hooks can ask; mcp uses the three-branch HITL |
 | B | zcode · workbuddy · pi · deepseek | ❌ → injection | ✅ | ❌ → injection | ❌ suspend → block |
 | C | trae | ❌ | read-only `additionalContext` | ❌ | Collection and audit only, no blocking |
 
@@ -131,7 +131,7 @@ Degradation is not silent loss: every degradation leaves a trace in `HostDecisio
 
 | Form | Plugins | Topology | State Boundary |
 |---|---|---|---|
-| Hook child process | codex / claude-code / zcode / workbuddy / trae | The host forks a Hook process per event, with a single stdin→stdout round trip | No resident state; session context is resumed across processes via the `SessionClaim` file lock |
+| Hook child process | claude-code / chatgpt / zcode / workbuddy / trae | The host forks a Hook process per event, with a single stdin→stdout round trip | No resident state; session context is resumed across processes via the `SessionClaim` file lock |
 | Global extension | opencode / pi / deepseek | The plugin resides in the host process as an extension/bundle, driven by event subscriptions | Session Map (with capacity limit) + claim lock |
 | Resident proxy | plugins/mcp | `arcs-plugin-mcp` acts as a stdio JSON-RPC transparent proxy, intercepting `tools/call` via a serial queue | Proxy in-memory state (session buffer + audit events); downstream MCP Servers are spawned by it |
 | In-process SDK | sdk/vercel · sdk/langchain | Wraps models/LangGraph nodes and runs with the host application | Sliding history snapshot within the wrapper instance |

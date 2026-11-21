@@ -6,17 +6,15 @@
 
 ## 接入拓扑
 
-十二种接入方式（11 个 Agent 平台 + MCP 网关）收敛到同一个 `HostAdapter` 契约：
+十种接入方式（9 个 Agent 平台 + MCP 网关）收敛到同一个 `HostAdapter` 契约：
 
 ```mermaid
 flowchart TB
   subgraph HOOK["原生 Hook 插件（manifest + hooks.json）"]
     CC["Claude Code · 17 hooks"]
-    CX["Codex · 12 hooks"]
     WB["WorkBuddy/CodeBuddy · 25 hooks"]
     ZC["ZCode · 7 hooks"]
     CG["ChatGPT / Codex 兼容 · 13 hooks"]
-    PA["PL Agent · 13 hooks"]
     QC["Qwen Code CLI · 13 hooks"]
   end
   subgraph EXT["全局扩展 / bundle（事件订阅）"]
@@ -65,7 +63,6 @@ Hook 型插件是一次性调用，`subscribe` 为空操作，由 `HookEntryAdap
 | 插件 | 包名 | 宿主 | 适配方式 | 能力等级 | 实际可落地的纠偏 |
 |---|---|---|---|---|---|
 | claude-code | `@chaos-design/arcs-plugin-claude-code` | Claude Code | 原生 Hook（17） | A | L1 改参 / L2 注入 / L4 `permissionDecision: ask` |
-| codex | `@chaos-design/arcs-plugin-codex` | OpenAI Codex CLI | 原生 Hook（12） | A | L1 改参 / L2 注入 / L4 降为 `deny` |
 | opencode | `@chaos-design/arcs-plugin-opencode` | OpenCode | 全局插件 + 工具中间件 | A | L1 改参 / L2 注入 / L4 权限询问挂起 |
 | zcode | `@chaos-design/arcs-plugin-zcode` | ZCode | 原生 Hook（7） | B | L2 注入 / L4 降为阻断 |
 | workbuddy | `@chaos-design/arcs-plugin-workbuddy` | WorkBuddy / CodeBuddy Code | 原生 Hook（25） | B | L2 注入 / L4 降为阻断 |
@@ -73,18 +70,16 @@ Hook 型插件是一次性调用，`subscribe` 为空操作，由 `HookEntryAdap
 | deepseek | `@chaos-design/arcs-plugin-deepseek` | DeepSeek Harness | Cordis bundle | B | L2 注入 / L4 广播阻断决策（需宿主消费） |
 | trae | `@chaos-design/arcs-plugin-trae` | Trae | 项目级 hooks（13） | C | 仅采集与审计；注入依赖宿主允许；不阻断 |
 | chatgpt | `@chaos-design/arcs-plugin-chatgpt` | ChatGPT / Codex 兼容 Hook | 原生 Hook（13） | A | L1 改参 / L2 注入 / L4 降为 `deny`（ask 降级） |
-| pl-agent | `@chaos-design/arcs-plugin-pl-agent` | PL Agent | 通用 Hook（13） | B | L2 注入 / L4 降为阻断 |
 | qwen-code | `@chaos-design/arcs-plugin-qwen-code` | Qwen Code CLI | Gemini 兼容 Hook（13） | B | L2 注入 / L4 降为阻断（不改参） |
 | mcp | `@chaos-design/arcs-plugin-mcp` | 所有支持 MCP 的宿主 | STDIO 透明代理 | 网关 | L1 改参 / L2 虚拟报错 / L3 改道 / L4 阻断 |
 
-> ChatGPT / PL Agent / Qwen Code 的 hook 契约按 Claude/Codex 兼容形态实现（`--event` + stdin JSON），真实宿主版本需集成方验证；验证前按上表的保守能力声明运行。
+> ChatGPT / Qwen Code 的 hook 契约按 Claude/Codex 兼容形态实现（`--event` + stdin JSON），真实宿主版本需集成方验证；验证前按上表的保守能力声明运行。OpenAI 宿主（ChatGPT / Codex）统一由 `chatgpt` 插件覆盖，Pi 宿主统一由 `pi` 插件覆盖。
 
 ### 能力矩阵（代码位于 `packages/host-kit/src/capabilities.ts`）
 
 | 宿主 | 级别 | 改参数 L1 | 改工具名 L3 | 注入提示 L2/L3 | 挂起审批 L4 | 阻断 L4 |
 |---|---|---|---|---|---|---|
 | claude-code | A | ✅ | ❌ | ✅ | ✅ `ask` | ✅ |
-| codex | A | ✅ | ❌ | ✅ | ❌（官方不支持 `ask`） | ✅ `deny` |
 | opencode | A | ✅ | ❌ | ✅ | ✅ `permission.ask` | ✅ |
 | zcode | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 | workbuddy | B | ❌ | ❌ | ✅ | ❌ | ✅ |
@@ -92,7 +87,6 @@ Hook 型插件是一次性调用，`subscribe` 为空操作，由 `HookEntryAdap
 | deepseek | B | ❌ | ❌ | ✅ | ❌ | ✅（事件广播） |
 | trae | C | ❌ | ❌ | ⚠️ 条件性 | ❌ | ❌ |
 | chatgpt | A | ✅ | ❌ | ✅ | ❌（ask 降 deny） | ✅ `deny` |
-| pl-agent | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 | qwen-code | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 
 **为什么所有宿主插件的「改工具名」都是 ❌**：Claude Code / Codex / OpenCode 的前置 Hook 只能改写**同一工具**的参数（`updatedInput`），无法把 `read` 换成 `grep`。`RedirectTool` 在这些插件上一律降级为"注入安全替代工具建议"。真正能改工具名的只有 MCP 透明代理（改写 `tools/call.name`）。
@@ -115,7 +109,7 @@ apply(ctx, {
 });
 ```
 
-- **契约护栏**：`pnpm verify:contracts` 除静态校验 11 个平台的 manifest/hooks 结构、事件数量与能力矩阵外，还**实际执行** Codex / Claude Code / ZCode 的 `serialize*` 函数，把输出喂给官方规则断言器（校验项数以 `pnpm verify:contracts` 实时输出为准）。fixture 来自 [Codex 官方 output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json)，解析规则来自 [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs)。注意：**schema 落后于 parser**——`allow` 必须与 `updatedInput` 成对、`deny` 必须带非空 reason、`ask` 一律拒绝，这几条只有 parser 里有。行为级校验据此实现，已抓到并修复多处会导致阻断失效的输出违规（Codex 孤立 allow / 无理由 deny；Claude 输出非法枚举 `block`；WorkBuddy/Trae 误用 `decision` 字段而非 `permissionDecision`；`additionalContext` 误置顶层）。行为级校验覆盖全部 8 个 Hook 平台（总项数以 `pnpm verify:contracts` 实时输出为准），按平台分治：Codex / ChatGPT 用 parser 规则，其余六家按 Claude 兼容形态（`permissionDecision` 与 `additionalContext` 都在 `hookSpecificOutput` 内；WorkBuddy 改参字段为 `modifiedInput`）。它是回归护栏，不替代真实宿主验证。
+- **契约护栏**：`pnpm verify:contracts` 除静态校验 9 个平台的 manifest/hooks 结构、事件数量与能力矩阵外，还**实际执行** ChatGPT / Claude Code / ZCode 的 `serialize*` 函数，把输出喂给官方规则断言器（校验项数以 `pnpm verify:contracts` 实时输出为准）。fixture 来自 [Codex 官方 output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json)，解析规则来自 [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs)。注意：**schema 落后于 parser**——`allow` 必须与 `updatedInput` 成对、`deny` 必须带非空 reason、`ask` 一律拒绝，这几条只有 parser 里有。行为级校验据此实现，已抓到并修复多处会导致阻断失效的输出违规（Codex 孤立 allow / 无理由 deny；Claude 输出非法枚举 `block`；WorkBuddy/Trae 误用 `decision` 字段而非 `permissionDecision`；`additionalContext` 误置顶层）。行为级校验覆盖全部 6 个 Hook 平台（总项数以 `pnpm verify:contracts` 实时输出为准），按平台分治：ChatGPT 用 Codex parser 规则，其余五家按 Claude 兼容形态（`permissionDecision` 与 `additionalContext` 都在 `hookSpecificOutput` 内；WorkBuddy 改参字段为 `modifiedInput`）。它是回归护栏，不替代真实宿主验证。
 - **本地审计证据**：设置 `ARCS_HOME` 或 `ARCS_AUDIT_FILE` 后，所有插件会把 `AuditEvent` 追加到 `<home>/audit/<host>/<YYYY-MM-DD>.jsonl`；`pnpm real-check` 探测 CLI 并给出真实会话步骤，`pnpm real-check -- --verify` 统计审计事件。未设置变量时不落盘、行为不变。详见 [telemetry.md](./telemetry.md)。
 
 ## 共用运行时 `packages/host-kit`

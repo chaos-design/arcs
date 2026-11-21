@@ -13,7 +13,7 @@
 | [core.md](./core.md) | 基础内核：职责、核心抽象、接口边界、默认传感器、预算与降级 |
 | [plugin-kit.md](./plugin-kit.md) | 插件胶水层：职责、核心抽象、会话状态、与 core 的拆分边界 |
 | [host-kit.md](./host-kit.md) | 宿主运行时：能力矩阵、Hook 入口桥、效果翻译、审计落盘与会话锁 |
-| [plugins.md](./plugins.md) | 具体插件：codex / deepseek / claude-code / mcp 等 9 家 |
+| [plugins.md](./plugins.md) | 具体插件：chatgpt / deepseek / claude-code / mcp 等 10 家 |
 | [sdk.md](./sdk.md) | SDK 代码级接入：拦截点、SteerEvent 契约、与插件的边界 |
 | [key-flows.md](./key-flows.md) | 纠偏闭环、运行时序、四级策略、HITL 恢复、失败降级 |
 | [telemetry.md](./telemetry.md) | 遥测：AuditEvent 模型、TelemetrySink 契约、偏移曲线与面板 |

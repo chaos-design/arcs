@@ -20,7 +20,6 @@ const HOST_DEPS = [
 // 平台插件的 node 内建逐条登记理由，避免白名单过宽削弱红线
 const PLUGIN_NODE = {
   'claude-code': ['node:url'], // cli 入口 isEntry 守卫
-  codex: ['node:url'],
   zcode: ['node:url'],
   workbuddy: ['node:url'],
   trae: ['node:url'],

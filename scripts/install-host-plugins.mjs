@@ -14,9 +14,6 @@ const MARKETPLACE = {
   'claude-code': [
     `claude --plugin-dir ${join(ROOT, 'plugins/claude-code')}`,
   ],
-  codex: [
-    `codex --plugin-dir ${join(ROOT, 'plugins/codex')}`,
-  ],
   workbuddy: [
     `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/workbuddy')}（含 .codebuddy-plugin/plugin.json 与 hooks/hooks.json），命令见 plugins/workbuddy/README.md`,
   ],
@@ -32,10 +29,6 @@ const MARKETPLACE = {
   chatgpt: [
     'pnpm build:native-plugins',
     `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/chatgpt')}；npm 包名 @chaos-design/arcs-plugin-chatgpt`,
-  ],
-  'pl-agent': [
-    'pnpm build:native-plugins',
-    `# 以本地插件目录方式加载 ${join(ROOT, 'plugins/pl-agent')}；npm 包名 @chaos-design/arcs-plugin-pl-agent`,
   ],
   'qwen-code': [
     'pnpm build:native-plugins',

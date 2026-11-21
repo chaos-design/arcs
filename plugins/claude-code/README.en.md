@@ -30,7 +30,7 @@ ARCS needs a goal to determine whether the Agent has deviated; choose one of the
 
 `goalFromArgs` parses `--goal=...` / `--goal ...` first, then falls back to `ARCS_GOAL`; when both are empty, steering degrades to observation only.
 
-The event name is read from `hook_event_name` / `event` / `eventName` in the stdin JSON, with `ARCS_EVENT` as the fallback; the command-line `--event=<Name>` is used for host-side registration, keeping the same shape as the codex plugin.
+The event name is read from `hook_event_name` / `event` / `eventName` in the stdin JSON, with `ARCS_EVENT` as the fallback; the command-line `--event=<Name>` is used for host-side registration, keeping the same shape as the chatgpt plugin.
 
 ## Hook output JSON schema
 

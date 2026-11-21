@@ -15,9 +15,8 @@ arcs/
 ├── sdk/                       # 代码级接入（sdk/xxx 形式，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   └── langchain/             # @chaos-design/arcs-sdk-langchain
-├── plugins/                   # 宿主插件（11 个 Agent 平台 + MCP 网关）
+├── plugins/                   # 宿主插件（9 个 Agent 平台 + MCP 网关）
 │   ├── claude-code/           # @chaos-design/arcs-plugin-claude-code
-│   ├── codex/                 # @chaos-design/arcs-plugin-codex
 │   ├── opencode/              # @chaos-design/arcs-plugin-opencode
 │   ├── pi/                    # @chaos-design/arcs-plugin-pi
 │   ├── deepseek/              # @chaos-design/arcs-plugin-deepseek
@@ -25,7 +24,6 @@ arcs/
 │   ├── zcode/                 # @chaos-design/arcs-plugin-zcode
 │   ├── trae/                  # @chaos-design/arcs-plugin-trae
 │   ├── chatgpt/               # @chaos-design/arcs-plugin-chatgpt
-│   ├── pl-agent/              # @chaos-design/arcs-plugin-pl-agent
 │   ├── qwen-code/             # @chaos-design/arcs-plugin-qwen-code
 │   └── mcp/                   # @chaos-design/arcs-plugin-mcp（常驻透明代理网关，唯一可改工具名）
 ├── examples/

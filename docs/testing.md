@@ -30,7 +30,7 @@
 | 对象 | 验证内容 |
 |---|---|
 | `plugins/mcp` | 真实 MCP Server 挂载，观测 L1/L2 纠偏与审计上报 |
-| `plugins/codex` / `deepseek` / `claude-code` | 真实宿主进程运行，验证 L3/L4 与审批恢复后任务续跑 |
+| `plugins/chatgpt` / `deepseek` / `claude-code` | 真实宿主进程运行，验证 L3/L4 与审批恢复后任务续跑 |
 | `sdk/vercel` / `sdk/langchain` | demo 跑通，`onSteer(SteerEvent)` 字段正确，边界约束（不接管生命周期、不做代理）通过 review |
 
 ## 边界守护（CI）

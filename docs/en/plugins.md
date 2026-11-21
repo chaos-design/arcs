@@ -6,17 +6,15 @@ Concrete plugins are where the "core key implementation" lands. Each plugin is r
 
 ## Integration Topology
 
-Twelve integration approaches (11 Agent platforms + the MCP gateway) converge on the same `HostAdapter` contract:
+Ten integration approaches (9 Agent platforms + the MCP gateway) converge on the same `HostAdapter` contract:
 
 ```mermaid
 flowchart TB
   subgraph HOOK["Native Hook Plugins (manifest + hooks.json)"]
     CC["Claude Code · 17 hooks"]
-    CX["Codex · 12 hooks"]
     WB["WorkBuddy/CodeBuddy · 25 hooks"]
     ZC["ZCode · 7 hooks"]
     CG["ChatGPT / Codex-compatible · 13 hooks"]
-    PA["PL Agent · 13 hooks"]
     QC["Qwen Code CLI · 13 hooks"]
   end
   subgraph EXT["Global Extensions / bundle (event subscription)"]
@@ -65,7 +63,6 @@ Hook-type plugins are one-shot calls with a no-op `subscribe`; `HookEntryAdapter
 | Plugin | Package Name | Host | Adaptation Method | Capability Tier | Actually Enforceable Corrections |
 |---|---|---|---|---|---|
 | claude-code | `@chaos-design/arcs-plugin-claude-code` | Claude Code | Native Hook (17) | A | L1 arg patching / L2 injection / L4 `permissionDecision: ask` |
-| codex | `@chaos-design/arcs-plugin-codex` | OpenAI Codex CLI | Native Hook (12) | A | L1 arg patching / L2 injection / L4 downgraded to `deny` |
 | opencode | `@chaos-design/arcs-plugin-opencode` | OpenCode | Global plugin + tool middleware | A | L1 arg patching / L2 injection / L4 permission-prompt suspension |
 | zcode | `@chaos-design/arcs-plugin-zcode` | ZCode | Native Hook (7) | B | L2 injection / L4 downgraded to blocking |
 | workbuddy | `@chaos-design/arcs-plugin-workbuddy` | WorkBuddy / CodeBuddy Code | Native Hook (25) | B | L2 injection / L4 downgraded to blocking |
@@ -73,18 +70,16 @@ Hook-type plugins are one-shot calls with a no-op `subscribe`; `HookEntryAdapter
 | deepseek | `@chaos-design/arcs-plugin-deepseek` | DeepSeek Harness | Cordis bundle | B | L2 injection / L4 broadcast block decision (requires host consumption) |
 | trae | `@chaos-design/arcs-plugin-trae` | Trae | Project-level hooks (13) | C | Collection and audit only; injection depends on host permission; no blocking |
 | chatgpt | `@chaos-design/arcs-plugin-chatgpt` | ChatGPT / Codex-compatible hooks | Native hooks (13) | A | L1 arg patching / L2 injection / L4 downgraded to `deny` |
-| pl-agent | `@chaos-design/arcs-plugin-pl-agent` | PL Agent | Generic hooks (13) | B | L2 injection / L4 downgraded to blocking |
 | qwen-code | `@chaos-design/arcs-plugin-qwen-code` | Qwen Code CLI | Gemini-compatible hooks (13) | B | L2 injection / L4 downgraded to blocking (no arg patching) |
 | mcp | `@chaos-design/arcs-plugin-mcp` | All MCP-capable hosts | STDIO transparent proxy | Gateway | L1 arg patching / L2 virtual error / L3 reroute / L4 blocking |
 
-> ChatGPT / PL Agent / Qwen Code hook contracts follow the Claude/Codex-compatible shape (`--event` + stdin JSON). Real host versions require integrator verification; until then, use the conservative capability declarations above.
+> ChatGPT / Qwen Code hook contracts follow the Claude/Codex-compatible shape (`--event` + stdin JSON). Real host versions require integrator verification; until then, use the conservative capability declarations above. The OpenAI host (ChatGPT / Codex) is covered by the single `chatgpt` plugin, and the Pi host by the single `pi` plugin.
 
 ### Capability Matrix (code at `packages/host-kit/src/capabilities.ts`)
 
 | Host | Tier | Patch Args L1 | Change Tool Name L3 | Inject Prompt L2/L3 | Suspend for Approval L4 | Block L4 |
 |---|---|---|---|---|---|---|
 | claude-code | A | ✅ | ❌ | ✅ | ✅ `ask` | ✅ |
-| codex | A | ✅ | ❌ | ✅ | ❌ (official `ask` not supported) | ✅ `deny` |
 | opencode | A | ✅ | ❌ | ✅ | ✅ `permission.ask` | ✅ |
 | zcode | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 | workbuddy | B | ❌ | ❌ | ✅ | ❌ | ✅ |
@@ -92,7 +87,6 @@ Hook-type plugins are one-shot calls with a no-op `subscribe`; `HookEntryAdapter
 | deepseek | B | ❌ | ❌ | ✅ | ❌ | ✅ (event broadcast) |
 | trae | C | ❌ | ❌ | ⚠️ Conditional | ❌ | ❌ |
 | chatgpt | A | ✅ | ❌ | ✅ | ❌ (ask → deny) | ✅ `deny` |
-| pl-agent | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 | qwen-code | B | ❌ | ❌ | ✅ | ❌ | ✅ |
 
 **Why "changing the tool name" is ❌ for all host plugins**: The pre-Hooks in Claude Code / Codex / OpenCode can only rewrite the arguments of the **same tool** (`updatedInput`); they cannot swap `read` for `grep`. On these plugins, `RedirectTool` is always downgraded to "inject a safe alternative tool suggestion". The only thing that can genuinely change the tool name is the MCP transparent proxy (rewriting `tools/call.name`).
@@ -115,7 +109,7 @@ apply(ctx, {
 });
 ```
 
-- **Contract guardrails**: In addition to statically validating the manifest/hooks structure, event counts, and capability matrix of the 11 platforms, `pnpm verify:contracts` also **actually executes** the `serialize*` functions of all 8 hook plugins and feeds their output into the official rule assertor (the check count is whatever `pnpm verify:contracts` reports at run time). Fixtures come from the [Codex official output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json), and parsing rules come from [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs). Note: **the schema lags behind the parser** — `allow` must be paired with `updatedInput`, `deny` must carry a non-empty reason, and `ask` is always rejected; these rules exist only in the parser. Behavior-level validation is implemented accordingly and has caught and fixed multiple output violations that would have broken blocking (Codex orphaned `allow` / `deny` without a reason; Claude outputting the illegal enum `block`; WorkBuddy/Trae misusing the `decision` field instead of `permissionDecision`; `additionalContext` wrongly placed at the top level). These behavior-level checks cover all 8 Hook platforms (the total count is whatever `pnpm verify:contracts` reports at run time), split by platform: Codex / ChatGPT use parser rules, while the other six follow the Claude-compatible shape (`permissionDecision` and `additionalContext` both inside `hookSpecificOutput`; WorkBuddy's arg-patching field is `modifiedInput`). It is a regression guardrail and does not replace real host verification.
+- **Contract guardrails**: In addition to statically validating the manifest/hooks structure, event counts, and capability matrix of the 9 platforms, `pnpm verify:contracts` also **actually executes** the `serialize*` functions of ChatGPT / Claude Code / ZCode and feeds their output into the official rule assertor (the check count is whatever `pnpm verify:contracts` reports at run time). Fixtures come from the [Codex official output schema](https://github.com/openai/codex/blob/main/codex-rs/hooks/schema/generated/pre-tool-use.command.output.schema.json), and parsing rules come from [output_parser.rs](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/output_parser.rs). Note: **the schema lags behind the parser** — `allow` must be paired with `updatedInput`, `deny` must carry a non-empty reason, and `ask` is always rejected; these rules exist only in the parser. Behavior-level validation is implemented accordingly and has caught and fixed multiple output violations that would have broken blocking (Codex orphaned `allow` / `deny` without a reason; Claude outputting the illegal enum `block`; WorkBuddy/Trae misusing the `decision` field instead of `permissionDecision`; `additionalContext` wrongly placed at the top level). These behavior-level checks cover all 6 Hook platforms (the total count is whatever `pnpm verify:contracts` reports at run time), split by platform: ChatGPT uses the Codex parser rules, while the other five follow the Claude-compatible shape (`permissionDecision` and `additionalContext` both inside `hookSpecificOutput`; WorkBuddy's arg-patching field is `modifiedInput`). It is a regression guardrail and does not replace real host verification.
 - **Local audit evidence**: Once `ARCS_HOME` or `ARCS_AUDIT_FILE` is set, all plugins append `AuditEvent` to `<home>/audit/<host>/<YYYY-MM-DD>.jsonl`; `pnpm real-check` probes the CLI and provides real-session steps, while `pnpm real-check -- --verify` counts audit events. When the variables are not set, nothing is written to disk and behavior is unchanged. See [telemetry.md](./telemetry.md) for details.
 
 ## Shared Runtime `packages/host-kit`

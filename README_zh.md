@@ -71,9 +71,8 @@ flowchart TB
       SV["sdk/vercel"]
       SL["sdk/langchain"]
     end
-    subgraph PL["宿主插件 plugins/（11 平台 + MCP 网关）"]
+    subgraph PL["宿主插件 plugins/（9 平台 + MCP 网关）"]
       CC["claude-code"]
-      CODEX["codex"]
       OC["opencode"]
       PI["pi"]
       DS["deepseek"]
@@ -81,7 +80,6 @@ flowchart TB
       ZC["zcode"]
       TR["trae"]
       CG["chatgpt"]
-      PA["pl-agent"]
       QC["qwen-code"]
       MCP["mcp 透明代理"]
     end
@@ -145,9 +143,8 @@ arcs/
 ├── sdk/                       # 代码级接入（sdk/xxx，进程内）
 │   ├── vercel/                # @chaos-design/arcs-sdk-vercel
 │   └── langchain/             # @chaos-design/arcs-sdk-langchain
-├── plugins/                   # 宿主插件（11 家 Agent 平台 + MCP 网关）
+├── plugins/                   # 宿主插件（9 家 Agent 平台 + MCP 网关）
 │   ├── claude-code/           # 原生 Hook（17）· L1/L2/L4 ask
-│   ├── codex/                 # 原生 Hook（12）· L1/L2/L4 deny
 │   ├── opencode/              # 全局插件 + 工具中间件 · L1/L2/L4 挂起
 │   ├── zcode/                 # 原生 Hook（7）· L2/L4 阻断
 │   ├── workbuddy/             # 原生 Hook（25）· L2/L4 阻断
@@ -155,7 +152,6 @@ arcs/
 │   ├── deepseek/              # Cordis bundle · L2/L4 事件广播
 │   ├── trae/                  # 项目级 hooks · 仅采集与审计
 │   ├── chatgpt/               # Codex 兼容 Hook（13）· L1/L2/L4 deny
-│   ├── pl-agent/              # 通用 Hook（13）· L2/L4 阻断
 │   ├── qwen-code/             # Gemini 兼容 Hook（13）· L2/L4 阻断
 │   └── mcp/                   # 透明代理网关 · L1–L4（唯一可改工具名）
 ├── examples/
@@ -251,7 +247,7 @@ flowchart LR
 | **P0** | core 地基 | 类型检查通过；算法单测覆盖；失败降级单测通过；依赖扫描确认零宿主依赖 |
 | **P1** | plugin-kit 运行时 | ReplayHarness 回放仿真通过；mock adapter 跑通 capture→sense→plan→apply 全链单测 |
 | **P2** | 首个插件（MCP） | 真实 MCP Server 挂载，L1/L2 纠偏可观测 |
-| **P3** | 11 家 Agent 平台插件 | ✅ 已实现 11 家插件 + `host-kit`；mock 宿主端到端夹具通过，能力矩阵与降级行为由一致性测试锁定（真实宿主实测待集成方执行，见 [plugins.md](./docs/plugins.md)） |
+| **P3** | 9 家 Agent 平台插件 | ✅ 已实现 9 家插件 + `host-kit`；mock 宿主端到端夹具通过，能力矩阵与降级行为由一致性测试锁定（真实宿主实测待集成方执行，见 [plugins.md](./docs/plugins.md)） |
 | **P4** | SDK 适配 | ✅ `sdk/vercel` / `sdk/langchain` 完成；examples/ 提供可运行 demo |
 | **P5** | 文档与遥测 | ✅ README 与 docs 同步；`pnpm dashboard` 生成偏移曲线面板（终端 + HTML） |
 
@@ -281,7 +277,7 @@ npx @chaos-design/arcs-cli start mcp --dry-run -- --goal "..." --target "..."
 npx @chaos-design/arcs-cli start claude-code
 ```
 
-`mcp` 是唯一有独立常驻服务的插件；其余 11 家宿主插件为 Hook / 全局扩展，由宿主内调用。也可全局安装后用短命令 `arcs`（`pnpm add -g @chaos-design/arcs-cli`）。
+`mcp` 是唯一有独立常驻服务的插件；其余 9 家宿主插件为 Hook / 全局扩展，由宿主内调用。也可全局安装后用短命令 `arcs`（`pnpm add -g @chaos-design/arcs-cli`）。
 
 ### 2. SDK 代码级集成（适用于自研 Agent 应用）
 
@@ -340,10 +336,10 @@ corepack pnpm dashboard --home ~/.arcs --html dashboard.html     # 独立 HTML �
 
 针对封闭或半开放的外部 Harness，ARCS 提供 **生命周期 Hook 插件** 与 **MCP 透明代理** 两种无侵入挂载方式。
 
-#### 方式 A：Codex / DeepSeek Harness 插件挂载
+#### 方式 A：ChatGPT（Codex 兼容）/ DeepSeek Harness 插件挂载
 
 ```bash
-pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
+pnpm add -g @chaos-design/arcs-plugin-chatgpt @chaos-design/arcs-plugin-deepseek
 ```
 
 ```json
@@ -351,7 +347,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 {
   "plugins": [
     {
-      "name": "@chaos-design/arcs-plugin-codex",
+      "name": "@chaos-design/arcs-plugin-chatgpt",
       "enabled": true,
       "options": {
         "driftThreshold": 0.72,
@@ -384,7 +380,7 @@ pnpm add -g @chaos-design/arcs-plugin-codex @chaos-design/arcs-plugin-deepseek
 
 ---
 
-### 6. 安装各平台宿主插件（11 家 Agent）
+### 6. 安装各平台宿主插件（9 家 Agent）
 
 平台插件提供原生 manifest / hooks.json 或全局扩展形态，全部复用 `host-kit` 的能力矩阵与 fail-open 入口桥：
 
@@ -398,7 +394,7 @@ node scripts/install-host-plugins.mjs --client=trae --target=/abs/path/to/worksp
 node scripts/install-host-plugins.mjs --client=opencode
 node scripts/install-host-plugins.mjs --client=pi
 
-# Claude Code / Codex / WorkBuddy / ZCode / DeepSeek：脚本打印各平台 CLI 安装命令
+# Claude Code / ChatGPT / WorkBuddy / ZCode / DeepSeek：脚本打印各平台 CLI 安装命令
 node scripts/install-host-plugins.mjs --client=claude-code
 ```
 

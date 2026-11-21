@@ -27,6 +27,7 @@
 
 ### 变更（Changed）
 
+- 平台收敛：OpenAI 宿主统一由 `chatgpt` 插件覆盖（移除重复的 `codex` 插件——同一 Codex 兼容契约、实现一致），Pi 宿主统一由 `pi` 插件覆盖（移除重复的 `pl-agent` 插件）；`PLATFORMS`/`HOST_CAPABILITIES`、CLI 清单、安装器、构建脚本、real-check 探测、契约护栏与中英文档同步至 9 个平台（CLI 共 10 个插件）。
 - 中英两种语言的文档索引现均交叉链接各篇文档的中英文版本。
 - 站点布局对齐 memx 参考：分区式文档矩阵与顶边色条卡片、面包屑 + 快捷入口卡、单行侧栏导航（含「导航」首组）与双按钮底栏、移动端 GitHub 图标 + 动画汉堡、右侧粘性 TOC、mermaid 灯箱、双行上/下一篇 pager（`be09700`）。
 - `scripts/install-host-plugins.mjs` 打印已验证的本地插件目录命令（废弃不存在的 `astro-*` marketplace 命名），支持 `--clients=a,b` 多选，复制全局插件时排除 `node_modules`/`dist`。

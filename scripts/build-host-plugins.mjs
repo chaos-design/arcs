@@ -8,7 +8,6 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const FILTERS = [
   '@chaos-design/arcs-host-kit',
   '@chaos-design/arcs-plugin-claude-code',
-  '@chaos-design/arcs-plugin-codex',
   '@chaos-design/arcs-plugin-opencode',
   '@chaos-design/arcs-plugin-zcode',
   '@chaos-design/arcs-plugin-workbuddy',
@@ -16,7 +15,6 @@ const FILTERS = [
   '@chaos-design/arcs-plugin-deepseek',
   '@chaos-design/arcs-plugin-trae',
   '@chaos-design/arcs-plugin-chatgpt',
-  '@chaos-design/arcs-plugin-pl-agent',
   '@chaos-design/arcs-plugin-qwen-code',
   '@chaos-design/arcs-plugin-mcp',
 ];

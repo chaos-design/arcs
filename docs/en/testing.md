@@ -30,7 +30,7 @@ Recorded traces are used in place of a real host to verify runtime behavior acro
 | Target | What is verified |
 |---|---|
 | `plugins/mcp` | Real MCP Server mounting; observe L1/L2 correction and audit reporting |
-| `plugins/codex` / `deepseek` / `claude-code` | Real host processes running; verify L3/L4 and task resumption after approval |
+| `plugins/chatgpt` / `deepseek` / `claude-code` | Real host processes running; verify L3/L4 and task resumption after approval |
 | `sdk/vercel` / `sdk/langchain` | demos run through, `onSteer(SteerEvent)` fields correct, boundary constraints (no lifecycle takeover, no proxying) pass review |
 
 ## Boundary guards (CI)

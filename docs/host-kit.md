@@ -15,19 +15,18 @@
 
 | 宿主 | tier | 关键怪癖 |
 |---|---|---|
-| codex | A | 官方 schema 的 `ask` 「parsed but not supported」→ L4 按 deny 阻断；allow 必须配 `updatedInput` |
 | claude-code | A | `hookSpecificOutput.permissionDecision(allow/deny/ask)` + `updatedInput` |
 | opencode | A | `tool.execute.before` 中间件可改参、`permission.ask` 可挂起 |
 | zcode / workbuddy / pi / deepseek | B | 可拒绝但无改参通道：L1/L3 降为注入，L4 降为 block |
 | trae | C | 项目级 hooks 只读：always allow + `additionalContext` 采集 |
-| chatgpt | A | Codex 兼容：改参 + deny，`ask` 降为带原因的 deny |
-| pl-agent / qwen-code | B | 通用 / Gemini 兼容 hooks：可注入 + deny，无稳定改参通道 |
+| chatgpt | A | Codex 兼容：改参 + deny；官方 schema 的 `ask` 「parsed but not supported」，降为带原因的 deny |
+| qwen-code | B | Gemini 兼容 hooks：可注入 + deny，无稳定改参通道 |
 
 矩阵一致性由两层锁定：`conformance.test.ts`（能力矩阵 ↔ 行为一致性）与 `scripts/verify-host-contracts.mjs`（静态断言 + Codex 官方 schema 行为级校验）。
 
 ## Hook 入口桥 `runHookEntry`
 
-Hook 型平台（codex / claude-code / zcode / workbuddy / trae / chatgpt / pl-agent / qwen-code）每个事件 fork 一次 Hook 进程，`runHookEntry` 把这一的一次性往返收敛为固定管线：
+Hook 型平台（claude-code / zcode / workbuddy / trae / chatgpt / qwen-code）每个事件 fork 一次 Hook 进程，`runHookEntry` 把这一的一次性往返收敛为固定管线：
 
 ```
 stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRuntime.run
@@ -51,7 +50,7 @@ stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRunt
 | `hookContextText(decision)` | 注入提示与能力降级说明的统一拼装 |
 | `makeNativeEvent` / `shouldSteerPreToolUse` | 事件订阅型插件共用的构造与决策门槛 |
 
-插件只保留宿主差异：`CHATGPT_PROFILE`（Codex 规则）、`PL_AGENT_PROFILE` / `QWEN_CODE_PROFILE`（Tier B 保守策略）等。契约护栏会实际执行各插件的序列化函数并断言输出合法，确保共享算法不会掩盖宿主差异。
+插件只保留宿主差异：`CHATGPT_PROFILE`（Codex 规则）、`QWEN_CODE_PROFILE`（Tier B 保守策略）等。契约护栏会实际执行各插件的序列化函数并断言输出合法，确保共享算法不会掩盖宿主差异。
 
 ## 效果翻译 `applyEffect` / `translateEffects`
 
@@ -65,7 +64,7 @@ stdin 文本 → parse(text, env) → NativeEvent → nativeToRaw → PluginRunt
 | 无 `suspend` 但可 block | L4 挂起降为阻断 | `suspend→block` |
 | 无 `suspend` 且不可 block | 放行 + 注入解释 | `suspend→allow` |
 
-`HostDecision` 携带 `kind: allow|block|ask`、`updatedInput`、`updatedName`、`injected[]`、`degraded[]`、`level`，由各插件 `serialize*` 函数编码为平台输出（codex 的解析器怪癖、workbuddy 的 `modifiedInput` 字段等都在插件层处理）。
+`HostDecision` 携带 `kind: allow|block|ask`、`updatedInput`、`updatedName`、`injected[]`、`degraded[]`、`level`，由各插件 `serialize*` 函数编码为平台输出（chatgpt 的 Codex 解析器怪癖、workbuddy 的 `modifiedInput` 字段等都在插件层处理）。
 
 ## 审计落盘 `FileAuditSink`
 

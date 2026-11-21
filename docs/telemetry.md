@@ -15,7 +15,7 @@
 interface AuditEvent {
   ts: number;
   sessionId: string;
-  host: string;                   // codex / deepseek / claude-code / mcp / sdk-vercel / sdk-langchain
+  host: string;                   // chatgpt / deepseek / claude-code / mcp / sdk-vercel / sdk-langchain
   level: 1 | 2 | 3 | 4 | null;    // 触发等级，null = 无偏航放行
   signals: DriftSignal[];
   effects: SteeringEffect[];      // 实际物化的有序效果列表

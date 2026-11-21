@@ -13,7 +13,7 @@ This directory organizes ARCS's architecture and design documentation by functio
 | [core.md](./core.md) | Core engine: responsibilities, core abstractions, interface boundaries, default sensors, budgets, and degradation |
 | [plugin-kit.md](./plugin-kit.md) | Plugin glue layer: responsibilities, core abstractions, session state, and the separation boundary with core |
 | [host-kit.md](./host-kit.md) | Host runtime: capability matrix, Hook entry bridge, effect translation, audit persistence, and session locks |
-| [plugins.md](./plugins.md) | Concrete plugins: 9 providers including codex / deepseek / claude-code / mcp |
+| [plugins.md](./plugins.md) | Concrete plugins: 10 providers including chatgpt / deepseek / claude-code / mcp |
 | [sdk.md](./sdk.md) | SDK code-level integration: interception points, the SteerEvent contract, and boundaries with plugins |
 | [key-flows.md](./key-flows.md) | Correction feedback loop, runtime sequence, four-level strategy, HITL recovery, and failure degradation |
 | [telemetry.md](./telemetry.md) | Telemetry: the AuditEvent model, the TelemetrySink contract, offset curves, and dashboards |

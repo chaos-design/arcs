@@ -40,14 +40,6 @@ export const PLUGINS: readonly PluginInfo[] = [
     enableHint: 'claude --plugin-dir /abs/path/to/arcs/plugins/claude-code',
   },
   {
-    name: 'codex',
-    package: '@chaos-design/arcs-plugin-codex',
-    host: 'OpenAI Codex CLI',
-    kind: 'host-managed',
-    capability: '原生 Hook（12）· L1 改参 / L2 注入 / L4 deny',
-    enableHint: 'codex plugin marketplace add /abs/path/to/arcs',
-  },
-  {
     name: 'opencode',
     package: '@chaos-design/arcs-plugin-opencode',
     host: 'OpenCode',
@@ -102,14 +94,6 @@ export const PLUGINS: readonly PluginInfo[] = [
     kind: 'host-managed',
     capability: '原生 Hook（13）· L1 改参 / L2 注入 / L4 deny（ask 降级）',
     enableHint: 'node scripts/install-host-plugins.mjs --client=chatgpt',
-  },
-  {
-    name: 'pl-agent',
-    package: '@chaos-design/arcs-plugin-pl-agent',
-    host: 'PL Agent',
-    kind: 'host-managed',
-    capability: '通用 Hook（13）· L2 注入 / L4 deny',
-    enableHint: 'node scripts/install-host-plugins.mjs --client=pl-agent',
   },
   {
     name: 'qwen-code',

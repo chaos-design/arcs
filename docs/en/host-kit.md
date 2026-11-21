@@ -15,19 +15,18 @@ Each host has one `HostCapabilities` record: a `tier` (A/B/C) plus five capabili
 
 | Host | tier | Key quirks |
 |---|---|---|
-| codex | A | The official schema's `ask` is "parsed but not supported" → L4 blocks it as deny; allow must include `updatedInput` |
 | claude-code | A | `hookSpecificOutput.permissionDecision(allow/deny/ask)` + `updatedInput` |
 | opencode | A | `tool.execute.before` middleware can modify arguments; `permission.ask` can suspend |
 | zcode / workbuddy / pi / deepseek | B | Can deny but has no argument-modification channel: L1/L3 downgrade to injection, L4 downgrades to block |
 | trae | C | Project-level hooks are read-only: always allow + `additionalContext` collection |
-| chatgpt | A | Codex-compatible: arg patching + deny; `ask` downgraded to a reasoned deny |
-| pl-agent / qwen-code | B | Generic / Gemini-compatible hooks: injection + deny, no stable arg-patching channel |
+| chatgpt | A | Codex-compatible: arg patching + deny; the official schema's `ask` is "parsed but not supported", downgraded to a reasoned deny |
+| qwen-code | B | Gemini-compatible hooks: injection + deny, no stable arg-patching channel |
 
 Matrix consistency is enforced at two levels: `conformance.test.ts` (capability matrix ↔ behavioral consistency) and `scripts/verify-host-contracts.mjs` (static assertions + behavior-level validation against Codex's official schema).
 
 ## Hook Entry Bridge `runHookEntry`
 
-Hook-based platforms (codex / claude-code / zcode / workbuddy / trae / chatgpt / pl-agent / qwen-code) fork a Hook process for each event; `runHookEntry` collapses this one-shot round trip into a fixed pipeline:
+Hook-based platforms (claude-code / zcode / workbuddy / trae / chatgpt / qwen-code) fork a Hook process for each event; `runHookEntry` collapses this one-shot round trip into a fixed pipeline:
 
 ```
 stdin text → parse(text, env) → NativeEvent → nativeToRaw → PluginRuntime.run
@@ -51,7 +50,7 @@ Hook plugins no longer duplicate parsing and serialization. They declare host di
 | `hookContextText(decision)` | Single assembly rule for injected text and capability-degradation notes |
 | `makeNativeEvent` / `shouldSteerPreToolUse` | Shared construction and decision gate for subscription-based plugins |
 
-Plugins retain only profiles such as `CHATGPT_PROFILE` (Codex rules), `PL_AGENT_PROFILE` / `QWEN_CODE_PROFILE` (conservative tier B). The contract guardrail actually executes each plugin's serializer and asserts the output, so a shared algorithm cannot hide host differences.
+Plugins retain only profiles such as `CHATGPT_PROFILE` (Codex rules), `QWEN_CODE_PROFILE` (conservative tier B). The contract guardrail actually executes each plugin's serializer and asserts the output, so a shared algorithm cannot hide host differences.
 
 ## Effect Translation `applyEffect` / `translateEffects`
 
